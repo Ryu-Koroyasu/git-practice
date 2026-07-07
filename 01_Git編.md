@@ -1,0 +1,444 @@
+# 01. Git編 〜自分のPCの中でGitを使う〜
+
+このドキュメントは「Gitを一度も使ったことがない人」を対象に、**自分のPCの中だけで完結するGitの基本**を説明します。
+GitHub（クラウド）と繋ぐ話は [02_GitHub編](02_GitHub編.md) で扱います。まずはここで「変更を記録する」感覚をつかみましょう。
+
+> 💡 **このドキュメントの読み方**
+> - とりあえず動かしたい人 → 「インストール」→「最初の設定」→「黄金フロー」だけ写経すればOK
+> - コマンドをド忘れした人 → [04_逆引きチートシート](04_逆引きチートシート.md) へ
+
+---
+
+## 目次
+
+1. [そもそもGitとは](#そもそもgitとは)
+2. [Gitの3つのエリア（最重要の概念）](#gitの3つのエリア最重要の概念)
+3. [Gitのインストール](#gitのインストール)
+4. [最初の設定](#最初の設定)
+5. [黄金フロー：はじめてのコミット](#黄金フローはじめてのコミット)
+6. [状態を確認するコマンド](#状態を確認するコマンド)
+7. [.gitignore：記録したくないファイルを除外する](#gitignore記録したくないファイルを除外する)
+
+---
+
+## そもそもGitとは
+
+Gitは**ファイルの変更履歴を記録・管理するツール**です。一言でいうと「**いつでも戻れるセーブポイントを作れる仕組み**」です。
+
+普段こんなことをしていませんか？
+
+```text
+レポート.docx
+レポート_最終.docx
+レポート_最終2.docx
+レポート_本当に最終.docx
+```
+
+Gitを使うと、ファイルは1つのまま、変更の節目ごとに「コミット」という名前のセーブポイントを残せます。後から「あの時点に戻したい」「いつ・誰が・どこを変えたか知りたい」が全部できます。
+
+```mermaid
+graph LR
+    A["昔のレポート<br/>（コミットA）"] --> B["少し進めた<br/>（コミットB）"] --> C["完成<br/>（コミットC）"]
+    style A fill:#4a90d9,color:#fff
+    style B fill:#4a90d9,color:#fff
+    style C fill:#2e7d32,color:#fff
+```
+
+各コミットには「いつ・誰が・何を変えたか」と一言メッセージが残るので、後から履歴をたどれます。
+
+---
+
+## Gitの3つのエリア（最重要の概念）
+
+Gitを理解する上で**ここだけは必ず押さえてください**。Gitでは、ファイルが次の3つの場所を移動していきます。
+
+```mermaid
+graph LR
+    A["作業ツリー<br/>(Working Tree)<br/>原本を編集する場所"] -->|"git add<br/>写しを取る"| B["ステージング<br/>(Staging Area)<br/>写しを詰める段ボール箱"]
+    B -->|"git commit<br/>写しを取る"| C["ローカルリポジトリ<br/>(Local Repository)<br/>写しを保管する倉庫"]
+    style A fill:#c0392b,color:#fff
+    style B fill:#d68910,color:#fff
+    style C fill:#2e7d32,color:#fff
+```
+
+ポイントは、各操作が「モノを運ぶ」のではなく「**写し（コピー）を取って次の場所に置く**」イメージだという点です。原本は元の場所に残るので、**先に進めても元のエリアは空になりません**。
+
+| エリア | これは何か | たとえると |
+|---|---|---|
+| **作業ツリー** | 実際にファイルを編集している、いつものフォルダ | 原本の書類を広げた作業机の上 |
+| **ステージング** | 「次のコミットに含める変更」を選んで詰める場所 | 書類の写しを詰める、コミット1回分の段ボール箱 |
+| **ローカルリポジトリ** | コミットとして履歴が保存される場所（`.git` フォルダの中） | 箱の写しを保管する倉庫 |
+
+- `git add`：机の上の原本の**写しを取って**箱に入れる（原本は机に残る）
+- `git commit`：箱の中身の**写しを取って**倉庫に保管する（箱の中身も残る）
+
+倉庫に保管された写し（コミット）は、いつでもその時点の状態として取り出せます。
+
+> **補足**：コミットしても箱が空になって消えるわけではありません。`add` も `commit` も「原本を運び出す」のではなく「**写しを取る**」操作だからです。Gitは各エリアが「その時点の写し（スナップショット）」を持つように動くため、コミットは**差分ではなくスナップショット**として記録されます。
+
+つまり基本操作は **「編集する → `add` で写しを詰める → `commit` で写しを保管する」** の繰り返しです。この3ステップが分かれば、Gitの8割は理解できたようなものです。
+
+---
+
+## Gitのインストール
+
+お使いのPCのOSに合わせて進めてください。インストールが終わったら、ターミナルで次を実行し、バージョンが表示されれば成功です。
+
+```bash
+git --version
+# 出力例: git version 2.45.0
+```
+
+### Windows
+
+Windowsでは「Git for Windows」をインストールします。これには **Git Bash** という、Mac/Linux風のコマンドが使えるターミナルが付いてきます。本手引書のWindowsの説明はこの Git Bash を使う前提です。
+
+1. 下記URLからインストーラをダウンロードします。
+   [Git - Downloading Package](https://git-scm.com/download/win)
+2. ダウンロードしたインストーラをダブルクリックして起動します。
+
+以下、インストーラの選択画面を順に説明します。**基本はデフォルトのまま進めて問題ありません。**変更が必要な箇所だけ太字で示します。
+
+- **「Next」をクリック**
+
+  <img src="images/01_git/win_install_01.png" alt="インストール開始画面" width="500">
+
+- インストール先フォルダ。特に問題がなければデフォルトのまま「Next」
+
+  <img src="images/01_git/win_install_02.png" alt="インストール先の選択" width="500">
+
+- インストールするコンポーネントの選択。研究用途では追加不要なのでデフォルトのまま「Next」
+
+  <img src="images/01_git/win_install_03.png" alt="コンポーネントの選択" width="500">
+
+  各項目の意味（参考）:
+
+| 項目 | 意味 |
+|---|---|
+| Additional icons → On the Desktop | デスクトップにGitアイコンを置くか |
+| Windows Explorer integration | 右クリックメニューからGit Bash/GUIを使えるようにするか |
+| Git LFS | 動画・画像など大きなファイルを扱えるようにするか |
+| Associate .git* configuration files… | `.git`で始まる設定ファイルを既定のエディタに関連付けるか |
+| Associate .sh files… | `.sh`ファイルをGit Bashで実行するか |
+| Check daily for Git for Windows updates | 毎日アップデートを確認するか |
+| Add a Git Bash Profile to Windows Terminal | Windows TerminalでGit Bashを使えるようにするか |
+
+- スタートメニューに表示する名前。デフォルトのまま「Next」
+
+  <img src="images/01_git/win_install_04.png" alt="スタートメニューフォルダ" width="500">
+
+- **既定のエディタの選択**。デフォルトはVimですが、不慣れだと操作が難しいため、**VS Codeを使う予定なら「Use Visual Studio Code as Git's default editor」を選択**します。
+
+  <img src="images/01_git/win_install_05.png" alt="既定エディタの選択" width="500">
+
+- 新規リポジトリの初期ブランチ名。**「Override the default branch name…」を選び、`main` と入力する**のがおすすめです（世界的に `main` が標準）。こだわりがなければ「Let Git decide」でも構いません。
+
+  <img src="images/01_git/win_install_06.png" alt="初期ブランチ名の設定" width="333">
+
+- 環境変数（PATH）の設定。デフォルトのまま「Next」
+
+  <img src="images/01_git/win_install_07.png" alt="PATH環境の設定" width="333">
+
+- SSH実行ファイルの選択。外部のSSHを使う特別な理由がなければデフォルト（Use bundled OpenSSH）のまま「Next」
+
+  <img src="images/01_git/win_install_08.png" alt="SSHの選択" width="500">
+
+- HTTPS通信に使う証明書の選択。デフォルト（OpenSSL library）のまま「Next」で問題ありません。
+  （※将来、独自の認証局を使う企業のサーバーにアクセスする場合のみ、Windowsの証明書ストアを使う後者を選びます）
+
+  <img src="images/01_git/win_install_09.png" alt="HTTPS証明書の選択" width="500">
+
+- **改行コードの扱い**。Windowsと他OSで改行コードが異なるため重要です。複数人・複数環境で開発するなら **「Checkout as-is, commit Unix-style line endings」** を選びます。
+
+  <img src="images/01_git/win_install_10.png" alt="改行コードの設定" width="500">
+
+| 選択肢 | 動作 |
+|---|---|
+| Checkout Windows-style, commit Unix-style | 取得時CRLFに、コミット時LFに変換 |
+| **Checkout as-is, commit Unix-style**（推奨） | 取得時はそのまま、コミット時のみLFに変換 |
+| Checkout as-is, commit as-is | 一切変換しない |
+
+- Git Bashで使うターミナルエミュレータ。Linuxのコマンドも使える **「Use MinTTY」**（デフォルト）がおすすめです。
+
+  <img src="images/01_git/win_install_11.png" alt="ターミナルエミュレータの選択" width="500">
+
+- `git pull` の動作。デフォルト（Fast-forward or merge）のまま「Next」
+
+  <img src="images/01_git/win_install_12.png" alt="pullの動作設定" width="500">
+
+- 認証情報の保存方法。デフォルトの **「Git Credential Manager」** のまま「Next」（パスワードを毎回入力せずに済みます）
+
+  <img src="images/01_git/win_install_13.png" alt="認証情報ヘルパーの選択" width="500">
+
+- 追加オプション。**「Enable file system caching」**（高速化）にチェック。Mac等とリポジトリを共有するなら **「Enable symbolic links」** もチェックします。
+
+  <img src="images/01_git/win_install_14.png" alt="追加オプションの選択" width="500">
+
+- 実験的オプション。予期せぬ不具合を避けるため**何もチェックせず**「Install」をクリックします。
+
+  <img src="images/01_git/win_install_15.png" alt="実験的オプションとインストール" width="500">
+
+インストール後、スタートメニューから **Git Bash** を起動し、`git --version` でバージョンが出れば完了です。
+
+> 🖼️ **用意する画像**: `images/win_gitbash_start.png` … スタートメニューから Git Bash を起動する様子。
+> （配置時は `<img src="images/win_gitbash_start.png" alt="Git Bashの起動" width="500">` の形式で、他の画像と表示幅を揃えてください）
+
+### Mac
+
+Macには2つの方法があります。**どちらか一方**でOKです。
+
+**方法A: Xcode Command Line Tools（最も手軽）**
+
+ターミナル（`アプリケーション > ユーティリティ > ターミナル.app`）を開き、次を実行します。Gitを含む開発ツール一式が入ります。
+
+```bash
+xcode-select --install
+```
+
+ダイアログが出たら「インストール」をクリックします。
+
+**方法B: Homebrew（最新版を使いたい場合）**
+
+[Homebrew](https://brew.sh/index_ja) が入っていれば、次で最新のGitが入ります。
+
+```bash
+brew install git
+```
+
+どちらの場合も、ターミナルで `git --version` を実行してバージョンが表示されれば完了です。
+
+### Linux
+
+ディストリビューションのパッケージマネージャを使います。
+
+```bash
+# Debian / Ubuntu 系
+sudo apt update && sudo apt install git
+
+# Fedora / RHEL 系
+sudo dnf install git
+
+# Arch 系
+sudo pacman -S git
+```
+
+端末（ターミナル）で `git --version` を実行してバージョンが表示されれば完了です。
+
+---
+
+## 最初の設定
+
+インストール直後に**一度だけ**行う設定です。コミットに記録される「あなたの名前とメールアドレス」を登録します。ここで設定した名前・メールが、後でGitHub上の履歴にも表示されます。
+
+ターミナル（Windowsは Git Bash）を開き、次を順に実行します。
+
+```bash
+# あなたの名前を登録（GitHubのアカウント名に合わせるのがおすすめ）
+git config --global user.name "your-name"
+
+# あなたのメールアドレスを登録（GitHubで使う予定のメール）
+git config --global user.email "you@example.com"
+
+# 設定内容を確認する
+git config --global --list
+```
+
+> ⚠️ 名前やメールにスペースが含まれる場合は、上のように **ダブルクォート `"` で囲んでください**。
+
+`--global` は「このPC全体の共通設定」という意味です。一度やれば、以降すべてのリポジトリに適用されます。
+
+> 💡 おすすめの追加設定（初期ブランチ名を `main` に統一）
+> ```bash
+> git config --global init.defaultBranch main
+> ```
+
+---
+
+## 黄金フロー：はじめてのコミット
+
+ここが本番です。**この通りに写経すれば、最初のコミットが作れます。** 練習用のフォルダで試してみましょう。
+
+### ステップ0：作業フォルダを用意して移動する
+
+```bash
+# 練習用フォルダを作って中に入る
+mkdir git-practice
+cd git-practice
+```
+
+> 💡 `cd`（change directory）はフォルダを移動するコマンドです。以降の操作は「今いるフォルダ」に対して行われます。
+
+### ステップ1：リポジトリを作る（git init）
+
+```bash
+git init
+```
+
+これで今のフォルダに `.git` という隠しフォルダが作られ、Gitでの管理が始まります。`.git` の中に履歴が保存されます（中身を直接触る必要はありません）。
+
+```bash
+# git initに成功すると、次のように表示されます
+hoge@n171h100 git-practice % git init
+Initialized empty Git repository in /Users/hoge/git-practice/.git/
+```
+
+
+> `git init` 後にフォルダ内へ `.git` フォルダができた様子（Windowsはエクスプローラで隠しファイル表示ON、Macは Finder で `Cmd+Shift+.`、Linuxはファイルマネージャで隠しファイル表示）。
+>
+> <img src="images/01_git/01_git_init_folder.png" alt="git init後の.gitフォルダ" width="500">
+
+### ステップ2：ファイルを作る
+
+試しにテキストファイルを1つ作ります。
+
+```bash
+echo "Hello Git" > hello.txt
+```
+
+### ステップ3：変更を確認する（git status）
+
+```bash
+git status
+```
+
+`hello.txt` が「Untracked files（まだ管理されていないファイル）」として赤色で表示されます。
+
+> `git status` の出力画面
+> 
+> <img src="images/01_git/01_git_status.png" alt="git statusの出力" width="500">
+
+### ステップ4：ステージングに追加する（git add）
+
+```bash
+git add hello.txt
+```
+
+これで `hello.txt` が「次のコミットに含める変更」として選ばれました。もう一度 `git status` を実行すると、今度は緑色で表示されます。
+
+> `git add` 後の `git status` の出力画面
+> 
+> <img src="images/01_git/01_git_add_status.png" alt="git add後のgit statusの出力" width="500">
+
+### ステップ5：コミットする（git commit）
+
+```bash
+git commit -m "最初のコミット"
+```
+
+`-m` の後ろの文字列が**コミットメッセージ**（変更内容の一言メモ）です。これでセーブポイントが1つ作られました。
+
+### ステップ6：履歴を確認する（git log）
+
+```bash
+git log
+```
+
+> `git log` の出力画面
+> 
+> <img src="images/01_git/01_git_commit_log.png" alt="git logの出力" width="500">
+
+今作ったコミットが、作成者・日時・メッセージとともに表示されます。`q` キーで表示を終了します。
+
+### 黄金フローのまとめ
+
+```mermaid
+graph LR
+    E["ファイルを編集"] -->|"1. git add"| S["ステージング"]
+    S -->|"2. git commit -m '...'"| R["履歴に記録"]
+    R --> E
+    style E fill:#c0392b,color:#fff
+    style S fill:#d68910,color:#fff
+    style R fill:#2e7d32,color:#fff
+```
+
+実際の作業は、この **「編集 → add → commit」** をひたすら繰り返すだけです。
+
+```bash
+# 日常的に使う最小セット
+git add .                       # 変更した全ファイルをステージングに追加
+git commit -m "変更内容のメモ"   # コミットとして記録
+```
+
+> 💡 `git add .` の `.`（ドット）は「今いるフォルダ以下のすべての変更」という意味です。
+
+---
+
+## 状態を確認するコマンド
+
+Gitは「今どういう状態か」をこまめに確認しながら使うのが安全です。困ったらまず `git status` を打つ癖をつけましょう。
+
+| コマンド | 何が分かるか |
+|---|---|
+| `git status` | どのファイルが変更され、どのエリアにあるか |
+| `git log` | これまでのコミット履歴（作成者・日時・メッセージ） |
+| `git log --oneline` | コミット履歴を1行ずつ簡潔に表示 |
+| `git diff` | まだステージングしていない変更の中身（どこを書き換えたか） |
+| `git diff --staged` | ステージング済みの変更の中身 |
+
+```bash
+git diff
+```
+
+`git diff` では、追加された行が `+` 付きの緑、削除された行が `-` 付きの赤で表示されます。
+
+> `git log` と `git diff` の出力画面（差分の色分けが分かるもの）。
+> 
+> <img src="images/01_git/01_git_log_diff.png" alt="git logとgit diffの出力" width="500">
+
+> `git add` でステージングに追加した後は、`git diff` では何も表示されなくなります。ステージング済みの変更を確認するには `git diff --staged` を使います。
+> 
+>  <img src="images/01_git/01_git_diff_staged.png" alt="git diff --stagedの出力" width="500">
+
+> `git commit` でコミットした後は、`git diff` でも `git diff --staged` でも何も表示されなくなります。コミット済みの変更を確認するには `git log` を使います。
+> 
+> <img src="images/01_git/01_git_log.png" alt="git logの出力" width="500">
+
+---
+
+## .gitignore：記録したくないファイルを除外する
+
+プロジェクトには「Gitで管理したくないファイル」があります。たとえば次のようなものです。
+
+- パスワードやAPIキーなどの**秘密情報**
+- 自動生成される一時ファイル（`.DS_Store`、`__pycache__/`、LaTeXの `.aux` `.log` など）
+- サイズの大きいデータやビルド成果物
+
+これらは `.gitignore` というファイルに書いておくと、Gitが**最初から無視**してくれます（`git status` にも出てこなくなります）。
+
+リポジトリの一番上の階層に `.gitignore` という名前のファイルを作り、無視したいものを1行ずつ書きます。
+
+```text
+# Mac が作る隠しファイル
+.DS_Store
+
+# Python のキャッシュ
+__pycache__/
+*.pyc
+
+# LaTeX の中間ファイル
+*.aux
+*.log
+*.out
+
+# 秘密情報（絶対にコミットしない）
+.env
+secrets.txt
+```
+
+> ⚠️ **重要**: 一度コミットしてしまったファイルは、後から `.gitignore` に書いても無視されません。秘密情報は**最初のコミット前**に `.gitignore` へ登録してください。
+
+> 💡 言語やフレームワークごとの `.gitignore` テンプレートは [github/gitignore](https://github.com/github/gitignore) で公開されています。
+
+> 💡 使用する言語やフレームワークが決まっている場合は、[Toptal](https://www.toptal.com/developers/gitignore)を使うと、必要な `.gitignore` を自動生成できます。
+
+---
+
+## このドキュメントのまとめ
+
+- Gitは「いつでも戻れるセーブポイント」を作る変更履歴管理ツール
+- ファイルは **作業ツリー → ステージング → ローカルリポジトリ** の3エリアへ「写し」が渡っていく（元のエリアは空にならない）
+- 基本操作は **「編集 → `git add` → `git commit`」** の繰り返し
+- 困ったら `git status` で現在地を確認する
+
+次は、ここで作った履歴を**クラウド（GitHub）に上げて共有する**方法です。
+→ [02_GitHub編](02_GitHub編.md) へ
