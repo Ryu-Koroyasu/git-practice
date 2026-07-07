@@ -176,7 +176,17 @@ gh auth status
    - **Note**：用途のメモ（例：`my-laptop`）
    - **Expiration**：有効期限（例：90 days）
    - **Select scopes**：`repo` にチェック（リポジトリの読み書きに必要）
+   >トークン作成画面
+   > 
+   > <img src="images/02_github/create_token.png" alt="トークン発行画面（repoスコープにチェック）" width="500">
+   >
+   > 作成するトークンの設定
+   > 
+   > <img src="images/02_github/create_token_setting.png" alt="作成するトークンの設定" width="500">
 5. **Generate token** を押すと、`ghp_xxxx…` という文字列が表示されます。
+   > トークン発行画面。
+   > 
+   > <img src="images/02_github/pat_scopes.png" alt="トークン発行画面（repoスコープにチェック）" width="500">
 
 > ⚠️ **トークンは発行直後の1回しか表示されません。** その場でコピーし、パスワードマネージャ等に保管してください。画面を閉じると二度と確認できず、再発行が必要になります。
 
@@ -190,8 +200,6 @@ Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなく
 ```
 
 一度入力すれば、01編のインストールで設定した **Git Credential Manager**（Windows/Mac）がトークンを記憶し、次回以降は入力不要になります。
-
-> 🖼️ **用意する画像**: `images/02_github/pat_scopes.png` … トークン発行画面（`repo` スコープにチェックした状態）。
 
 ### 方式B：SSH鍵
 
@@ -244,7 +252,9 @@ ssh -T git@github.com
 Hi your-github-name! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-> 🖼️ **用意する画像**: `images/02_github/ssh_key_add.png` … SSH and GPG keys の New SSH key 登録画面。
+> SSH and GPG keys の New SSH key 登録画面。
+> 
+> <img src="images/02_github/ssh_key_add.png" alt="SSH鍵登録画面" width="500">
 
 ---
 
@@ -443,14 +453,14 @@ graph LR
 
 ```bash
 # 1. 作業開始前に最新を取り込む
-git pull
+git pull origin branch-name # 例：git pull origin main
 
 # 2. 編集して、ローカルに記録する（01編の黄金フロー）
 git add .
 git commit -m "変更内容のメモ"
 
 # 3. クラウドへ反映する
-git push
+git push origin branch-name # 例：git push origin main
 ```
 
 この繰り返しで、手元とクラウドが常に同期された状態を保てます。
