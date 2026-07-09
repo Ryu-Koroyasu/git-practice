@@ -4,7 +4,7 @@
 GitHub（クラウド）と繋ぐ話は [02_GitHub編](02_GitHub編.md) で扱います。まずはここで「変更を記録する」感覚をつかみましょう。
 
 > 💡 **このドキュメントの読み方**
-> - とりあえず動かしたい人 → 「インストール」→「最初の設定」→「黄金フロー」だけ写経すればOK
+> - とりあえず動かしたい人 → 「インストール」→「最初の設定」→「【実践】はじめてのコミット」だけ写経すればOK
 > - コマンドをド忘れした人 → [04_逆引きチートシート](04_逆引きチートシート.md) へ
 
 ---
@@ -15,7 +15,7 @@ GitHub（クラウド）と繋ぐ話は [02_GitHub編](02_GitHub編.md) で扱�
 2. [Gitの3つのエリア（最重要の概念）](#gitの3つのエリア最重要の概念)
 3. [Gitのインストール](#gitのインストール)
 4. [最初の設定](#最初の設定)
-5. [黄金フロー：はじめてのコミット](#黄金フローはじめてのコミット)
+5. [【実践】はじめてのコミット](#実践はじめてのコミット)
 6. [状態を確認するコマンド](#状態を確認するコマンド)
 7. [.gitignore：記録したくないファイルを除外する](#gitignore記録したくないファイルを除外する)
 
@@ -25,7 +25,7 @@ GitHub（クラウド）と繋ぐ話は [02_GitHub編](02_GitHub編.md) で扱�
 
 Gitは**ファイルの変更履歴を記録・管理するツール**です。一言でいうと「**いつでも戻れるセーブポイントを作れる仕組み**」です。
 
-普段こんなことをしていませんか？
+たとえば、レポートをこんなふうに管理していませんか？（**ファイル管理のよくないやり方**）
 
 ```text
 レポート.docx
@@ -34,7 +34,15 @@ Gitは**ファイルの変更履歴を記録・管理するツール**です。�
 レポート_本当に最終.docx
 ```
 
-Gitを使うと、ファイルは1つのまま、変更の節目ごとに「コミット」という名前のセーブポイントを残せます。後から「あの時点に戻したい」「いつ・誰が・どこを変えたか知りたい」が全部できます。
+このやり方だと、次のことに困ります。
+
+- **どれが本当に最新か分からない**（「本当に最終」の後にまた直したら？）
+- **ファイルが増え続けて散らかる**
+- **いつ・誰が・どこを・なぜ変えたのか分からない**（中身を開いて見比べるしかない）
+
+コピーを取っておけば「昔の状態に戻す」ことはできます。しかし、**「どこが違うのか」「なぜ変えたのか」までは分かりません**。ここがGitとの決定的な違いです。
+
+Gitを使うと、**ファイルは1つのまま**、変更の節目ごとに「**コミット**」という記録（いつでも戻れるセーブポイント）を残せます。各コミットには「いつ・誰が・何を・なぜ変えたか」に加えて、**前回との差分（どの行をどう変えたか）**まで残るので、後からいつでも正確にたどれます。
 
 ```mermaid
 graph LR
@@ -44,13 +52,15 @@ graph LR
     style C fill:#2e7d32,color:#fff
 ```
 
-各コミットには「いつ・誰が・何を変えたか」と一言メッセージが残るので、後から履歴をたどれます。
+上の図のように、コミットを積み重ねることで、変更の歴史が1本の線としてつながっていきます。
 
 ---
 
 ## Gitの3つのエリア（最重要の概念）
 
-Gitを理解する上で**ここだけは必ず押さえてください**。Gitでは、ファイルが次の3つの場所を移動していきます。
+Gitを理解する上で**ここだけは必ず押さえてください**。Gitでは、ファイルは次の3つの場所を通って記録されていきます。
+
+> 💡 下の図に出てくる `git add` と `git commit` は、この後の「実践」で実際に使うGitのコマンドです。ここでは深く考えず、**エリアの間を移す操作の名前**とだけ捉えてください。
 
 ```mermaid
 graph LR
@@ -61,7 +71,7 @@ graph LR
     style C fill:#2e7d32,color:#fff
 ```
 
-ポイントは、各操作が「モノを運ぶ」のではなく「**写し（コピー）を取って次の場所に置く**」イメージだという点です。原本は元の場所に残るので、**先に進めても元のエリアは空になりません**。
+ポイントは、各操作が「**写し（コピー）を取って次の場所に置く**」というイメージだという点です。**元のエリアには元のまま残る**ので、先に進めても空になりません。
 
 | エリア | これは何か | たとえると |
 |---|---|---|
@@ -72,11 +82,11 @@ graph LR
 - `git add`：机の上の原本の**写しを取って**箱に入れる（原本は机に残る）
 - `git commit`：箱の中身の**写しを取って**倉庫に保管する（箱の中身も残る）
 
-倉庫に保管された写し（コミット）は、いつでもその時点の状態として取り出せます。
+倉庫に保管されたコミットは、いつでもその時点の状態として取り出せます。
 
-> **補足**：コミットしても箱が空になって消えるわけではありません。`add` も `commit` も「原本を運び出す」のではなく「**写しを取る**」操作だからです。Gitは各エリアが「その時点の写し（スナップショット）」を持つように動くため、コミットは**差分ではなくスナップショット**として記録されます。
+> **補足**：`add` や `commit` をしても、**元のエリアが空になって消えることはありません**。どちらも「元を運び出す」のではなく「**写しを取って次に置く**」操作だからです。Gitは各エリアが「その時点の写し（スナップショット）」を持つように動くため、コミットは**差分ではなくスナップショット**として記録されます。
 
-つまり基本操作は **「編集する → `add` で写しを詰める → `commit` で写しを保管する」** の繰り返しです。この3ステップが分かれば、Gitの8割は理解できたようなものです。
+つまり基本操作は **「編集する → `add` で写しを詰める → `commit` で写しを保管する」** の繰り返しです。本書ではこの流れを**黄金フロー**と呼びます。この3ステップが分かれば、Gitの8割は理解できたようなものです。
 
 ---
 
@@ -97,21 +107,23 @@ Windowsでは「Git for Windows」をインストールします。これには 
    [Git - Downloading Package](https://git-scm.com/download/win)
 2. ダウンロードしたインストーラをダブルクリックして起動します。
 
-以下、インストーラの選択画面を順に説明します。**基本はデフォルトのまま進めて問題ありません。**変更が必要な箇所だけ太字で示します。
+以下、インストーラの選択画面を順に説明します。
 
-- **「Next」をクリック**
+> 💡 **基本はどの画面もデフォルトのまま「Next」で進めて問題ありません。** 以下では、特に選択に注意したい画面を中心に説明します。
 
-  <img src="images/01_git/win_install_01.png" alt="インストール開始画面" width="500">
+**1. 「Next」をクリックする**
 
-- インストール先フォルダ。特に問題がなければデフォルトのまま「Next」
+<img src="images/01_git/win_install_01.png" alt="インストール開始画面" width="500">
 
-  <img src="images/01_git/win_install_02.png" alt="インストール先の選択" width="500">
+**2. インストール先フォルダを選択する**（特に問題がなければデフォルトのまま「Next」）
 
-- インストールするコンポーネントの選択。研究用途では追加不要なのでデフォルトのまま「Next」
+<img src="images/01_git/win_install_02.png" alt="インストール先の選択" width="500">
 
-  <img src="images/01_git/win_install_03.png" alt="コンポーネントの選択" width="500">
+**3. インストールするコンポーネントを選択する**（研究用途では追加不要なのでデフォルトのまま「Next」）
 
-  各項目の意味（参考）:
+<img src="images/01_git/win_install_03.png" alt="コンポーネントの選択" width="500">
+
+各項目の意味（参考）:
 
 | 項目 | 意味 |
 |---|---|
@@ -123,34 +135,43 @@ Windowsでは「Git for Windows」をインストールします。これには 
 | Check daily for Git for Windows updates | 毎日アップデートを確認するか |
 | Add a Git Bash Profile to Windows Terminal | Windows TerminalでGit Bashを使えるようにするか |
 
-- スタートメニューに表示する名前。デフォルトのまま「Next」
+**4. スタートメニューに表示する名前を決める**（デフォルトのまま「Next」）
 
-  <img src="images/01_git/win_install_04.png" alt="スタートメニューフォルダ" width="500">
+> 💡 「スタートメニュー」とは、画面左下の Windows アイコンをクリックすると開く、アプリの一覧のことです。
 
-- **既定のエディタの選択**。デフォルトはVimですが、不慣れだと操作が難しいため、**VS Codeを使う予定なら「Use Visual Studio Code as Git's default editor」を選択**します。
+<img src="images/01_git/win_install_04.png" alt="スタートメニューフォルダ" width="500">
 
-  <img src="images/01_git/win_install_05.png" alt="既定エディタの選択" width="500">
+**5. 既定のエディタを選択する**
 
-- 新規リポジトリの初期ブランチ名。**「Override the default branch name…」を選び、`main` と入力する**のがおすすめです（世界的に `main` が標準）。こだわりがなければ「Let Git decide」でも構いません。
+デフォルトはVimですが、不慣れだと操作が難しいため、**VS Codeを使う予定なら「Use Visual Studio Code as Git's default editor」を選択**します。
 
-  <img src="images/01_git/win_install_06.png" alt="初期ブランチ名の設定" width="333">
+<img src="images/01_git/win_install_05.png" alt="既定エディタの選択" width="500">
 
-- 環境変数（PATH）の設定。デフォルトのまま「Next」
+**6. 新規リポジトリの初期ブランチ名を指定する**
 
-  <img src="images/01_git/win_install_07.png" alt="PATH環境の設定" width="333">
+**「Override the default branch name…」を選び、`main` と入力する**のがおすすめです（世界的に `main` が標準）。こだわりがなければ「Let Git decide」でも構いません。
 
-- SSH実行ファイルの選択。外部のSSHを使う特別な理由がなければデフォルト（Use bundled OpenSSH）のまま「Next」
+<img src="images/01_git/win_install_06.png" alt="初期ブランチ名の設定" width="333">
 
-  <img src="images/01_git/win_install_08.png" alt="SSHの選択" width="500">
+**7. 環境変数（PATH）を設定する**（デフォルトのまま「Next」）
 
-- HTTPS通信に使う証明書の選択。デフォルト（OpenSSL library）のまま「Next」で問題ありません。
-  （※将来、独自の認証局を使う企業のサーバーにアクセスする場合のみ、Windowsの証明書ストアを使う後者を選びます）
+<img src="images/01_git/win_install_07.png" alt="PATH環境の設定" width="333">
 
-  <img src="images/01_git/win_install_09.png" alt="HTTPS証明書の選択" width="500">
+**8. SSH実行ファイルを選択する**（外部のSSHを使う特別な理由がなければデフォルト「Use bundled OpenSSH」のまま「Next」）
 
-- **改行コードの扱い**。Windowsと他OSで改行コードが異なるため重要です。複数人・複数環境で開発するなら **「Checkout as-is, commit Unix-style line endings」** を選びます。
+<img src="images/01_git/win_install_08.png" alt="SSHの選択" width="500">
 
-  <img src="images/01_git/win_install_10.png" alt="改行コードの設定" width="500">
+**9. HTTPS通信に使う証明書を選択する**（デフォルト「OpenSSL library」のまま「Next」で問題ありません）
+
+将来、独自の認証局を使う企業のサーバーにアクセスする場合のみ、Windowsの証明書ストアを使う後者を選びます。
+
+<img src="images/01_git/win_install_09.png" alt="HTTPS証明書の選択" width="500">
+
+**10. 改行コードの扱いを選択する**
+
+Windowsと他OSで改行コードが異なるため重要です。複数人・複数環境で開発するなら **「Checkout as-is, commit Unix-style line endings」** を選びます。
+
+<img src="images/01_git/win_install_10.png" alt="改行コードの設定" width="500">
 
 | 選択肢 | 動作 |
 |---|---|
@@ -158,30 +179,31 @@ Windowsでは「Git for Windows」をインストールします。これには 
 | **Checkout as-is, commit Unix-style**（推奨） | 取得時はそのまま、コミット時のみLFに変換 |
 | Checkout as-is, commit as-is | 一切変換しない |
 
-- Git Bashで使うターミナルエミュレータ。Linuxのコマンドも使える **「Use MinTTY」**（デフォルト）がおすすめです。
+**11. ターミナルエミュレータを選択する**（Linuxのコマンドも使える **「Use MinTTY」**（デフォルト）がおすすめ）
 
-  <img src="images/01_git/win_install_11.png" alt="ターミナルエミュレータの選択" width="500">
+<img src="images/01_git/win_install_11.png" alt="ターミナルエミュレータの選択" width="500">
 
-- `git pull` の動作。デフォルト（Fast-forward or merge）のまま「Next」
+**12. `git pull` の動作を選択する**（デフォルト「Fast-forward or merge」のまま「Next」）
 
-  <img src="images/01_git/win_install_12.png" alt="pullの動作設定" width="500">
+> 💡 `git pull` は、後の [02_GitHub編](02_GitHub編.md) で扱う「クラウド側の変更を手元に取り込むコマンド」です。ここでは意味が分からなくても問題ありません。
 
-- 認証情報の保存方法。デフォルトの **「Git Credential Manager」** のまま「Next」（パスワードを毎回入力せずに済みます）
+<img src="images/01_git/win_install_12.png" alt="pullの動作設定" width="500">
 
-  <img src="images/01_git/win_install_13.png" alt="認証情報ヘルパーの選択" width="500">
+**13. 認証情報の保存方法を選択する**（デフォルトの **「Git Credential Manager」** のまま「Next」。パスワードを毎回入力せずに済みます）
 
-- 追加オプション。**「Enable file system caching」**（高速化）にチェック。Mac等とリポジトリを共有するなら **「Enable symbolic links」** もチェックします。
+<img src="images/01_git/win_install_13.png" alt="認証情報ヘルパーの選択" width="500">
 
-  <img src="images/01_git/win_install_14.png" alt="追加オプションの選択" width="500">
+**14. 追加オプションを選択する**
 
-- 実験的オプション。予期せぬ不具合を避けるため**何もチェックせず**「Install」をクリックします。
+**「Enable file system caching」**（高速化）にチェック。Mac等とリポジトリを共有するなら **「Enable symbolic links」** もチェックします。
 
-  <img src="images/01_git/win_install_15.png" alt="実験的オプションとインストール" width="500">
+<img src="images/01_git/win_install_14.png" alt="追加オプションの選択" width="500">
+
+**15. 実験的オプションを確認してインストールする**（予期せぬ不具合を避けるため**何もチェックせず**「Install」をクリック）
+
+<img src="images/01_git/win_install_15.png" alt="実験的オプションとインストール" width="500">
 
 インストール後、スタートメニューから **Git Bash** を起動し、`git --version` でバージョンが出れば完了です。
-
-> 🖼️ **用意する画像**: `images/win_gitbash_start.png` … スタートメニューから Git Bash を起動する様子。
-> （配置時は `<img src="images/win_gitbash_start.png" alt="Git Bashの起動" width="500">` の形式で、他の画像と表示幅を揃えてください）
 
 ### Mac
 
@@ -209,7 +231,7 @@ brew install git
 
 ### Linux
 
-ディストリビューションのパッケージマネージャを使います。
+Linuxでは、お使いの**ディストリビューション**（Ubuntu、Fedora など Linux の種類）に付属する**パッケージマネージャ**（ソフトを導入・管理する仕組み）を使います。自分の環境に合うものを1つ選んで実行します。
 
 ```bash
 # Debian / Ubuntu 系
@@ -254,9 +276,9 @@ git config --global --list
 
 ---
 
-## 黄金フロー：はじめてのコミット
+## 【実践】はじめてのコミット
 
-ここが本番です。**この通りに写経すれば、最初のコミットが作れます。** 練習用のフォルダで試してみましょう。
+ここが本番です。先ほどの**黄金フロー（編集 → `add` → `commit`）**を、実際に手を動かして体験します。**この通りに写経すれば、最初のコミットが作れます。** 練習用のフォルダで試してみましょう。
 
 ### ステップ0：作業フォルダを用意して移動する
 
@@ -274,7 +296,7 @@ cd git-practice
 git init
 ```
 
-これで今のフォルダに `.git` という隠しフォルダが作られ、Gitでの管理が始まります。`.git` の中に履歴が保存されます（中身を直接触る必要はありません）。
+これで今のフォルダに `.git` という隠しフォルダが作られ、Gitでの管理が始まります。**これが、あなたのPCの中の「ローカルリポジトリ」**です。`.git` の中に履歴（コミット）が保存されます（中身を直接触る必要はありません）。
 
 ```bash
 # git initに成功すると、次のように表示されます
@@ -325,7 +347,7 @@ git add hello.txt
 git commit -m "最初のコミット"
 ```
 
-`-m` の後ろの文字列が**コミットメッセージ**（変更内容の一言メモ）です。これでセーブポイントが1つ作られました。
+`-m` の後ろの文字列が**コミットメッセージ**（変更内容の一言メモ）です。これでコミット（セーブポイント）が1つ作られました。
 
 ### ステップ6：履歴を確認する（git log）
 
@@ -341,10 +363,12 @@ git log
 
 ### 黄金フローのまとめ
 
+上の**ステップ4（`git add`）→ ステップ5（`git commit`）**が、この黄金フローの中核です。図にすると、次の3つの繰り返しになります。
+
 ```mermaid
 graph LR
-    E["ファイルを編集"] -->|"1. git add"| S["ステージング"]
-    S -->|"2. git commit -m '...'"| R["履歴に記録"]
+    E["① ファイルを編集"] -->|"② git add"| S["ステージング"]
+    S -->|"③ git commit -m '...'"| R["コミットとして記録"]
     R --> E
     style E fill:#c0392b,color:#fff
     style S fill:#d68910,color:#fff
@@ -375,6 +399,8 @@ Gitは「今どういう状態か」をこまめに確認しながら使うの�
 | `git diff` | まだステージングしていない変更の中身（どこを書き換えたか） |
 | `git diff --staged` | ステージング済みの変更の中身 |
 
+このうち **`git diff`** は「どこをどう書き換えたか」を確認するのに特によく使います。実際に実行してみましょう。
+
 ```bash
 git diff
 ```
@@ -383,25 +409,25 @@ git diff
 
 > `git log` と `git diff` の出力画面（差分の色分けが分かるもの）。
 > 
-> <img src="images/01_git/01_git_log_diff.png" alt="git logとgit diffの出力" width="500">
+> <img src="images/01_git/01_git_log_diff.png" alt="git logとgit diffの出力" width="800">
 
 > `git add` でステージングに追加した後は、`git diff` では何も表示されなくなります。ステージング済みの変更を確認するには `git diff --staged` を使います。
 > 
->  <img src="images/01_git/01_git_diff_staged.png" alt="git diff --stagedの出力" width="500">
+> <img src="images/01_git/01_git_diff_staged.png" alt="git diff --stagedの出力" width="800">
 
 > `git commit` でコミットした後は、`git diff` でも `git diff --staged` でも何も表示されなくなります。コミット済みの変更を確認するには `git log` を使います。
 > 
-> <img src="images/01_git/01_git_log.png" alt="git logの出力" width="500">
+> <img src="images/01_git/01_git_log.png" alt="git logの出力" width="800">
 
 ---
 
 ## .gitignore：記録したくないファイルを除外する
 
-プロジェクトには「Gitで管理したくないファイル」があります。たとえば次のようなものです。
+プロジェクトには「Gitで記録（コミット）したくないファイル」があります。たとえば次のようなものです。
 
-- パスワードやAPIキーなどの**秘密情報**
-- 自動生成される一時ファイル（`.DS_Store`、`__pycache__/`、LaTeXの `.aux` `.log` など）
-- サイズの大きいデータやビルド成果物
+- パスワードやAPIキーなどの**秘密情報**（誤って公開すると危険なので、そもそも記録しない）
+- 自動生成される一時ファイル（`.DS_Store`、`__pycache__/`、LaTeXの `.aux` `.log` など。**元から作り直せる**ので記録する意味がない）
+- サイズの大きいデータやビルド成果物（**リポジトリが重くなる**うえ、GitHubにはアップロードできる容量の上限もある。これらも必要なときに生成し直せることが多い）
 
 これらは `.gitignore` というファイルに書いておくと、Gitが**最初から無視**してくれます（`git status` にも出てこなくなります）。
 
