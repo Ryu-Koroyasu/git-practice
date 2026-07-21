@@ -102,7 +102,7 @@ git --version
 
 ### Windows
 
-Windowsでは「Git for Windows」をインストールします。これには **Git Bash** という、Mac/Linux風のコマンドが使えるターミナルが付いてきます。本手引書のWindowsの説明はこの Git Bash を使う前提です。
+Windowsでは「Git for Windows」をインストールします。これには **Git Bash** という、macOS/Linux風のコマンドが使えるターミナルが付いてきます。本手引書のWindowsの説明はこの Git Bash を使う前提です。
 
 1. 下記URLからインストーラをダウンロードします。
    [Git - Downloading Package](https://git-scm.com/download/win)
@@ -196,7 +196,7 @@ Windowsと他OSで改行コードが異なるため重要です。複数人・�
 
 **14. 追加オプションを選択する**
 
-**「Enable file system caching」**（高速化）にチェック。Mac等とリポジトリを共有するなら **「Enable symbolic links」** もチェックします。
+**「Enable file system caching」**（高速化）にチェック。macOS等とリポジトリを共有するなら **「Enable symbolic links」** もチェックします。
 
 <img src="images/01_git/win_install_14.png" alt="追加オプションの選択" width="500">
 
@@ -206,9 +206,9 @@ Windowsと他OSで改行コードが異なるため重要です。複数人・�
 
 インストール後、スタートメニューから **Git Bash** を起動し、`git --version` でバージョンが出れば完了です。
 
-### Mac
+### macOS
 
-Macには2つの方法があります。**どちらか一方**でOKです。
+macOSには2つの方法があります。**どちらか一方**でOKです。
 
 **方法A: Xcode Command Line Tools（最も手軽）**
 
@@ -306,7 +306,7 @@ Initialized empty Git repository in /Users/hoge/git-practice/.git/
 ```
 
 
-> `git init` 後にフォルダ内へ `.git` フォルダができた様子（Windowsはエクスプローラで隠しファイル表示ON、Macは Finder で `Cmd+Shift+.`、Linuxはファイルマネージャで隠しファイル表示）。
+> `git init` 後にフォルダ内へ `.git` フォルダができた様子（Windowsはエクスプローラで隠しファイル表示ON、macOSは Finder で `Cmd+Shift+.`、Linuxはファイルマネージャで隠しファイル表示）。
 >
 > <img src="images/01_git/01_git_init_folder.png" alt="git init後の.gitフォルダ" width="500">
 
@@ -435,7 +435,7 @@ git diff
 リポジトリの一番上の階層に `.gitignore` という名前のファイルを作り、無視したいものを1行ずつ書きます。
 
 ```text
-# Mac が作る隠しファイル
+# macOS が作る隠しファイル
 .DS_Store
 
 # Python のキャッシュ

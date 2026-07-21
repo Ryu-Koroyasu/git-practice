@@ -123,7 +123,7 @@ HTTPSでの認証には2通りあります。**GitHub CLI（`gh`）を使う方�
 > ⚠️ **`gh` はGit本体には含まれていません。** 01編でGitをインストールしても `gh` は入っていないので、**最初に別途インストールが必要**です。まず `gh --version` を実行し、`command not found`（未インストール）なら下記でインストールしてください。
 
 ```bash
-# Mac（Homebrew）
+# macOS（Homebrew）
 brew install gh
 
 # Windows（winget）
@@ -149,6 +149,9 @@ gh auth login
 ```
 
 対話形式で聞かれるので、次のように選びます。
+
+> 💡 質問文や順序、選択肢の文言は **`gh` のバージョンによって変わることがあります**。下記の画面例と完全に一致しなくても、**同じ意味の選択肢**（GitHub.com／HTTPS／ブラウザでログイン など）を選べば問題ありません。
+
 1. **What account do you want to log into?(認証するアカウントの選択)**
 ```bash
 # GitHub.com を選択する
@@ -243,7 +246,12 @@ Username: your-github-name
 Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなくトークンを入力
 ```
 
-一度入力すればトークンが記憶されるので、次回以降は入力不要になります。
+一度入力すればトークンが記憶されるので、次回以降は入力不要になります。これは **Git Credential Manager（GCM）** などの「認証情報ヘルパー」がトークンを保存してくれるためです。
+
+> 💡 **GCMの導入状況はOSで異なります。** Windowsは 01編でインストールした Git for Windows に GCM が同梱されています。macOS では GCM は標準では入っておらず、OS標準の `osxkeychain` ヘルパーが使われるのが一般的です（`gh auth login` を使う場合は `gh` がこの設定まで面倒を見ます）。いま何が使われているかは次で確認できます。
+> ```bash
+> git config --show-origin --get-all credential.helper
+> ```
 
 ### 方式B：SSH鍵
 
@@ -267,7 +275,7 @@ ssh-keygen -t ed25519 -C "you@example.com"
 **手順2：公開鍵の中身をコピーする**
 
 ```bash
-# Mac
+# macOS
 pbcopy < ~/.ssh/id_ed25519.pub
 
 # Windows（Git Bash）
@@ -506,14 +514,17 @@ graph LR
 ```
 
 ```bash
-# 1. 作業開始前に、GitHub（リモート）の最新を手元に取り込む
+# 1. まず現在の状態を確認する（今どのファイルがどのエリアにあるか）
+git status
+
+# 2. 作業開始前に、GitHub（リモート）の最新を手元に取り込む
 git pull
 
-# 2. ファイルを編集したら、変更を記録する（01編の黄金フロー）
+# 3. ファイルを編集したら、変更を記録する（01編の黄金フロー）
 git add .                      # 変更をステージングに追加
 git commit -m "変更内容のメモ"   # コミットとして記録
 
-# 3. 記録した変更を GitHub（リモート）へアップロードする
+# 4. 記録した変更を GitHub（リモート）へアップロードする
 git push
 ```
 
