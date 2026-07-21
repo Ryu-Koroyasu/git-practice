@@ -246,12 +246,7 @@ Username: your-github-name
 Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなくトークンを入力
 ```
 
-一度入力すればトークンが記憶されるので、次回以降は入力不要になります。これは **Git Credential Manager（GCM）** などの「認証情報ヘルパー」がトークンを保存してくれるためです。
-
-> 💡 **GCMの導入状況はOSで異なります。** Windowsは 01編でインストールした Git for Windows に GCM が同梱されています。macOS では GCM は標準では入っておらず、OS標準の `osxkeychain` ヘルパーが使われるのが一般的です（`gh auth login` を使う場合は `gh` がこの設定まで面倒を見ます）。いま何が使われているかは次で確認できます。
-> ```bash
-> git config --show-origin --get-all credential.helper
-> ```
+一度入力すればトークンが記憶されるので、次回以降は入力不要になります。
 
 ### 方式B：SSH鍵
 
