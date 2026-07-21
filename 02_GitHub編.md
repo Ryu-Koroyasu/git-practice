@@ -8,7 +8,8 @@
 
 > 💡 **このドキュメントの読み方**
 > - まず一度つないでみたい人 → 「アカウントを作る」→「認証を設定する」→「リモートリポジトリを用意する」→「つなぐ」を順に写経
-> - コマンドをド忘れした人 → [04_逆引きチートシート](04_逆引きチートシート.md) へ
+> - コマンドをド忘れした人 → [05_逆引きチートシート](05_逆引きチートシート.md) へ
+> - エラーが出て困った人 → [04_トラブルシューティング編](04_トラブルシューティング編.md) へ
 
 ---
 
@@ -148,13 +149,56 @@ gh auth login
 ```
 
 対話形式で聞かれるので、次のように選びます。
+1. **What account do you want to log into?(認証するアカウントの選択)**
+```bash
+# GitHub.com を選択する
+hoge@n171h184 Git_GitHub_Document % gh auth login
+? Where do you use GitHub?  [Use arrows to move, type to filter]
+> GitHub.com
+  Other
+```
+2. **What is your preferred protocol for Git operations?(認証方式の選択)**
+```bash
+# HTTPS を選択する
+? What is your preferred protocol for Git operations?[Use arrows to move, type to filter]
+> HTTPS
+  SSH
+```
+3.  **Authenticate Git with your GitHub credentials?(Gitの認証をGitHubの資格情報で行うか)**
+```bash
+# Yを入力する
+Authenticate Git with your GitHub credentials? (Y/n) Y
+```
+4. **How would you like to authenticate?(認証方法の選択)**
+```bash
+# Login with a web browser を選択する
+? How would you like to authenticate? [Use arrows to move, type to filter]
+> Login with a web browser
+  Paste an authentication token
 
-- **What account do you want to log into?** → `GitHub.com`
-- **What is your preferred protocol for Git operations?** → `HTTPS`
-- **Authenticate Git with your GitHub credentials?** → `Yes`
-- **How would you like to authenticate?** → `Login with a web browser`（ブラウザが開くので、表示された8桁のコードを貼り付けて認証）
+# Login with a web browser を選ぶと以下のようなメッセージが出ます。
+# このメッセージが出た後にEnterを押すとブラウザが開き、GitHubにログインして認証できます。
+? How would you like to authenticate GitHub CLI? Login with a web browser
 
-これで完了です。`gh` がGitの認証情報ヘルパーとして登録され、**以降 `git push` / `git pull` で認証を聞かれなくなります**。トークンの発行・保管・期限管理はすべて `gh` が面倒を見てくれます。
+! First copy your one-time code: FDAC-FFFB #←認証用のワンタイムコード
+Press Enter to open https://github.com/login/device in your browser... 
+```
+
+> Enter押下の後に開くブラウザ画面
+> 
+> **Continue**を押す。
+>
+> <img src="images/02_github/gh_auth_login.png" alt="GitHubログイン画面" width="500">
+>
+> Continue押下の後に表示されるブラウザ画面
+> 
+> ワンタイムコードを入力して **Continue** を押す。
+> 
+> <img src="images/02_github/gh_authorize_window.png" alt="GitHub認証画面" width="500">
+
+これで完了です。`gh` がGitの認証情報ヘルパーとして登録され、**以降 `git push` / `git pull` で認証を聞かれなくなります**。トークンの発行・保管は `gh` が肩代わりしてくれるため、自分で発行・管理する必要はありません。
+
+> ⚠️ ただし `gh` が**自動で無期限に更新してくれるわけではありません**。トークンの有効期限が切れたり、GitHub側でアクセスを取り消したり、新しい権限（スコープ）が必要になった場合は、再度 `gh auth login`（権限追加なら `gh auth refresh`）で認証し直してください。`gh auth status` で現在の状態を確認できます。
 
 ```bash
 # ログイン状態を確認する
@@ -199,7 +243,7 @@ Username: your-github-name
 Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなくトークンを入力
 ```
 
-一度入力すれば、01編のインストールで設定した **Git Credential Manager**（Windows/Mac）がトークンを記憶し、次回以降は入力不要になります。
+一度入力すればトークンが記憶されるので、次回以降は入力不要になります。
 
 ### 方式B：SSH鍵
 
@@ -370,12 +414,14 @@ git remote -v
 # 3. 現在のブランチ名を main に統一する
 git branch -M main
 
-# 4. 初回のアップロード（-u で以降の宛先を記憶させる）
+# 4. 初回のアップロード（-u で「送り先」を覚えさせる）
 git push -u origin main
 ```
 
 - **`origin`** は「リモートリポジトリの標準的な別名」です。以降 URL の代わりに `origin` と書けます。
-- **`-u`（`--set-upstream`）** は「このローカルブランチの写し先はこのリモートだ」と記憶させるオプションです。一度付ければ、次回からは `git push` だけで済みます。
+- **`-u`（`--set-upstream`）** は、`push` の引数で指定した送り先（ここでは `origin` の `main`）を、いまのローカルブランチの「既定の送り先」として覚えさせるオプションです。
+  - 本来 `git push` は毎回どこへ送るか（`origin main`）を指定する必要があります。`-u` を一度付けておくと対応付けが記録され、**次回からは `git push` / `git pull` だけ**で同じ相手とやり取りできます。
+  - 記録された送り先は `git branch -vv` で確認できます（ブランチ名の横に `[origin/main]` と表示されます）。
 
 > ⚠️ `git remote add origin ...` で `error: remote origin already exists.` と出たら、既に登録済みです。URLを付け替えたいときは `git remote set-url origin <新しいURL>` を使います。
 
@@ -397,7 +443,7 @@ graph LR
 ```
 
 ```bash
-# 初回（宛先を記憶させる）
+# 初回（-u で送り先を覚えさせる）
 git push -u origin main
 
 # 2回目以降はこれだけでOK
@@ -412,24 +458,32 @@ git push
 
 ## ダウンロードする（pull と fetch）
 
-別のPCや他の人がリモートを更新したとき、その最新を手元に取り込むのが `pull` と `fetch` です。
+別のPCや他の人がリモートを更新したとき、その最新を手元に取り込む（または確認する）のが `pull` と `fetch` です。
 
 | コマンド | 動き | いつ使うか |
 |---|---|---|
-| `git fetch` | リモートの最新を**取得するだけ**（手元の作業ツリーは変わらない） | 反映前に「何が来たか」だけ確認したいとき |
-| `git pull` | `fetch` + **統合（merge）**。取得して手元にも反映 | ふだんの「最新に追いつく」操作 |
+| `git fetch` | リモートの最新を**取得して `origin/main` に記録するだけ**（手元の `main` や作業ツリーは変えない） | 反映前に「何が来たか」を確認したいとき |
+| `git pull` | `fetch` + **統合（merge）**。取得して手元の `main` にも反映 | ふだんの「最新に追いつく」操作 |
+
+> 💡 **`origin/main` とは？** `git fetch` で取得したリモートの内容は、手元の `main` とは別の **`origin/main`** という場所に記録されます。これは「**リモートが今どうなっているかを指す、手元にあるブックマーク**」だと考えてください。だから fetch した後は、自分の作業を変えずに `git log origin/main` でリモート側の中身を確認できます。
 
 ```bash
-# ふだんはこれ（取得して手元に反映）
+# ふだんはこれ（取得して手元の main に反映）
 git pull
 
 # 取得だけしておいて、中身を確認してから反映したい場合
-git fetch
-git log origin/main   # リモート側の履歴を確認
-git merge origin/main # 問題なければ手元に統合
+git fetch              # リモートの最新を origin/main に取得（手元の main は変わらない）
+git log origin/main    # 取得した origin/main の履歴を確認
+git merge origin/main  # 問題なければ手元の main に統合
 ```
 
 > 💡 **作業を始める前に `git pull` する**のを習慣にすると、手元を常に最新の状態から始められ、後述のコンフリクト（衝突）が起きにくくなります。
+
+> 💡 新しめのGit（2.27以降）では、**初めて `git pull` したときに一度だけ**「取り込み方を merge にするか rebase にするか」を設定するよう促されることがあります。迷ったら、01編と同じ標準の **merge 方式**を選ぶ次の設定を1度だけ実行しておけば、以降は聞かれません。
+> ```bash
+> git config --global pull.rebase false
+>
+> これは上流ブランチの設定（`-u`）とは別の全体設定です。一度決めれば、あとは引数なしの `git pull` / `git push` だけで同期できます。
 
 > ⚠️ 複数人・複数PCで同じブランチを編集していると、`pull` 時に**コンフリクト**（同じ箇所を別々に変更したことによる衝突）が起きることがあります。その解決方法は [03_ブランチ・PR編](03_ブランチ・PR編.md) で詳しく扱います。
 
@@ -437,7 +491,7 @@ git merge origin/main # 問題なければ手元に統合
 
 ## 日常のフロー
 
-GitHubとつないだ後の、毎日の基本的な流れです。**「始めにpull、終わりにpush」**を挟むだけで、01編の黄金フロー（編集 → add → commit）がそのまま使えます。
+GitHubとつないだ後の、毎日の基本的な流れです。**始めにpull、終わりにpush**を挟むだけで、01編の黄金フロー（編集 → add → commit）がそのまま使えます。
 
 ```mermaid
 graph LR
@@ -452,15 +506,15 @@ graph LR
 ```
 
 ```bash
-# 1. 作業開始前に最新を取り込む
-git pull origin branch-name # 例：git pull origin main
+# 1. 作業開始前に、GitHub（リモート）の最新を手元に取り込む
+git pull
 
-# 2. 編集して、ローカルに記録する（01編の黄金フロー）
-git add .
-git commit -m "変更内容のメモ"
+# 2. ファイルを編集したら、変更を記録する（01編の黄金フロー）
+git add .                      # 変更をステージングに追加
+git commit -m "変更内容のメモ"   # コミットとして記録
 
-# 3. クラウドへ反映する
-git push origin branch-name # 例：git push origin main
+# 3. 記録した変更を GitHub（リモート）へアップロードする
+git push
 ```
 
 この繰り返しで、手元とクラウドが常に同期された状態を保てます。
