@@ -402,6 +402,13 @@ cd git-practice
 git remote -v   # origin が登録されていることを確認
 ```
 
+次のように `origin` が `fetch` / `push` の2行で表示されれば、正しく登録されています（URLは自分のものになります）。
+
+```text
+origin  https://github.com/your-name/git-practice.git (fetch)
+origin  https://github.com/your-name/git-practice.git (push)
+```
+
 ### パターンB：既存のローカルを `push`（01編で作ったものを上げる）
 
 01編で `git init` して作った手元のリポジトリを、後からGitHubにつなぐ場合です。リポジトリのフォルダ内で実行します。
@@ -413,6 +420,9 @@ git remote add origin https://github.com/your-name/git-practice.git
 
 # 2. 登録内容を確認する
 git remote -v
+#    → origin  https://github.com/your-name/git-practice.git (fetch)
+#      origin  https://github.com/your-name/git-practice.git (push)
+#      のように2行表示されれば登録成功
 
 # 3. 現在のブランチ名を main に統一する
 git branch -M main
