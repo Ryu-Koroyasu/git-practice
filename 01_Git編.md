@@ -71,6 +71,7 @@ graph LR
     style B fill:#d68910,color:#fff
     style C fill:#2e7d32,color:#fff
 ```
+<img src="images/01_git/git_area.png" alt="Gitの3つのエリア" width="650">
 
 ポイントは、各操作が「**写し（コピー）を取って次の場所に置く**」というイメージだという点です。**元のエリアには元のまま残る**ので、先に進めても空になりません。
 
