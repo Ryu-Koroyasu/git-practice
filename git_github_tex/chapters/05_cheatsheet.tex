@@ -1,0 +1,278 @@
+% =====================================================================
+% 第5章 逆引きチートシート — 「〜したい」からコマンドを引く
+% 元原稿: 05_逆引きチートシート.md
+% =====================================================================
+\chapter{逆引きチートシート —「〜したい」からコマンドを引く—}
+
+本章は、第1〜3章で登場したコマンドを \textbf{「〜したい → このコマンド」} の形で引けるようにまとめた辞書です。使い方や背景をしっかり知りたいときは、各節末尾に示した該当章を参照してください。
+
+\begin{hintbox}
+\textbf{この章の読み方}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{やりたいことが決まっている} → 各表の左列で探す
+  \item \textbf{意味や背景を知りたい} → 各節末尾のリンク（第1〜3章）へ
+  \item \textbf{迷ったらまず \cmd{git status}}：今どのファイルがどのエリアにあるかが分かり、次の一手が見えます
+\end{itemize}
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{最初の設定（1度だけ）}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+名前を登録する & \cmd{git config -{}-global user.name "your-name"} \\
+メールアドレスを登録する & \cmd{git config -{}-global user.email "you@example.com"} \\
+設定内容を確認する & \cmd{git config -{}-global -{}-list} \\
+新規リポジトリの初期ブランチ名を \cmd{main} にする & \cmd{git config -{}-global init.defaultBranch main} \\
+Gitのバージョンを確認する & \cmd{git -{}-version} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第1章「最初の設定」を参照。
+
+% ---------------------------------------------------------------------
+\section{変更を記録する（黄金フロー）}
+
+\textbf{編集 → \cmd{add} → \cmd{commit}} の3ステップが基本です。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+新しいフォルダをリポジトリにする & \cmd{git init} \\
+変更した1ファイルをステージングに追加する & \cmd{git add ファイル名} \\
+変更した全ファイルをステージングに追加する & \cmd{git add .} \\
+コミット（セーブポイント）を作る & \cmd{git commit -m "変更内容のメモ"} \\
+ステージング＋コミットをまとめて行う（追跡済みのみ） & \cmd{git commit -am "メモ"} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第1章「【実践】はじめてのコミット」を参照。
+
+\begin{hintbox}
+\cmd{git add .} の \cmd{.}（ドット）は「今いるフォルダ以下のすべての変更」という意味です。\cmd{push} は\textbf{コミット済みの内容だけ}を送ります。手元の編集を反映したいときは、必ず先に \cmd{add} → \cmd{commit} します。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{状態・履歴を確認する}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+どのファイルが変更され、どのエリアにあるか見る & \cmd{git status} \\
+コミット履歴を見る & \cmd{git log} \\
+履歴を1行ずつ簡潔に見る & \cmd{git log -{}-oneline} \\
+まだステージングしていない変更の中身を見る & \cmd{git diff} \\
+ステージング済みの変更の中身を見る & \cmd{git diff -{}-staged} \\
+リモートの登録内容を確認する & \cmd{git remote -v} \\
+いまのブランチの「送り先」を確認する & \cmd{git branch -vv} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第1章「状態を確認するコマンド」を参照（\cmd{git log} の表示は \cmd{q} キーで終了）。
+
+% ---------------------------------------------------------------------
+\section{認証を設定する（GitHub連携の準備）}
+
+\cmd{push} する前に、\textbf{HTTPS か SSH のどちらか一方}を1度だけ設定します。
+
+\noindent\textbf{HTTPS（GitHub CLI を使う・おすすめ）}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+\cmd{gh} がインストール済みか確認する & \cmd{gh -{}-version} \\
+\cmd{gh} をインストールする（Mac / Homebrew） & \cmd{brew install gh} \\
+\cmd{gh} をインストールする（Linux / apt） & \cmd{sudo apt install gh} \\
+GitHubにログインする & \cmd{gh auth login} \\
+ログイン状態を確認する & \cmd{gh auth status} \\
+権限（スコープ）を追加する & \cmd{gh auth refresh -s スコープ名} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\noindent\textbf{SSH鍵}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+鍵ペアを作る & \cmd{ssh-keygen -t ed25519 -C "you@example.com"} \\
+公開鍵をコピーする（Mac） & \cmd{pbcopy < \textasciitilde/.ssh/id\_ed25519.pub} \\
+公開鍵をコピーする（Windows / Git Bash） & \cmd{cat \textasciitilde/.ssh/id\_ed25519.pub | clip} \\
+公開鍵を表示する（Linux） & \cmd{cat \textasciitilde/.ssh/id\_ed25519.pub} \\
+GitHubへの接続を確認する & \cmd{ssh -T git@github.com} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第2章「認証を設定する（HTTPS と SSH）」を参照。
+
+\begin{warnbox}
+秘密鍵（\cmd{.pub} が付かない方）は絶対に他人に渡さないでください。GitHubに登録するのは公開鍵（\cmd{.pub}）だけです。
+\end{warnbox}
+
+% ---------------------------------------------------------------------
+\section{リモートとつなぐ・同期する}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+GitHubのリポジトリを丸ごと複製する & \cmd{git clone URL} \\
+手元のリポジトリにリモートを登録する & \cmd{git remote add origin URL} \\
+リモートのURLを付け替える & \cmd{git remote set-url origin 新しいURL} \\
+ブランチ名を \cmd{main} に統一する & \cmd{git branch -M main} \\
+初回のアップロード（送り先を覚えさせる） & \cmd{git push -u origin main} \\
+2回目以降のアップロード & \cmd{git push} \\
+リモートの最新を取得して手元に反映する & \cmd{git pull} \\
+リモートの最新を取得だけする（反映しない） & \cmd{git fetch} \\
+取得済みの内容を手元に統合する & \cmd{git merge origin/main} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第2章「ローカルとリモートをつなぐ」を参照。
+
+\begin{hintbox}
+\textbf{始めに \cmd{pull}、終わりに \cmd{push}} を習慣にすると、コンフリクトが起きにくくなります。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{ブランチを操作する}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+ブランチ一覧を見る（\cmd{*} が今いるブランチ） & \cmd{git branch} \\
+ブランチを作って同時に切り替える & \cmd{git switch -c feature/xxx} \\
+（古い書き方）作って切り替える & \cmd{git checkout -b feature/xxx} \\
+既存のブランチへ切り替える & \cmd{git switch ブランチ名} \\
+作業ブランチをリモートへ上げる（初回） & \cmd{git push -u origin feature/xxx} \\
+ローカルのブランチを削除する（マージ済みのみ安全に） & \cmd{git branch -d feature/xxx} \\
+リモートのブランチを削除する & \cmd{git push origin -{}-delete feature/xxx} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第3章「ブランチの基本操作」を参照。
+
+\begin{warnbox}
+作業を始める前に、\textbf{\cmd{main} を最新にしてから枝分かれ}するのが安全です（\cmd{git switch main} → \cmd{git pull} → \cmd{git switch -c 新ブランチ}）。
+\end{warnbox}
+
+% ---------------------------------------------------------------------
+\section{プルリクエスト（PR）とマージ後の後片付け}
+
+PRの作成・レビュー・マージは\textbf{GitHubの画面（ブラウザ）で操作}します。マージ後の後片付けはコマンドで行います。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド／操作 \\
+\midrule
+PRを作る & GitHubの「Compare \& pull request」→ base/compare を確認 → 作成 \\
+PRに変更を追加する & 同じブランチで \cmd{add} → \cmd{commit} → \cmd{push} \\
+マージ後にローカルの \cmd{main} を最新化する & \cmd{git switch main} → \cmd{git pull} \\
+マージ済みのローカルブランチを消す & \cmd{git branch -d feature/xxx} \\
+マージ済みのリモートブランチを消す & \cmd{git push origin -{}-delete feature/xxx} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+詳しくは第3章「プルリクエスト（PR）を作る」を参照。
+
+% ---------------------------------------------------------------------
+\section{コンフリクト（競合）を解決する}
+
+同じ箇所を別々に変更したとき、\cmd{pull} / \cmd{merge} で発生します。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+どのファイルが競合したか確認する & \cmd{git status} \\
+解決したファイルを「解決済み」として登録する & \cmd{git add ファイル名} \\
+解決を確定する（メッセージは自動用意） & \cmd{git commit} \\
+マージをやめて開始前の状態に戻す & \cmd{git merge -{}-abort} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{解決の手順}：ファイルを開き、マーカー3行（\cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>}）を削除して正しい状態にする → \cmd{add} → \cmd{commit}。
+
+詳しくは第3章「コンフリクト（競合）を解決する」を参照。
+
+\begin{hintbox}
+VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボタンでマーカーごと処理できます。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{やり直し・取り消し}
+
+\begin{warnbox}
+取り消し系は状態を戻す操作です。\textbf{不安なときはまず \cmd{git status} で現在地を確認}してから使ってください。
+\end{warnbox}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+したいこと & コマンド \\
+\midrule
+作業ツリーの変更を捨てて最後のコミットに戻す（1ファイル） & \cmd{git restore ファイル名} \\
+ステージングから下ろす（変更内容は残す） & \cmd{git restore -{}-staged ファイル名} \\
+直前のコミットメッセージを修正する & \cmd{git commit -{}-amend -m "新しいメモ"} \\
+マージ作業を中止して開始前に戻す & \cmd{git merge -{}-abort} \\
+公開済みのコミットを打ち消す（履歴は残す） & \cmd{git revert コミットID} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+各操作の使い分けや事故からの復旧は第4章「トラブルシューティング編」を参照。
+
+\begin{hintbox}
+\cmd{git restore} は\textbf{まだコミットしていない}変更を捨てるコマンドです。捨てた変更は元に戻せないので注意してください。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{困ったときのフローチャート}
+
+「今こうしたい」から、打つべきコマンドを引けます（図\ref{fig:help-flow}）。
+
+\begin{numfig}{「〜したい」から引く早見表}{fig:help-flow}
+\begin{tikzpicture}[node distance=0.55cm and 1.4cm]
+  \node[decisionnode, fill=gitAmber, text width=3cm] (Q1) {今の状態が分からない};
+  \node[flownode, fill=gitOrange, text width=6.5cm, right=of Q1] (A1) {git status};
+  \node[decisionnode, fill=gitAmber, text width=3cm, below=of Q1] (Q2) {手元の変更を上げたい};
+  \node[flownode, fill=gitGreen, text width=6.5cm, right=of Q2] (A2) {git add . → git commit → git push};
+  \node[decisionnode, fill=gitAmber, text width=3cm, below=of Q2] (Q3) {クラウドの最新を取り込みたい};
+  \node[flownode, fill=gitBlue, text width=6.5cm, right=of Q3] (A3) {git pull};
+  \node[decisionnode, fill=gitAmber, text width=3cm, below=of Q3] (Q4) {新しい作業を始めたい};
+  \node[flownode, fill=gitPurple, text width=6.5cm, right=of Q4] (A4) {git switch main → git pull → git switch -c feature/xxx};
+  \node[decisionnode, fill=gitAmber, text width=3cm, below=of Q4] (Q5) {pull / merge で競合が出た};
+  \node[flownode, fill=gitRed, text width=6.5cm, right=of Q5] (A5) {マーカーを消す → git add → git commit};
+  \draw[flowarrow] (Q1) -- (A1);
+  \draw[flowarrow] (Q2) -- (A2);
+  \draw[flowarrow] (Q3) -- (A3);
+  \draw[flowarrow] (Q4) -- (A4);
+  \draw[flowarrow] (Q5) -- (A5);
+\end{tikzpicture}
+\end{numfig}
+
+各コマンドの「なぜそうするのか」は、第1〜3章の本文で図とともに説明しています。手が止まったら、まずこのチートシートで当たりをつけ、詳しく知りたくなったら該当章へ戻ってください。

@@ -1,0 +1,245 @@
+% =====================================================================
+% 第4章 トラブルシューティング編 — エラー・事故からの復旧
+% 元原稿: 04_トラブルシューティング編.md
+% =====================================================================
+\chapter{トラブルシューティング編 —エラー・事故からの復旧—}
+
+本章は、Gitを使っていて \textbf{エラーが出た・操作を間違えた} ときの対処をまとめた「困ったときの駆け込み寺」です。第1〜3章で基本の流れを学んだあと、実際に手を動かすと必ず何かにぶつかります。そのときにここを開いてください。
+
+\begin{hintbox}
+\textbf{この章の読み方}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{エラーメッセージが出た} → 「エラーメッセージ逆引き」でメッセージの一部から探す
+  \item \textbf{操作を間違えた・元に戻したい} → 「やり直し・取り消し」へ
+  \item \textbf{やらかした気がする} → 「よくある事故と復旧」へ
+  \item コマンドだけ手早く引きたい → 第5章「逆引きチートシート」へ
+\end{itemize}
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{トラブル対応の心得}
+
+エラーが出ても、\textbf{慌てて次々コマンドを打つのが一番危険}です。まず次の3つを守ってください。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{まず \cmd{git status}}：今どのファイルがどのエリアにあるか、どのブランチにいるかが分かります。ほとんどのヒントはここに出ます。
+  \item \textbf{メッセージを読む}：Gitのエラーは、たいてい\textbf{次にやるべきことを英語で提案}してくれています（\cmd{use "git ..."} の形）。
+  \item \textbf{コミット済みなら基本は安全}：一度 \cmd{commit} した内容は履歴に残っており、多くの操作は後から取り戻せます。怖いのは「まだコミットしていない変更」を捨てる操作だけです。
+\end{enumerate}
+
+\begin{numfig}{トラブル対応の基本手順}{fig:trouble-flow}
+\begin{tikzpicture}[node distance=1.0cm]
+  \node[flownode, fill=gitRed, text width=5.5cm] (E) {エラーが出た / 操作を間違えた};
+  \node[flownode, fill=gitOrange, text width=5.5cm, below=of E] (S) {git status で現在地を確認};
+  \node[flownode, fill=gitOrange, text width=5.5cm, below=of S] (R) {エラーメッセージを読む};
+  \node[decisionnode, fill=gitAmber, text width=2.4cm, below=of R] (Q) {対処法が分かる？};
+  \node[flownode, fill=gitGreen, text width=4.2cm, below left=1.2cm and 0.2cm of Q] (DO) {提案されたコマンドを実行};
+  \node[flownode, fill=gitBlue, text width=4.2cm, below right=1.2cm and 0.2cm of Q] (DOC) {この章でメッセージを検索};
+  \draw[flowarrow] (E) -- (S);
+  \draw[flowarrow] (S) -- (R);
+  \draw[flowarrow] (R) -- (Q);
+  \draw[flowarrow] (Q) -- (DO) node[edgelabel, midway, left] {はい};
+  \draw[flowarrow] (Q) -- (DOC) node[edgelabel, midway, right] {いいえ};
+\end{tikzpicture}
+\end{numfig}
+
+% ---------------------------------------------------------------------
+\section{エラーメッセージ逆引き}
+
+出たメッセージの一部から、原因と対処を引けます。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.6cm} X X@{}}
+\toprule
+メッセージ（一部） & 主な原因 & 対処 \\
+\midrule
+\cmd{remote origin already exists} & \cmd{origin} が既に登録済み & URLを変えたいなら \cmd{git remote set-url origin 新URL} \\
+\cmd{Updates were rejected} / \cmd{non-fast-forward} & リモートに手元が知らない更新がある & 先に \cmd{git pull} してから \cmd{git push} \\
+\cmd{Authentication failed} & HTTPSの認証切れ・トークン失効 & \cmd{gh auth login}（再ログイン）または トークン再発行 \\
+\cmd{Permission denied (publickey)} & SSH鍵が未登録／認識されていない & 公開鍵をGitHubに登録、\cmd{ssh -T git@github.com} で確認 \\
+\cmd{fatal: not a git repository} & Git管理下でない場所にいる & 正しいフォルダへ \cmd{cd}、または \cmd{git init} \\
+\cmd{nothing to commit, working tree clean} & 記録すべき変更がない & 変更を保存したか確認。\cmd{git status} で状態確認 \\
+\cmd{detached HEAD state} & 特定コミットに直接いる（ブランチ上でない） & \cmd{git switch -c 新ブランチ名} で拾う、または \cmd{git switch main} で戻る \\
+\cmd{error: failed to push some refs} & 多くは push 拒否（上記 \cmd{non-fast-forward}） & \cmd{git pull} で最新を取り込んでから \cmd{git push} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{push が拒否された（Updates were rejected）}
+
+最も多いトラブルです。\textbf{あなたが最後に取得して以降、リモート側が更新された}ときに起こります（図\ref{fig:push-rejected}）。
+
+\begin{numfig}{push 拒否は「pull してから push」で解決する}{fig:push-rejected}
+\begin{tikzpicture}
+  \node[flownode, fill=gitOrange, text width=2.2cm] (L) {手元の履歴};
+  \node[flownode, fill=gitRed, text width=2.6cm, right=2.4cm of L] (X) {拒否（リモートが先行）};
+  \node[flownode, fill=gitBlue, text width=2.4cm, right=2.4cm of X] (M) {最新に追いつく};
+  \node[flownode, fill=gitGreen, right=2.4cm of M] (OK) {成功};
+  \draw[flowarrow] (L) -- (X) node[edgelabel, midway, above] {push};
+  \draw[flowarrow] (X) -- (M) node[edgelabel, midway, above] {git pull};
+  \draw[flowarrow] (M) -- (OK) node[edgelabel, midway, above] {git push};
+\end{tikzpicture}
+\end{numfig}
+
+\begin{codebox}[bash]
+\begin{code}
+# 1. まず取り込む（このときコンフリクトが出ることがある → 次節へ）
+git pull
+
+# 2. 取り込めたら改めて上げる
+git push
+\end{code}
+\end{codebox}
+
+\subsection{認証で弾かれた}
+
+HTTPSかSSHかで対処が分かれます。
+
+\begin{codebox}[bash]
+\begin{code}
+# HTTPS（gh を使っている場合）：再ログインする
+gh auth login
+gh auth status   # 状態を確認
+
+# SSH：鍵が使えているか確認する
+ssh -T git@github.com
+\end{code}
+\end{codebox}
+
+認証の設定方法そのものは第2章「認証を設定する（HTTPS と SSH）」を参照してください。
+
+% ---------------------------------------------------------------------
+\section{やり直し・取り消し}
+
+\begin{warnbox}
+取り消し系は状態を戻す操作です。\textbf{実行前に必ず \cmd{git status} で現在地を確認}してください。特に「まだコミットしていない変更を捨てる」操作は、元に戻せません。
+\end{warnbox}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X l@{}}
+\toprule
+したいこと & コマンド & 危険度 \\
+\midrule
+ステージングから下ろす（変更内容は残す） & \cmd{git restore -{}-staged ファイル名} & 安全 \\
+作業ツリーの変更を捨てて最後のコミットに戻す & \cmd{git restore ファイル名} & 要注意（変更が消える） \\
+直前のコミットメッセージを直す & \cmd{git commit -{}-amend -m "新しいメモ"} & 注意※ \\
+直前のコミットに、入れ忘れたファイルを追加する & \cmd{git add 忘れファイル} → \cmd{git commit -{}-amend -{}-no-edit} & 注意※ \\
+公開済みのコミットを打ち消す（履歴は残す） & \cmd{git revert コミットID} & 安全 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+※ \cmd{-{}-amend} は\textbf{コミットを作り直す}操作です。\textbf{まだ push していないコミット}にだけ使ってください。push 済みのものを \cmd{-{}-amend} すると履歴がずれ、チームに影響します。
+
+\subsection{restore と revert の違い（重要）}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{\cmd{git restore}}：\textbf{まだコミットしていない}手元の変更を捨てる。作業をなかったことにする。
+  \item \textbf{\cmd{git revert}}：\textbf{すでにコミット（push）済み}の変更を、「打ち消す新しいコミット」を積んで無効化する。\textbf{履歴は消さず}に安全に取り消せるので、共有ブランチではこちらを使う。
+\end{itemize}
+
+\begin{codebox}[bash]
+\begin{code}
+# 例：直前のコミットを打ち消したい（公開済みでも安全）
+git revert HEAD
+\end{code}
+\end{codebox}
+
+\begin{hintbox}
+「間違えたコミットを歴史から抹消したい」と思っても、共有済みの履歴は\textbf{消さずに打ち消す（revert）}のが鉄則です。履歴を書き換える \cmd{reset -{}-hard} はローカル専用・自己責任の最終手段と考えてください。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{コンフリクト（競合）で詰まったとき}
+
+コンフリクトの基本的な直し方は第3章「コンフリクト（競合）を解決する」に詳しくあります。ここでは \textbf{「解決できずに詰まった／やめたい」} ときの逃げ道を補足します。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X l@{}}
+\toprule
+状況 & コマンド \\
+\midrule
+マージ作業をやめて、開始前の状態に戻したい & \cmd{git merge -{}-abort} \\
+\cmd{pull} で始まった競合をやめたい & \cmd{git merge -{}-abort}（pull は fetch + merge のため） \\
+どのファイルが競合中か確認したい & \cmd{git status}（\cmd{Unmerged paths} を見る） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{codebox}[bash]
+\begin{code}
+# 泥沼化したら、まず落ち着いて開始前に戻す
+git merge --abort
+
+# 状態を確認して、もう一度ていねいにやり直す
+git status
+\end{code}
+\end{codebox}
+
+\begin{warnbox}
+競合ファイルには \cmd{<<<<<<<} \cmd{=======} \cmd{>>>>>>>} の\textbf{マーカー3行}が入ります。\textbf{これを消し忘れたままコミットしない}でください。消し忘れるとコードや原稿にゴミが残ります。VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボタンでマーカーごと安全に処理できます。
+\end{warnbox}
+
+% ---------------------------------------------------------------------
+\section{よくある事故と復旧}
+
+\subsection{間違ったブランチで作業してしまった}
+
+\textbf{まだコミットしていない}なら、変更を持ったまま正しいブランチへ移れます。
+
+\begin{codebox}[bash]
+\begin{code}
+# 今の変更を持ったまま、正しいブランチへ切り替える
+git switch 正しいブランチ名
+\end{code}
+\end{codebox}
+
+\cmd{main} で誤ってコミットまでしてしまった場合は、作業ブランチを切って続け、\cmd{main} はローカルで巻き戻す方法があります。判断に迷うときは無理に操作せず、状態（\cmd{git status} / \cmd{git log -{}-oneline}）を控えてから対処してください。
+
+\subsection{秘密情報（パスワード・APIキー）をコミットしてしまった}
+
+\begin{warnbox}
+\textbf{push してしまった場合、その秘密情報は「漏れた」ものとして扱います。} 履歴から消す以前に、まず対処が必要です。
+\end{warnbox}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{まず鍵・トークンを無効化して再発行する}（これが最優先。消しても取得された可能性は消えない）
+  \item 該当ファイルを \cmd{.gitignore}（第1章参照）に追加し、今後コミットされないようにする
+  \item 履歴からの完全削除は影響が大きいため、チームや管理者と相談して対応する
+\end{enumerate}
+
+\subsection{大きなファイルを上げてしまった／リポジトリが重い}
+
+GitHubにはアップロード容量の上限があります。ビルド成果物や大容量データは、そもそもコミットしないのが基本です。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item 生成し直せるファイル・大容量データは \cmd{.gitignore}（第1章参照）で除外する
+  \item 既にコミット済みのものは、\cmd{.gitignore} に足すだけでは消えません。対処が必要なら管理者に相談してください
+\end{itemize}
+
+\subsection{コミットしたはずの変更が push されない}
+
+\cmd{push} は\textbf{コミット済みの内容だけ}を送ります。「保存したのに反映されない」ときは、\cmd{add} → \cmd{commit} を忘れていないか確認します。
+
+\begin{codebox}[bash]
+\begin{code}
+git status                    # 未コミットの変更が残っていないか確認
+git add . && git commit -m "メモ"
+git push
+\end{code}
+\end{codebox}
+
+% ---------------------------------------------------------------------
+\section*{この章のまとめ}
+\addcontentsline{toc}{section}{この章のまとめ}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{困ったらまず \cmd{git status}}。エラーメッセージは次の一手を教えてくれる
+  \item \textbf{コミット済みは基本安全}。怖いのは未コミットの変更を捨てる操作だけ
+  \item push 拒否は \textbf{\cmd{pull} してから \cmd{push}}
+  \item 共有済みの取り消しは、履歴を消す \cmd{reset} ではなく\textbf{打ち消す \cmd{revert}}
+  \item 泥沼化した競合は \textbf{\cmd{git merge -{}-abort}} で開始前に戻れる
+  \item 秘密情報の流出は、消す前に\textbf{まず鍵の無効化・再発行}
+\end{itemize}
+
+コマンドだけ手早く引きたいときは第5章「逆引きチートシート」を、各操作の背景を知りたいときは第1〜3章の本文を参照してください。
