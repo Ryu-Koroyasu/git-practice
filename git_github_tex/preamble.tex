@@ -1,0 +1,128 @@
+% =====================================================================
+% preamble.tex — パッケージ読込・色・カスタム環境・マクロの定義
+% 本文（chapters/*.tex）から使う見た目の部品はすべてここに集約する。
+% エンジン: LuaLaTeX + jlreq
+% =====================================================================
+
+% --- 基本パッケージ ---------------------------------------------------
+\usepackage{graphicx}          % 画像の取り込み
+\usepackage{xcolor}            % 色指定
+\usepackage{booktabs}          % 罫線のきれいな表
+\usepackage{tabularx}          % 幅を自動調整する表
+\usepackage{enumitem}          % 箇条書きの調整
+\usepackage{fancyvrb}          % コード枠に使う Verbatim
+\usepackage[most]{tcolorbox}   % 装飾枠（コード・注意書き）
+\usepackage{adjustbox}         % 図が本文幅を超えたときの自動縮小
+\usepackage{tikz}              % 概念図・フロー図
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,backgrounds}
+\usepackage{float}             % 図を本文の位置に固定する [H]
+\usepackage{caption}           % 図番号つきキャプションの体裁
+\captionsetup{font=small, labelfont=bf, labelsep=quad}
+
+% 画像の探索パス（既存の Markdown 版と同じ images/ を共有する）
+\graphicspath{{../images/}{./images/}}
+
+% --- 配色 -------------------------------------------------------------
+% Markdown 版の Mermaid 図の色をそのまま踏襲する（薄い色は使わない方針）。
+\definecolor{gitRed}{HTML}{C0392B}     % 作業ツリー・注意
+\definecolor{gitOrange}{HTML}{D68910}  % ステージング
+\definecolor{gitGreen}{HTML}{2E7D32}   % リポジトリ・完了
+\definecolor{gitBlue}{HTML}{4A90D9}    % コミット・情報
+\definecolor{gitPurple}{HTML}{6C3483}  % 自分側
+\definecolor{gitTeal}{HTML}{117A65}    % 両方採用
+\definecolor{gitAmber}{HTML}{8A6D0B}   % 判断ノード
+\definecolor{codeBg}{HTML}{F4F5F7}     % コード枠の背景
+\definecolor{codeFrame}{HTML}{D0D3D9}  % コード枠の枠線
+
+% --- コード枠 ---------------------------------------------------------
+% 使い方: \begin{codebox}[bash] ... Verbatim ... \end{codebox}
+% 省略時のラベルは bash。右上に言語ラベルを小さく表示する。
+\newtcolorbox{codebox}[1][bash]{%
+  enhanced, breakable,
+  colback=codeBg, colframe=codeFrame, boxrule=0.6pt, arc=2pt,
+  left=9pt, right=9pt, top=13pt, bottom=8pt,
+  before skip=8pt, after skip=8pt,
+  overlay={%
+    \node[anchor=north east, font=\sffamily\scriptsize\bfseries,
+          text=gray!60] at ([xshift=-6pt, yshift=-3pt]frame.north east) {#1};%
+  },
+}
+% コード本体を書くための Verbatim 環境（小さめ・行間やや詰め）
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small, xleftmargin=0pt}
+
+% 本文中のインラインコード: \code{git status}
+\newcommand{\cmd}[1]{\texttt{#1}}
+
+% --- 注意書き（admonition）枠 ----------------------------------------
+% ヒント（緑）・注意（赤）・補足（グレー）の3種。emoji は使わずラベルで表す。
+% タイトルは本文（明るい背景）に直接乗るため、白文字だと見えない。
+% タイトル文字色は各テーマ色にして、はっきり読めるようにする。
+\newtcolorbox{hintbox}{%
+  enhanced, breakable,
+  colback=gitGreen!5, colframe=gitGreen, boxrule=0.8pt, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  coltitle=gitGreen, fonttitle=\sffamily\bfseries\small,
+  title=ヒント, attach title to upper=\quad,
+}
+\newtcolorbox{warnbox}{%
+  enhanced, breakable,
+  colback=gitRed!5, colframe=gitRed, boxrule=0.8pt, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  coltitle=gitRed, fonttitle=\sffamily\bfseries\small,
+  title=注意, attach title to upper=\quad,
+}
+\newtcolorbox{notebox}{%
+  enhanced, breakable,
+  colback=gray!8, colframe=gray!60!black, boxrule=0.8pt, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  coltitle=gray!30!black, fonttitle=\sffamily\bfseries\small,
+  title=補足, attach title to upper=\quad,
+}
+
+% --- スクリーンショット取り込み --------------------------------------
+% \screenshot[幅の割合]{ファイル}{キャプション}
+% フロートにせず本文の流れに沿って中央寄せで置く（説明の直後に見せたいため）。
+\newcommand{\screenshot}[3][0.7]{%
+  \begin{center}
+    \includegraphics[width=#1\linewidth]{#2}\\[3pt]
+    {\small\itshape #3}%
+  \end{center}%
+}
+
+% --- TikZ 共通スタイル ------------------------------------------------
+% Mermaid のフロー図を再現するためのノード／矢印スタイル。
+\tikzset{
+  flownode/.style={%
+    rounded corners=4pt, draw=none, text=white,
+    font=\sffamily\small, align=center,
+    minimum height=1.15cm, minimum width=2.2cm, inner sep=6pt},
+  decisionnode/.style={%
+    diamond, aspect=1.9, draw=none, text=white,
+    font=\sffamily\small, align=center, inner sep=3pt},
+  flowarrow/.style={-{Latex[length=3.6mm, width=3mm]}, line width=1.8pt, draw=black},
+  edgelabel/.style={font=\sffamily\normalsize\bfseries, fill=white, inner sep=3pt},
+}
+% 図全体を中央寄せで置くためのヘルパ環境（図番号なし）。
+% 本文幅を超えた図は自動で縮小する（幅が足りている図は拡大しない）。
+\newenvironment{diagram}%
+  {\par\medskip\begin{center}\begin{adjustbox}{max width=\linewidth}}%
+  {\end{adjustbox}\end{center}\par\medskip}
+
+% --- 図番号つきの図（本文が「図1.2のように」と参照する概念図・フロー図用）---
+% 手順に紐づく操作スクショには使わない（そちらは \screenshot を使う）。
+\makeatletter
+% TikZ など本体を囲む環境: \begin{numfig}{キャプション}{ラベル} ... \end{numfig}
+\newenvironment{numfig}[2]{%
+  \def\nf@cap{#1}\def\nf@lab{#2}%
+  \begin{figure}[H]\centering\begin{adjustbox}{max width=\linewidth}%
+}{%
+  \end{adjustbox}\caption{\nf@cap}\label{\nf@lab}\end{figure}%
+}
+\makeatother
+% 画像1枚を図番号つきで置く: \figimage[幅]{ファイル}{キャプション}{ラベル}
+\newcommand{\figimage}[4][0.95]{%
+  \begin{figure}[H]\centering
+    \includegraphics[width=#1\linewidth]{#2}
+    \caption{#3}\label{#4}
+  \end{figure}%
+}

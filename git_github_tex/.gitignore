@@ -1,0 +1,13 @@
+# LaTeX の中間・出力ファイル
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.lof
+*.lot
+main.pdf
