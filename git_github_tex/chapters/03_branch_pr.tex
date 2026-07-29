@@ -88,18 +88,20 @@ PR → マージ & 完成した書類を\textbf{本棚に納める申請と反�
 \begin{tikzpicture}
   \node[flownode, fill=gitGreen, text width=2.6cm] (MAIN)
         {本棚（main）\\完成品の共有棚};
-  \node[flownode, fill=gitOrange, text width=3cm, above right=0.5cm and 3.4cm of MAIN] (A)
+  \node[flownode, fill=gitOrange, text width=3cm, above right=1.9cm and 5cm of MAIN] (A)
         {Aさんの作業棚\\feature/login};
-  \node[flownode, fill=gitPurple, text width=3cm, below right=0.5cm and 3.4cm of MAIN] (B)
+  \node[flownode, fill=gitPurple, text width=3cm, below right=1.9cm and 5cm of MAIN] (B)
         {Bさんの作業棚\\feature/report};
-  \draw[flowarrow, dashed] (MAIN.east) to[out=25, in=180]
-        node[edgelabel, midway, above] {写し取る} (A.west);
-  \draw[flowarrow] (A.south west) to[out=250, in=40]
-        node[edgelabel, midway, below] {PR→マージ} (MAIN.north east);
-  \draw[flowarrow, dashed] (MAIN.east) to[out=-25, in=180]
-        node[edgelabel, midway, below] {写し取る} (B.west);
-  \draw[flowarrow] (B.north west) to[out=110, in=-40]
-        node[edgelabel, midway, above] {PR→マージ} (MAIN.south east);
+  % Aさん：写し取る（破線・上の弧）／PR→マージ（実線・下の弧）
+  \draw[flowarrow, dashed] (MAIN.north east) to[out=55, in=210]
+        node[edgelabel, pos=0.62, above left=-1pt] {写し取る} (A.west);
+  \draw[flowarrow] (A.south west) to[out=250, in=30]
+        node[edgelabel, pos=0.4, below right=-1pt] {PR→マージ} (MAIN.east);
+  % Bさん：写し取る（破線・下の弧）／PR→マージ（実線・上の弧）
+  \draw[flowarrow, dashed] (MAIN.south east) to[out=-55, in=150]
+        node[edgelabel, pos=0.62, below left=-1pt] {写し取る} (B.west);
+  \draw[flowarrow] (B.north west) to[out=110, in=-30]
+        node[edgelabel, pos=0.4, above right=-1pt] {PR→マージ} (MAIN.east);
 \end{tikzpicture}
 \end{numfig}
 
@@ -169,9 +171,9 @@ git push
 
 \begin{numfig}{作業ブランチをリモートにも作って同期する}{fig:push-branch}
 \begin{tikzpicture}
-  \node[flownode, fill=gitOrange, text width=3.4cm] (LB)
+  \node[flownode, fill=gitOrange, text width=2.8cm] (LB)
         {ローカル\\feature/add-login};
-  \node[flownode, fill=gitBlue, text width=3.4cm, right=6cm of LB] (RB)
+  \node[flownode, fill=gitBlue, text width=2.8cm, right=8cm of LB] (RB)
         {GitHub\\origin/feature/add-login};
   \draw[flowarrow] (LB) -- (RB)
         node[edgelabel, midway, above] {git push -u origin feature/add-login};
