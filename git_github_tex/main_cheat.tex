@@ -1,0 +1,37 @@
+% =====================================================================
+% 独立冊子『Git & GitHub 逆引きチートシート』
+% エンジン: LuaLaTeX（jlreq / book）
+% ビルド:   latexmk -lualatex main_cheat.tex
+%
+% 本編・別冊とは独立した、コマンドを引くための辞書。
+% =====================================================================
+\documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
+
+\input{preamble}
+
+\usepackage[unicode, hidelinks]{hyperref}
+
+\title{Git \& GitHub 逆引きチートシート}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\sffamily\bfseries\Huge 逆引きチートシート\par}
+  \vspace{1.2cm}
+  {\sffamily\Large 「〜したい」から引く Git \& GitHub コマンド\par}
+  \vspace{0.6cm}
+  {\sffamily\normalsize ── 本編『はじめてのバージョン管理』／別冊『チームで安全に開発する』の副読本 ──\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+\input{chapters/cheat}
+
+\end{document}

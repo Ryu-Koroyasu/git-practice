@@ -1,0 +1,74 @@
+% =====================================================================
+% 本編『Git & GitHub 入門 — はじめてのバージョン管理』
+% エンジン: LuaLaTeX（jlreq / book）
+% ビルド:   latexmk -lualatex main_intro.tex
+%
+% 対象: Git / GitHub をはじめて触る人。1人で使い、GitHubに上げるまで。
+% チーム開発（ブランチ・PR・コンフリクト）は別冊 main_team.tex を参照。
+% =====================================================================
+\documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
+
+\input{preamble}
+
+% hyperref はプリアンブルの最後（他パッケージ読込後）に置くのが安全。
+\usepackage[unicode, hidelinks]{hyperref}
+
+% --- 書誌情報 ---------------------------------------------------------
+\title{Git \& GitHub 入門}
+\author{}
+\date{\today}
+
+\begin{document}
+
+% --- 表紙 -------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\sffamily\bfseries\Huge Git \& GitHub 入門\par}
+  \vspace{1.2cm}
+  {\sffamily\Large はじめてのバージョン管理\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+% --- この本のねらい（表紙の次のページ） ------------------------------
+\thispagestyle{empty}
+\vspace*{1.5cm}
+{\sffamily\LARGE\bfseries はじめに —この本を読むとできること—\par}
+\vspace{1em}
+
+本書は、\textbf{Git・GitHub をはじめて使う人}のための入門書です。特別な前提知識は要りません。読み終えると、\textbf{自分のPCと GitHub アカウントだけ}で、次のことができるようになります。
+
+\begin{itemize}[leftmargin=1.6em]
+  \item Git で、ファイルの変更を「コミット」として記録し、履歴を残せる
+  \item 変更の履歴や差分を確認できる（\cmd{git status} / \cmd{git log} / \cmd{git diff}）
+  \item \cmd{.gitignore} で、記録したくないファイルを除外できる
+  \item GitHub アカウントを作り、\cmd{gh} でログイン（認証）できる
+  \item 手元のリポジトリを GitHub に上げ（\cmd{push}）、最新を取り込める（\cmd{pull} / \cmd{fetch}）
+  \item \textbf{「\cmd{pull} → 編集 → \cmd{add} → \cmd{commit} → \cmd{push}」} の日常の流れを回せる
+\end{itemize}
+
+つまり、\textbf{1人で Git を使い、その成果を GitHub にバックアップ・共有する}ところまでが、本書のゴールです。
+
+\begin{hintbox}
+\textbf{この先へ}（本書を読み終えたら）
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item チームでブランチや PR を使って開発したい → 別冊『チームで安全に開発する』
+  \item コマンドをすぐ引きたい → 『逆引きチートシート』
+  \item エラーや操作ミスで困った → 『トラブルシューティング』
+\end{itemize}
+\end{hintbox}
+
+\clearpage
+
+% --- 目次 -------------------------------------------------------------
+\tableofcontents
+\clearpage
+
+% --- 本文 -------------------------------------------------------------
+% 本編は「教科書」に徹する。トラブルシューティング・チートシートは
+% 別冊 main_team.tex の付録にまとめている。
+\input{chapters/01_git}
+\input{chapters/02_github}
+
+\end{document}

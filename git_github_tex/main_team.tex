@@ -1,0 +1,50 @@
+% =====================================================================
+% 別冊『Git & GitHub 実践 — チームで安全に開発する』
+% エンジン: LuaLaTeX（jlreq / book）
+% ビルド:   latexmk -lualatex main_team.tex
+%
+% 対象: 本編『はじめてのバージョン管理』を終え、チーム開発に進む人。
+% ブランチ・プルリクエスト（PR）・コンフリクト解決を扱う。
+% =====================================================================
+\documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
+
+\input{preamble}
+
+% hyperref はプリアンブルの最後（他パッケージ読込後）に置くのが安全。
+\usepackage[unicode, hidelinks]{hyperref}
+
+% --- 書誌情報 ---------------------------------------------------------
+\title{Git \& GitHub 実践}
+\author{}
+\date{\today}
+
+\begin{document}
+
+% --- 表紙 -------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\sffamily\bfseries\Huge Git \& GitHub 実践\par}
+  \vspace{1.2cm}
+  {\sffamily\Large チームで安全に開発する\par}
+  \vspace{0.6cm}
+  {\sffamily\normalsize ── 本編『はじめてのバージョン管理』の続き ──\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+% --- 目次 -------------------------------------------------------------
+\tableofcontents
+\clearpage
+
+% --- 本文 -------------------------------------------------------------
+\input{chapters/T1_branch_pr}
+\input{chapters/T2_conflict}
+
+% --- 付録 -------------------------------------------------------------
+% トラブルシューティング・チートシートは独立冊子
+%（main_trouble.tex / main_cheat.tex）に分離した。
+\appendix
+\input{chapters/T3_rules}
+
+\end{document}

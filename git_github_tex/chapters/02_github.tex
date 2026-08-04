@@ -4,16 +4,16 @@
 % =====================================================================
 \chapter{GitHub編 —ローカルとクラウドをつなぐ—}
 
-本章は第1章の続きです。第1章では「自分のPCの中だけ」で変更を記録しました。本章では、その記録を \textbf{GitHub（クラウド）} に置いて、バックアップ・複数PC・複数人での共有ができるようにします。
+第1章では「自分のPCの中だけ」で変更を記録しました。この章では、その記録を \textbf{GitHub（クラウド）} に置いて、バックアップ・複数PC・複数人での共有ができるようにします。
 
-扱うのは \textbf{「ローカルとGitHubをつなぎ、同期するところまで」}です。ブランチを分けた共同作業・プルリクエスト（PR）・コンフリクトの解決は第3章で扱います。
+扱うのは「ローカルとGitHubをつなぎ、同期するところまで」です。ブランチを分けた共同作業・プルリクエスト（PR）・コンフリクトの解決は、別冊『チームで安全に開発する』で扱います。
 
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
-  \item まず一度つないでみたい人 → 「アカウントを作る」→「認証を設定する」→「リモートリポジトリを用意する」→「つなぐ」を順に写経
-  \item コマンドをド忘れした人 → 第5章「逆引きチートシート」へ
-  \item エラーが出て困った人 → 第4章「トラブルシューティング編」へ
+  \item まず一度つないでみたい人 → 「アカウントを作る」→「ログイン」→「リモートリポジトリを用意する」→「つなぐ」を順に写経
+  \item コマンドをド忘れした人 → 『逆引きチートシート』へ
+  \item エラーが出て困った人 → 『トラブルシューティング』へ
 \end{itemize}
 \end{hintbox}
 
@@ -27,7 +27,7 @@
   \item \textbf{GitHub} … Gitのリポジトリを\textbf{クラウド上に置いて共有できるWebサービス}
 \end{itemize}
 
-第1章では、あなたのPCの中に「倉庫（ローカルリポジトリ）」を作りました。GitHubは、その\textbf{クラウド上にあるもう一つの倉庫（リモートリポジトリ）}だと考えてください。手元の倉庫の\textbf{写しをクラウドの倉庫にも置いておく}イメージです（図\ref{fig:local-remote}）。
+第1章では、PCの中に「倉庫（ローカルリポジトリ）」を作りました。GitHubは、その\textbf{クラウド上にあるもう一つの倉庫（リモートリポジトリ）}です。手元の倉庫の写しをクラウドにも置いておくイメージです（図\ref{fig:local-remote}）。
 
 \begin{numfig}{ローカルとリモートは「同期」でつながる2つの倉庫}{fig:local-remote}
 \begin{tikzpicture}
@@ -47,11 +47,11 @@
   \item \textbf{バックアップ}：PCが壊れても、GitHubから取り戻せる
   \item \textbf{複数PCで共有}：研究室のPCと自宅のPCで同じ作業を続けられる
   \item \textbf{複数人で共有}：チームで同じリポジトリを編集できる
-  \item \textbf{公開}：コードや手引書を世界に公開できる（このドキュメントもGitHub上にあります）
+  \item \textbf{公開}：コードや手引書を世界に公開できる
 \end{itemize}
 
 \begin{hintbox}
-「リモート（remote）」は\textbf{手元から離れた場所＝クラウド側}、「ローカル（local）」は\textbf{あなたのPCの中}を指す言葉です。以降ずっと出てくるので覚えておいてください。
+「リモート（remote）」は\textbf{クラウド側}、「ローカル（local）」は\textbf{あなたのPCの中}を指す言葉です。以降ずっと出てきます。
 \end{hintbox}
 
 % ---------------------------------------------------------------------
@@ -81,8 +81,8 @@
 \midrule
 \cmd{git clone} & リモート → ローカル & リモートの倉庫を\textbf{丸ごと手元に複製}する（最初の1回だけ） \\
 \cmd{git push} & ローカル → リモート & 手元のコミットを\textbf{クラウドへアップロード}する \\
-\cmd{git fetch} & リモート → ローカル & クラウドの最新を\textbf{取得するだけ}（手元の作業には反映しない） \\
-\cmd{git pull} & リモート → ローカル & クラウドの最新を\textbf{取得して手元に反映}する（\cmd{fetch} + 統合） \\
+\cmd{git pull} & リモート → ローカル & クラウドの最新を\textbf{取得して手元に反映}する \\
+\cmd{git fetch} & リモート → ローカル & クラウドの最新を\textbf{取得するだけ}（手元には反映しない） \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -107,37 +107,18 @@
 \end{hintbox}
 
 % ---------------------------------------------------------------------
-\section{認証を設定する（HTTPS と SSH）}
+\section{GitHubにログインする（認証）}
 
-GitHubに \cmd{push}（アップロード）するときは、「本当にあなたか」を確認する\textbf{認証}が必要です。方式は主に2つあり、\textbf{どちらか一方}を設定すればOKです。
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}l l X@{}}
-\toprule
-方式 & URLの形 & 特徴 \\
-\midrule
-\textbf{HTTPS} & \cmd{https://github.com/\ldots.git} & \textbf{GitHub CLI（\cmd{gh}）でログインするだけ}で使えて最も手軽。トークンの手動管理も可能 \\
-\textbf{SSH鍵} & \cmd{git@github.com:\ldots.git} & 鍵を1度登録すれば以降は認証不要。複数リポジトリで使い回せる \\
-\bottomrule
-\end{tabularx}
-\end{center}
+GitHubに \cmd{push}（アップロード）するときは、「本当にあなたか」を確認する\textbf{認証}が必要です。本書では、いちばん手軽な \textbf{GitHub CLI（\cmd{gh}）でのログイン}を使います。これで一度ログインしておくと、\cmd{gh} がGitの認証を裏で肩代わりしてくれるため、\textbf{トークンを自分で発行しなくても \cmd{push} / \cmd{pull} がそのまま通ります}。
 
 \begin{hintbox}
-迷ったら、まずは手軽な \textbf{HTTPS} で始めて構いません。HTTPSは、後述の \textbf{GitHub CLI（\cmd{gh}）でログインするだけ}で使えるようになり、トークンを自分で発行・管理する必要がありません。頻繁に使うようになったら SSH に移行しても快適です。
+SSH鍵やトークン（PAT）を手動で使う方式もあります。頻繁に使うようになったら、『逆引きチートシート』の「認証の別方式（SSH / PAT）」を参照してください。まずは \cmd{gh} だけでOKです。
 \end{hintbox}
-
-\subsection{方式A：HTTPS}
-
-HTTPSでの認証には2通りあります。\textbf{GitHub CLI（\cmd{gh}）を使う方法が圧倒的に手軽}なので、こちらを最初におすすめします。トークンを手作業で扱いたい場合のために、従来のPAT方式も後に載せます。
-
-\subsubsection{A-1（おすすめ）：GitHub CLI（gh）でログインする}
-
-\textbf{GitHub CLI（\cmd{gh}）} はGitHubを操作する公式コマンドです。これで一度ログインしておくと、\cmd{gh} がGitの認証を裏で肩代わりしてくれるため、\textbf{トークンを自分で発行しなくても \cmd{push} / \cmd{pull} がそのまま通ります}。
 
 \noindent\textbf{手順1：\cmd{gh} をインストールする}
 
 \begin{warnbox}
-\textbf{\cmd{gh} はGit本体には含まれていません。} 第1章でGitをインストールしても \cmd{gh} は入っていないので、\textbf{最初に別途インストールが必要}です。まず \cmd{gh -{}-version} を実行し、\cmd{command not found}（未インストール）なら下記でインストールしてください。
+\textbf{\cmd{gh} はGit本体には含まれていません。} 第1章でGitを入れても \cmd{gh} は入らないので、別途インストールが必要です。まず \cmd{gh -{}-version} を実行し、\cmd{command not found} なら下記で入れてください。
 \end{warnbox}
 
 \begin{codebox}[bash]
@@ -153,18 +134,7 @@ sudo apt install gh
 \end{code}
 \end{codebox}
 
-インストール後、次でバージョンが表示されれば成功です。
-
-\begin{codebox}[bash]
-\begin{code}
-gh --version
-# 出力例: gh version 2.62.0 (2024-11-27)
-\end{code}
-\end{codebox}
-
-\begin{hintbox}
-他の環境やうまくいかない場合は、公式手順 \url{https://cli.github.com/} を参照してください。
-\end{hintbox}
+インストール後、\cmd{gh --version} でバージョンが表示されれば成功です（うまくいかない場合は公式手順 \url{https://cli.github.com/} を参照）。
 
 \noindent\textbf{手順2：ログインする}
 
@@ -176,64 +146,29 @@ gh auth login
 
 対話形式で聞かれるので、次のように選びます。
 
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+質問 & 選ぶもの \\
+\midrule
+Where do you use GitHub? & \textbf{GitHub.com} \\
+preferred protocol for Git operations? & \textbf{HTTPS} \\
+Authenticate Git with your GitHub credentials? & \textbf{Y} \\
+How would you like to authenticate? & \textbf{Login with a web browser} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
 \begin{hintbox}
-質問文や順序、選択肢の文言は \textbf{\cmd{gh} のバージョンによって変わることがあります}。下記の画面例と完全に一致しなくても、\textbf{同じ意味の選択肢}（GitHub.com／HTTPS／ブラウザでログイン など）を選べば問題ありません。
+質問文や順序は \cmd{gh} のバージョンによって少し変わることがあります。完全に一致しなくても、\textbf{同じ意味の選択肢}（GitHub.com／HTTPS／ブラウザでログイン）を選べば問題ありません。
 \end{hintbox}
 
-\noindent\textbf{(1) 認証するアカウントの選択}
-\begin{codebox}[text]
-\begin{code}
-# GitHub.com を選択する
-? Where do you use GitHub?  [Use arrows to move, type to filter]
-> GitHub.com
-  Other
-\end{code}
-\end{codebox}
+最後の選択でワンタイムコードが表示され、Enterを押すとブラウザが開きます。表示されたコードを入力し、\textbf{Continue} を押せば認証完了です。
 
-\noindent\textbf{(2) 認証方式の選択}
-\begin{codebox}[text]
-\begin{code}
-# HTTPS を選択する
-? What is your preferred protocol for Git operations?
-> HTTPS
-  SSH
-\end{code}
-\end{codebox}
-
-\noindent\textbf{(3) Gitの認証をGitHubの資格情報で行うか}
-\begin{codebox}[text]
-\begin{code}
-# Y を入力する
-Authenticate Git with your GitHub credentials? (Y/n) Y
-\end{code}
-\end{codebox}
-
-\noindent\textbf{(4) 認証方法の選択}
-\begin{codebox}[text]
-\begin{code}
-# Login with a web browser を選択する
-? How would you like to authenticate?
-> Login with a web browser
-  Paste an authentication token
-
-# 選ぶと、次のようにワンタイムコードが表示される。
-# Enter を押すとブラウザが開き、GitHubにログインして認証できる。
-! First copy your one-time code: FDAC-FFFB
-Press Enter to open https://github.com/login/device in your browser...
-\end{code}
-\end{codebox}
-
-Enter押下の後に開くブラウザ画面で \textbf{Continue} を押します。
 \screenshot[0.62]{02_github/gh_auth_login.png}{GitHubログイン画面（Continueを押す）}
-
-続けて表示される画面で、ワンタイムコードを入力して \textbf{Continue} を押します。
 \screenshot[0.62]{02_github/gh_authorize_window.png}{GitHub認証画面（ワンタイムコードを入力）}
 
-これで完了です。\cmd{gh} がGitの認証情報ヘルパーとして登録され、\textbf{以降 \cmd{git push} / \cmd{git pull} で認証を聞かれなくなります}。トークンの発行・保管は \cmd{gh} が肩代わりしてくれるため、自分で発行・管理する必要はありません。
-
-\begin{warnbox}
-ただし \cmd{gh} が\textbf{自動で無期限に更新してくれるわけではありません}。トークンの有効期限が切れたり、GitHub側でアクセスを取り消したり、新しい権限（スコープ）が必要になった場合は、再度 \cmd{gh auth login}（権限追加なら \cmd{gh auth refresh}）で認証し直してください。\cmd{gh auth status} で現在の状態を確認できます。
-\end{warnbox}
+これで \cmd{gh} がGitの認証を肩代わりし、\textbf{以降 \cmd{git push} / \cmd{git pull} で認証を聞かれなくなります}。
 
 \begin{codebox}[bash]
 \begin{code}
@@ -242,116 +177,9 @@ gh auth status
 \end{code}
 \end{codebox}
 
-\begin{hintbox}
-この方法なら、次項の「トークンを発行する」手順は不要です。\textbf{基本はこの \cmd{gh auth login} だけで済みます。}
-\end{hintbox}
-
-\subsubsection{A-2（手動）：パーソナルアクセストークン（PAT）を使う}
-
-\cmd{gh} を使わずHTTPSで \cmd{push} すると、ユーザー名とパスワードを聞かれます。ここで、\textbf{GitHubのログインパスワードは使えません}。代わりに \textbf{パーソナルアクセストークン（PAT）} という専用の文字列を発行して使います。
-
-\noindent\textbf{トークンの発行手順}
-
-\begin{enumerate}[leftmargin=1.6em]
-  \item GitHubにログインし、右上のアイコン → \textbf{Settings} を開きます。
-  \item 左メニュー最下部の \textbf{Developer settings} をクリックします。
-  \item \textbf{Personal access tokens} → \textbf{Tokens (classic)} → \textbf{Generate new token (classic)} を選びます。
-  \item 次を設定して発行します。
-    \begin{itemize}[leftmargin=1.4em, nosep]
-      \item \textbf{Note}：用途のメモ（例：\cmd{my-laptop}）
-      \item \textbf{Expiration}：有効期限（例：90 days）
-      \item \textbf{Select scopes}：\cmd{repo} にチェック（リポジトリの読み書きに必要）
-    \end{itemize}
-  \item \textbf{Generate token} を押すと、\verb|ghp_xxxx…| という文字列が表示されます。
-\end{enumerate}
-
-\screenshot[0.62]{02_github/create_token.png}{トークン発行画面}
-\screenshot[0.62]{02_github/create_token_setting.png}{作成するトークンの設定}
-\screenshot[0.62]{02_github/pat_scopes.png}{トークン発行画面（repoスコープにチェック）}
-
 \begin{warnbox}
-\textbf{トークンは発行直後の1回しか表示されません。} その場でコピーし、パスワードマネージャ等に保管してください。画面を閉じると二度と確認できず、再発行が必要になります。
+トークンの有効期限が切れたり、GitHub側でアクセスを取り消したりすると、認証を聞かれるようになります。そのときは \cmd{gh auth login} で入り直してください。
 \end{warnbox}
-
-\noindent\textbf{トークンの使い方}
-
-\cmd{push} 時にユーザー名とパスワードを聞かれたら、\textbf{パスワードの欄に、先ほどのトークンを貼り付けます}。
-
-\begin{codebox}[text]
-\begin{code}
-Username: your-github-name
-Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなくトークンを入力
-\end{code}
-\end{codebox}
-
-一度入力すればトークンが記憶されるので、次回以降は入力不要になります。
-
-\subsection{方式B：SSH鍵}
-
-SSHは、\textbf{鍵ペア（秘密鍵と公開鍵）}を使う方式です。公開鍵をGitHubに登録しておくと、以降は認証情報の入力なしで \cmd{push} できます。
-
-\noindent\textbf{手順1：鍵ペアを作る}
-
-ターミナル（WindowsはGit Bash）で次を実行します。メールアドレスはGitHubのものにします。
-
-\begin{codebox}[bash]
-\begin{code}
-ssh-keygen -t ed25519 -C "you@example.com"
-\end{code}
-\end{codebox}
-
-\begin{itemize}[leftmargin=1.4em]
-  \item 保存先を聞かれたら、そのまま \textbf{Enter}（デフォルトの \verb|~/.ssh/id_ed25519| に保存されます）
-  \item パスフレーズは、設定してもしなくても構いません（設定するとより安全）
-\end{itemize}
-
-これで秘密鍵 \verb|id_ed25519| と公開鍵 \verb|id_ed25519.pub| の2つが \verb|~/.ssh/| に作られます。
-
-\begin{warnbox}
-\textbf{秘密鍵（\cmd{.pub} が付かない方）は絶対に他人に渡さないでください。} GitHubに登録するのは公開鍵（\cmd{.pub} が付く方）だけです。
-\end{warnbox}
-
-\noindent\textbf{手順2：公開鍵の中身をコピーする}
-
-\begin{codebox}[bash]
-\begin{code}
-# macOS
-pbcopy < ~/.ssh/id_ed25519.pub
-
-# Windows（Git Bash）
-cat ~/.ssh/id_ed25519.pub | clip
-
-# Linux（表示された内容を手動でコピー）
-cat ~/.ssh/id_ed25519.pub
-\end{code}
-\end{codebox}
-
-\noindent\textbf{手順3：GitHubに公開鍵を登録する}
-
-\begin{enumerate}[leftmargin=1.6em]
-  \item GitHubの \textbf{Settings} → \textbf{SSH and GPG keys} を開きます。
-  \item \textbf{New SSH key} をクリックします。
-  \item \textbf{Title} に分かりやすい名前（例：\cmd{my-laptop}）、\textbf{Key} に手順2でコピーした内容を貼り付けます。
-  \item \textbf{Add SSH key} で登録完了です。
-\end{enumerate}
-
-\noindent\textbf{手順4：接続を確認する}
-
-\begin{codebox}[bash]
-\begin{code}
-ssh -T git@github.com
-\end{code}
-\end{codebox}
-
-次のように表示されれば成功です（\cmd{yes} を求められたら \cmd{yes} と入力）。
-
-\begin{codebox}[text]
-\begin{code}
-Hi your-github-name! You've successfully authenticated, but GitHub does not provide shell access.
-\end{code}
-\end{codebox}
-
-\screenshot[0.62]{02_github/ssh_key_add.png}{SSH and GPG keys の New SSH key 登録画面}
 
 % ---------------------------------------------------------------------
 \section{リモートリポジトリを用意する}
@@ -364,16 +192,14 @@ GitHub上に、写しを置くための空の倉庫（リモートリポジト�
     \begin{itemize}[leftmargin=1.4em, nosep]
       \item \textbf{Repository name}：リポジトリ名（例：\cmd{git-practice}）
       \item \textbf{Public / Private}：公開するか非公開か（研究用途なら通常 \textbf{Private}）
-      \item \textbf{Add a README file}：\textbf{チェックしない}（後述のパターンBで既存ローカルをつなぐ場合、付けると手順が増えるため）
+      \item \textbf{Add a README file}：\textbf{チェックしない}（後述のパターンBで既存ローカルをつなぐとき、手順が増えるため）
     \end{itemize}
   \item \textbf{Create repository} をクリックします。
 \end{enumerate}
 
-作成後の画面に、\cmd{https://github.com/\ldots} や \cmd{git@github.com:\ldots} で始まる\textbf{リポジトリのURL}が表示されます。次の手順で使うのでこの画面を開いたままにしておきます。
+作成後の画面に\textbf{リポジトリのURL}が表示されます。次の手順で使うので、この画面を開いたままにしておきます。
 
-\screenshot[0.62]{02_github/new_repo.png}{新しいリポジトリの作成}
 \screenshot[0.62]{02_github/new_repo_setting.png}{作成するリポジトリの設定}
-\screenshot[0.62]{02_github/new_repo_create.png}{リポジトリの作成}
 
 % ---------------------------------------------------------------------
 \section{ローカルとリモートをつなぐ}
@@ -393,43 +219,17 @@ GitHub上に、写しを置くための空の倉庫（リモートリポジト�
 \end{tikzpicture}
 \end{numfig}
 
-\subsection{つなぐ前に：リポジトリのURL（リンクパス）を取得する}
-
-どちらのパターンでも、\cmd{git clone} や \cmd{git remote add} に渡す\textbf{リポジトリのURL}が必要です。このURLは\textbf{GitHubのリポジトリ画面から取得}します。取得場所は、リポジトリが空かどうかで少し変わります。
-
-\noindent\textbf{ケース1：中身のあるリポジトリ（\cmd{clone} する場合など）}
-
-リポジトリのトップ画面にある緑色の \textbf{「＜＞ Code」} ボタンをクリックします。開いたパネルで \textbf{HTTPS / SSH} のタブを選ぶと、それぞれのURLが表示されます。右側のコピーアイコンで丸ごとコピーできます。
-
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{HTTPS} タブ → \cmd{https://github.com/\ldots.git}
-  \item \textbf{SSH} タブ → \cmd{git@github.com:\ldots.git}
-\end{itemize}
+どちらのパターンでも\textbf{リポジトリのURL}が必要です。リポジトリのトップ画面にある緑色の \textbf{「＜＞ Code」} ボタン（作りたての空リポジトリなら \textbf{「Quick setup」} 画面）から、\cmd{https://github.com/\ldots.git} の形のURLをコピーします。
 
 \screenshot[0.62]{02_github/repo_https_url.png}{Codeボタンから HTTPS のURLを取得する}
-\screenshot[0.62]{02_github/repo_ssh_url.png}{Codeボタンから SSH のURLを取得する}
-
-\noindent\textbf{ケース2：作りたてで空のリポジトリ（パターンBでつなぐ場合）}
-
-README を付けずに作った直後は、\textbf{「Quick setup」} の画面が表示されます。ここに表示される \textbf{HTTPS / SSH} の切り替えボタンと、その隣のURL（コピーアイコン付き）から取得します。\cmd{\ldots or push an existing repository from the command line} の欄には、パターンBでそのまま使えるコマンドも載っています。
-
-\screenshot[0.62]{02_github/repo_quick_setup.png}{空リポジトリのQuick setup画面とURL}
-
-\begin{hintbox}
-\textbf{HTTPS と SSH のどちらのURLを使うかは、「認証を設定する」で設定した方式に合わせます。} \cmd{gh}／トークンで設定したなら HTTPS のURL、SSH鍵を登録したなら SSH のURLを選んでください。
-\end{hintbox}
 
 \subsection{パターンA：GitHubで作って \texttt{git clone}（これから始める人向け）}
 
-GitHub上のリポジトリを、\textbf{丸ごと手元に複製}します。作業したいフォルダの\textbf{親フォルダ}で実行してください（\cmd{clone} するとリポジトリ名のフォルダが新しく作られます）。
+GitHub上のリポジトリを、丸ごと手元に複製します。作業したいフォルダの\textbf{親フォルダ}で実行してください（リポジトリ名のフォルダが新しく作られます）。
 
 \begin{codebox}[bash]
 \begin{code}
-# HTTPS の場合
 git clone https://github.com/your-name/git-practice.git
-
-# SSH の場合
-git clone git@github.com:your-name/git-practice.git
 \end{code}
 \end{codebox}
 
@@ -442,15 +242,6 @@ git remote -v   # origin が登録されていることを確認
 \end{code}
 \end{codebox}
 
-次のように \cmd{origin} が \cmd{fetch} / \cmd{push} の2行で表示されれば、正しく登録されています（URLは自分のものになります）。
-
-\begin{codebox}[text]
-\begin{code}
-origin  https://github.com/your-name/git-practice.git (fetch)
-origin  https://github.com/your-name/git-practice.git (push)
-\end{code}
-\end{codebox}
-
 \subsection{パターンB：既存のローカルを \texttt{push}（第1章で作ったものを上げる）}
 
 第1章で \cmd{git init} して作った手元のリポジトリを、後からGitHubにつなぐ場合です。リポジトリのフォルダ内で実行します。
@@ -459,13 +250,9 @@ origin  https://github.com/your-name/git-practice.git (push)
 \begin{code}
 # 1. リモート（origin）を登録する
 git remote add origin https://github.com/your-name/git-practice.git
-#    SSH なら： git remote add origin git@github.com:your-name/git-practice.git
 
-# 2. 登録内容を確認する
+# 2. 登録内容を確認する（origin が2行表示されれば成功）
 git remote -v
-#    → origin  https://github.com/your-name/git-practice.git (fetch)
-#      origin  https://github.com/your-name/git-practice.git (push)
-#      のように2行表示されれば登録成功
 
 # 3. 現在のブランチ名を main に統一する
 git branch -M main
@@ -477,11 +264,7 @@ git push -u origin main
 
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{\cmd{origin}} は「リモートリポジトリの標準的な別名」です。以降 URL の代わりに \cmd{origin} と書けます。
-  \item \textbf{\cmd{-u}（\cmd{-{}-set-upstream}）} は、\cmd{push} の引数で指定した送り先（ここでは \cmd{origin} の \cmd{main}）を、いまのローカルブランチの「既定の送り先」として覚えさせるオプションです。
-    \begin{itemize}[leftmargin=1.4em, nosep]
-      \item 本来 \cmd{git push} は毎回どこへ送るか（\cmd{origin main}）を指定する必要があります。\cmd{-u} を一度付けておくと対応付けが記録され、\textbf{次回からは \cmd{git push} / \cmd{git pull} だけ}で同じ相手とやり取りできます。
-      \item 記録された送り先は \cmd{git branch -vv} で確認できます（ブランチ名の横に \cmd{[origin/main]} と表示されます）。
-    \end{itemize}
+  \item \textbf{\cmd{-u}} は、送り先（\cmd{origin} の \cmd{main}）を「既定の送り先」として覚えさせるオプションです。一度付けておけば、\textbf{次回からは \cmd{git push} / \cmd{git pull} だけ}で同期できます。
 \end{itemize}
 
 \begin{warnbox}
@@ -491,7 +274,7 @@ git push -u origin main
 % ---------------------------------------------------------------------
 \section{アップロードする（push）}
 
-\cmd{git push} は、\textbf{ローカルリポジトリのコミット（写し）を、リモートへ送る}操作です。第1章の「編集 → add → commit」でローカルに記録した内容を、クラウドへ反映します（図\ref{fig:push-flow}）。
+\cmd{git push} は、\textbf{ローカルのコミットをリモートへ送る}操作です。第1章の「編集 → add → commit」で記録した内容を、クラウドへ反映します（図\ref{fig:push-flow}）。
 
 \begin{numfig}{編集からクラウド反映までの流れ}{fig:push-flow}
 \begin{tikzpicture}
@@ -518,58 +301,76 @@ git push
 \cmd{push} が終わったら、GitHubのリポジトリ画面を再読み込みしてみてください。コミットしたファイルがクラウド上に表示されているはずです。
 
 \begin{warnbox}
-\textbf{コミットしていない変更は \cmd{push} されません。} \cmd{push} は「ローカルリポジトリにあるコミット」を送るものです。手元の編集をクラウドに反映したいときは、必ず先に \cmd{git add} → \cmd{git commit} してから \cmd{git push} します。
+\textbf{コミットしていない変更は \cmd{push} されません。} 手元の編集をクラウドに反映したいときは、必ず先に \cmd{git add} → \cmd{git commit} してから \cmd{git push} します。
 \end{warnbox}
 
 % ---------------------------------------------------------------------
 \section{ダウンロードする（pull と fetch）}
 
-別のPCや他の人がリモートを更新したとき、その最新を手元に取り込む（または確認する）のが \cmd{pull} と \cmd{fetch} です。
+別のPCや他の人がリモートを更新したとき、その最新を手元に取り込むのが \cmd{git pull} です。
+
+\begin{codebox}[bash]
+\begin{code}
+# リモートの最新を取得して、手元の main に反映する
+git pull
+\end{code}
+\end{codebox}
+
+\subsection{pull と fetch の違い}
+
+\cmd{git fetch} と \cmd{git pull} は、どちらも「クラウドの最新を取ってくる」コマンドですが、\textbf{手元に反映するかどうか}が違います。カギは、\cmd{git pull} が\textbf{2つの操作をまとめて}行っている点です（図\ref{fig:pull-fetch}）。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{取ってくる（fetch）}：クラウド（リモート）の最新を手元に取得する
+  \item \textbf{反映する（merge）}：取ってきた内容を、手元の \cmd{main} に合体させる
+\end{enumerate}
+
+\cmd{git fetch} は、このうち\textbf{①だけ}を行います。最新を取ってくるものの、\textbf{手元の \cmd{main} や編集中のファイルはまだ変えません}。取ってきた内容は \cmd{origin/main}（＝「リモートが今どうなっているか」を指す手元の目印）に入るので、\textbf{反映する前に中身を確認}できます。
+
+②の\textbf{反映}は、正しくは\textbf{マージ（merge）}といいます。マージは\textbf{2つの流れを1つに合流させる}操作で、ここでは「クラウドで進んだ分」を「手元の \cmd{main}」に合流させて追いつかせています。ふだんは手元がそのまま最新に追いつくだけなので、難しく考える必要はありません。ただし\textbf{同じファイルの同じ箇所を、クラウド側と手元で別々に変更していた場合}は、どちらを採用するか決められず\textbf{コンフリクト（競合）}が起こります。その直し方は、別冊『チームで安全に開発する』で扱います。
+
+\begin{numfig}{git pull は fetch と反映（merge）をまとめて行う}{fig:pull-fetch}
+\begin{tikzpicture}
+  \node[flownode, fill=gitBlue, text width=2.6cm] (G) {GitHub\\{\scriptsize（リモート）}};
+  \node[flownode, fill=gitOrange, text width=2.9cm, right=3.2cm of G] (O) {origin/main\\{\scriptsize（手元の目印）}};
+  \node[flownode, fill=gitGreen, text width=2.6cm, right=3.2cm of O] (M) {手元の main};
+  \draw[flowarrow] (G) -- (O) node[edgelabel, midway, above] {(1) git fetch};
+  \draw[flowarrow] (O) -- (M) node[edgelabel, midway, above] {(2) 反映(merge)};
+  \draw[flowarrow, dashed] (G) to[out=-32, in=-148]
+        node[edgelabel, midway, below] {git pull （(1)＋(2)）} (M);
+\end{tikzpicture}
+\end{numfig}
+
+つまり、\textbf{一言でいうと次の関係}です。
 
 \begin{center}
-\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\textbf{git pull ＝ git fetch ＋ 反映（merge）}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l c c@{}}
 \toprule
-コマンド & 動き & いつ使うか \\
+& \cmd{git fetch} & \cmd{git pull} \\
 \midrule
-\cmd{git fetch} & リモートの最新を\textbf{取得して \cmd{origin/main} に記録するだけ}（手元の \cmd{main} や作業ツリーは変えない） & 反映前に「何が来たか」を確認したいとき \\
-\cmd{git pull} & \cmd{fetch} + \textbf{統合（merge）}。取得して手元の \cmd{main} にも反映 & ふだんの「最新に追いつく」操作 \\
+クラウドの最新を取ってくる & ○ & ○ \\
+手元の \cmd{main} に反映する & ×（まだ反映しない） & ○ \\
+主な用途 & 反映前に中身を確認したいとき & ふだんの「最新に追いつく」操作 \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
 \begin{hintbox}
-\textbf{\cmd{origin/main} とは？} \cmd{git fetch} で取得したリモートの内容は、手元の \cmd{main} とは別の \cmd{origin/main} という場所に記録されます。これは「\textbf{リモートが今どうなっているかを指す、手元にあるブックマーク}」だと考えてください。だから fetch した後は、自分の作業を変えずに \cmd{git log origin/main} でリモート側の中身を確認できます。
+\textbf{ふだんは \cmd{git pull} で十分}です。\cmd{git fetch} は「取り込む前に、何が変わったか先に確認したい」ときに使います（\cmd{git fetch} → \cmd{git log origin/main} で確認 → 問題なければ \cmd{git pull}）。また、\textbf{作業を始める前に \cmd{git pull} する}のを習慣にすると、手元を常に最新から始められ、トラブルが起きにくくなります。
 \end{hintbox}
 
-\begin{codebox}[bash]
-\begin{code}
-# ふだんはこれ（取得して手元の main に反映）
-git pull
-
-# 取得だけしておいて、中身を確認してから反映したい場合
-git fetch              # リモートの最新を origin/main に取得（手元の main は変わらない）
-git log origin/main    # 取得した origin/main の履歴を確認
-git merge origin/main  # 問題なければ手元の main に統合
-\end{code}
-\end{codebox}
-
-\begin{hintbox}
-\textbf{作業を始める前に \cmd{git pull} する}のを習慣にすると、手元を常に最新の状態から始められ、後述のコンフリクト（衝突）が起きにくくなります。
-\end{hintbox}
-
-\begin{hintbox}
-新しめのGit（2.27以降）では、\textbf{初めて \cmd{git pull} したときに一度だけ}「取り込み方を merge にするか rebase にするか」を設定するよう促されることがあります。迷ったら、第1章と同じ標準の \textbf{merge 方式}を選ぶ次の設定を1度だけ実行しておけば、以降は聞かれません。
+\begin{notebox}
+新しめのGitでは、\textbf{初めて \cmd{git pull} したとき}に「取り込み方（merge か rebase か）」の設定を促されることがあります。迷ったら、標準の merge 方式にする次の設定を1度だけ実行しておけば、以降は聞かれません。
 \begin{codebox}[bash]
 \begin{code}
 git config --global pull.rebase false
 \end{code}
 \end{codebox}
-これは上流ブランチの設定（\cmd{-u}）とは別の全体設定です。一度決めれば、あとは引数なしの \cmd{git pull} / \cmd{git push} だけで同期できます。
-\end{hintbox}
-
-\begin{warnbox}
-複数人・複数PCで同じブランチを編集していると、\cmd{pull} 時に\textbf{コンフリクト}（同じ箇所を別々に変更したことによる衝突）が起きることがあります。その解決方法は第3章で詳しく扱います。
-\end{warnbox}
+\end{notebox}
 
 % ---------------------------------------------------------------------
 \section{日常のフロー}
@@ -592,17 +393,14 @@ GitHubとつないだ後の、毎日の基本的な流れです。\textbf{始め
 
 \begin{codebox}[bash]
 \begin{code}
-# 1. まず現在の状態を確認する（今どのファイルがどのエリアにあるか）
-git status
-
-# 2. 作業開始前に、GitHub（リモート）の最新を手元に取り込む
+# 1. 作業開始前に、GitHub（リモート）の最新を手元に取り込む
 git pull
 
-# 3. ファイルを編集したら、変更を記録する（第1章の黄金フロー）
+# 2. ファイルを編集したら、変更を記録する（第1章の黄金フロー）
 git add .                      # 変更をステージングに追加
 git commit -m "変更内容のメモ"   # コミットとして記録
 
-# 4. 記録した変更を GitHub（リモート）へアップロードする
+# 3. 記録した変更を GitHub（リモート）へアップロードする
 git push
 \end{code}
 \end{codebox}
@@ -616,9 +414,9 @@ git push
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Git（手元の道具）と GitHub（クラウドのサービス）は別物}。GitHubはローカルリポジトリの「もう一つの倉庫」
   \item リモートとの通信は \textbf{\cmd{clone} / \cmd{push} / \cmd{fetch} / \cmd{pull}} の4つ
-  \item \cmd{push} する前に\textbf{認証}（HTTPS + トークン、または SSH鍵）を1度だけ設定する
+  \item \cmd{push} する前に \textbf{\cmd{gh auth login}} で1度だけログインする
   \item つなぎ方は2パターン：\textbf{GitHubから始めるなら \cmd{clone}}、\textbf{手元を上げるなら \cmd{remote add} + \cmd{push -u}}
   \item 日常は \textbf{「\cmd{pull} → 編集 → \cmd{add} → \cmd{commit} → \cmd{push}」} の繰り返し
 \end{itemize}
 
-次は第3章で、\textbf{ブランチを分けた共同作業・プルリクエスト（PR）・コンフリクトの解決}を扱います。1人で使う分にはここまでで十分ですが、チームで開発するなら第3章が本番です。
+これで、1人でGitHubを使う基本はひと通り揃いました。チームでブランチを分けて開発したくなったら、別冊『チームで安全に開発する』へ進んでください。

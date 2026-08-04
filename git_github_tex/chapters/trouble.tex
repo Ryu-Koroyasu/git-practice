@@ -1,20 +1,10 @@
 % =====================================================================
-% 第4章 トラブルシューティング編 — エラー・事故からの復旧
-% 元原稿: 04_トラブルシューティング編.md
+% 独立冊子『トラブルシューティング』本文
+% 元原稿: 04_トラブルシューティング編.md（全範囲）
 % =====================================================================
-\chapter{トラブルシューティング編 —エラー・事故からの復旧—}
+\chapter{トラブルシューティング}
 
-本章は、Gitを使っていて \textbf{エラーが出た・操作を間違えた} ときの対処をまとめた「困ったときの駆け込み寺」です。第1〜3章で基本の流れを学んだあと、実際に手を動かすと必ず何かにぶつかります。そのときにここを開いてください。
-
-\begin{hintbox}
-\textbf{この章の読み方}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{エラーメッセージが出た} → 「エラーメッセージ逆引き」でメッセージの一部から探す
-  \item \textbf{操作を間違えた・元に戻したい} → 「やり直し・取り消し」へ
-  \item \textbf{やらかした気がする} → 「よくある事故と復旧」へ
-  \item コマンドだけ手早く引きたい → 第5章「逆引きチートシート」へ
-\end{itemize}
-\end{hintbox}
+Gitを使っていて \textbf{エラーが出た・操作を間違えた} ときの「困ったときの駆け込み寺」です。本編『はじめてのバージョン管理』と別冊『チームで安全に開発する』で基本の流れを学んだあと、実際に手を動かすと必ず何かにぶつかります。そのときにここを開いてください。
 
 % ---------------------------------------------------------------------
 \section{トラブル対応の心得}
@@ -23,8 +13,8 @@
 
 \begin{enumerate}[leftmargin=1.6em]
   \item \textbf{まず \cmd{git status}}：今どのファイルがどのエリアにあるか、どのブランチにいるかが分かります。ほとんどのヒントはここに出ます。
-  \item \textbf{メッセージを読む}：Gitのエラーは、たいてい\textbf{次にやるべきことを英語で提案}してくれています（\cmd{use "git ..."} の形）。
-  \item \textbf{コミット済みなら基本は安全}：一度 \cmd{commit} した内容は履歴に残っており、多くの操作は後から取り戻せます。怖いのは「まだコミットしていない変更」を捨てる操作だけです。
+  \item \textbf{メッセージを読む}：Gitのエラーは、たいてい次にやるべきことを英語で提案してくれています（\cmd{use "git ..."} の形）。
+  \item \textbf{コミット済みなら基本は安全}：一度 \cmd{commit} した内容は履歴に残り、後から取り戻せます。怖いのは「まだコミットしていない変更」を捨てる操作だけです。
 \end{enumerate}
 
 \begin{numfig}{トラブル対応の基本手順}{fig:trouble-flow}
@@ -34,7 +24,7 @@
   \node[flownode, fill=gitOrange, text width=5.5cm, below=of S] (R) {エラーメッセージを読む};
   \node[decisionnode, fill=gitAmber, text width=2.4cm, below=of R] (Q) {対処法が分かる？};
   \node[flownode, fill=gitGreen, text width=4.2cm, below left=1.2cm and 0.2cm of Q] (DO) {提案されたコマンドを実行};
-  \node[flownode, fill=gitBlue, text width=4.2cm, below right=1.2cm and 0.2cm of Q] (DOC) {この章でメッセージを検索};
+  \node[flownode, fill=gitBlue, text width=4.2cm, below right=1.2cm and 0.2cm of Q] (DOC) {この本でメッセージを検索};
   \draw[flowarrow] (E) -- (S);
   \draw[flowarrow] (S) -- (R);
   \draw[flowarrow] (R) -- (Q);
@@ -55,12 +45,12 @@
 \midrule
 \cmd{remote origin already exists} & \cmd{origin} が既に登録済み & URLを変えたいなら \cmd{git remote set-url origin 新URL} \\
 \cmd{Updates were rejected} / \cmd{non-fast-forward} & リモートに手元が知らない更新がある & 先に \cmd{git pull} してから \cmd{git push} \\
-\cmd{Authentication failed} & HTTPSの認証切れ・トークン失効 & \cmd{gh auth login}（再ログイン）または トークン再発行 \\
-\cmd{Permission denied (publickey)} & SSH鍵が未登録／認識されていない & 公開鍵をGitHubに登録、\cmd{ssh -T git@github.com} で確認 \\
+\cmd{error: failed to push some refs} & 多くは push 拒否（上記 \cmd{non-fast-forward}） & \cmd{git pull} で最新を取り込んでから \cmd{git push} \\
+\cmd{Authentication failed} & HTTPSの認証切れ・トークン失効 & \cmd{gh auth login} で再ログイン \\
+\cmd{Permission denied (publickey)} & SSH鍵が未登録／認識されていない & 公開鍵をGitHubに登録、\cmd{ssh -T git@github.com} で確認（『逆引きチートシート』参照） \\
 \cmd{fatal: not a git repository} & Git管理下でない場所にいる & 正しいフォルダへ \cmd{cd}、または \cmd{git init} \\
 \cmd{nothing to commit, working tree clean} & 記録すべき変更がない & 変更を保存したか確認。\cmd{git status} で状態確認 \\
 \cmd{detached HEAD state} & 特定コミットに直接いる（ブランチ上でない） & \cmd{git switch -c 新ブランチ名} で拾う、または \cmd{git switch main} で戻る \\
-\cmd{error: failed to push some refs} & 多くは push 拒否（上記 \cmd{non-fast-forward}） & \cmd{git pull} で最新を取り込んでから \cmd{git push} \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -83,7 +73,7 @@
 
 \begin{codebox}[bash]
 \begin{code}
-# 1. まず取り込む（このときコンフリクトが出ることがある → 次節へ）
+# 1. まず取り込む（このときコンフリクトが出ることがある）
 git pull
 
 # 2. 取り込めたら改めて上げる
@@ -91,22 +81,22 @@ git push
 \end{code}
 \end{codebox}
 
-\subsection{認証で弾かれた}
+\begin{hintbox}
+\cmd{pull} でコンフリクト（競合）が出たときの直し方は、別冊『チームで安全に開発する』の「コンフリクト（競合）を解決する」にあります。
+\end{hintbox}
 
-HTTPSかSSHかで対処が分かれます。
+\subsection{認証で弾かれた（Authentication failed）}
+
+\cmd{gh} を使っている場合は、再ログインで直ります。
 
 \begin{codebox}[bash]
 \begin{code}
-# HTTPS（gh を使っている場合）：再ログインする
 gh auth login
 gh auth status   # 状態を確認
-
-# SSH：鍵が使えているか確認する
-ssh -T git@github.com
 \end{code}
 \end{codebox}
 
-認証の設定方法そのものは第2章「認証を設定する（HTTPS と SSH）」を参照してください。
+認証の設定方法そのものは本編「GitHubにログインする」を、SSH鍵・PATを使う場合は『逆引きチートシート』の「認証の別方式」を参照してください。
 
 % ---------------------------------------------------------------------
 \section{やり直し・取り消し}
@@ -135,7 +125,7 @@ ssh -T git@github.com
 
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{\cmd{git restore}}：\textbf{まだコミットしていない}手元の変更を捨てる。作業をなかったことにする。
-  \item \textbf{\cmd{git revert}}：\textbf{すでにコミット（push）済み}の変更を、「打ち消す新しいコミット」を積んで無効化する。\textbf{履歴は消さず}に安全に取り消せるので、共有ブランチではこちらを使う。
+  \item \textbf{\cmd{git revert}}：\textbf{すでにコミット済み}の変更を、「打ち消す新しいコミット」を積んで無効化する。\textbf{履歴は消さず}に安全に取り消せるので、共有ブランチではこちらを使う。
 \end{itemize}
 
 \begin{codebox}[bash]
@@ -152,7 +142,7 @@ git revert HEAD
 % ---------------------------------------------------------------------
 \section{コンフリクト（競合）で詰まったとき}
 
-コンフリクトの基本的な直し方は第3章「コンフリクト（競合）を解決する」に詳しくあります。ここでは \textbf{「解決できずに詰まった／やめたい」} ときの逃げ道を補足します。
+コンフリクトの基本的な直し方は、別冊『チームで安全に開発する』の「コンフリクト（競合）を解決する」にあります。ここでは \textbf{「解決できずに詰まった／やめたい」} ときの逃げ道を補足します。
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}X l@{}}
@@ -166,18 +156,8 @@ git revert HEAD
 \end{tabularx}
 \end{center}
 
-\begin{codebox}[bash]
-\begin{code}
-# 泥沼化したら、まず落ち着いて開始前に戻す
-git merge --abort
-
-# 状態を確認して、もう一度ていねいにやり直す
-git status
-\end{code}
-\end{codebox}
-
 \begin{warnbox}
-競合ファイルには \cmd{<<<<<<<} \cmd{=======} \cmd{>>>>>>>} の\textbf{マーカー3行}が入ります。\textbf{これを消し忘れたままコミットしない}でください。消し忘れるとコードや原稿にゴミが残ります。VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボタンでマーカーごと安全に処理できます。
+競合ファイルには \cmd{<<<<<<<} \cmd{=======} \cmd{>>>>>>>} の\textbf{マーカー3行}が入ります。\textbf{これを消し忘れたままコミットしない}でください。消し忘れるとコードや原稿にゴミが残ります。
 \end{warnbox}
 
 % ---------------------------------------------------------------------
@@ -204,7 +184,7 @@ git switch 正しいブランチ名
 
 \begin{enumerate}[leftmargin=1.6em]
   \item \textbf{まず鍵・トークンを無効化して再発行する}（これが最優先。消しても取得された可能性は消えない）
-  \item 該当ファイルを \cmd{.gitignore}（第1章参照）に追加し、今後コミットされないようにする
+  \item 該当ファイルを \cmd{.gitignore}（本編参照）に追加し、今後コミットされないようにする
   \item 履歴からの完全削除は影響が大きいため、チームや管理者と相談して対応する
 \end{enumerate}
 
@@ -213,7 +193,7 @@ git switch 正しいブランチ名
 GitHubにはアップロード容量の上限があります。ビルド成果物や大容量データは、そもそもコミットしないのが基本です。
 
 \begin{itemize}[leftmargin=1.4em]
-  \item 生成し直せるファイル・大容量データは \cmd{.gitignore}（第1章参照）で除外する
+  \item 生成し直せるファイル・大容量データは \cmd{.gitignore}（本編参照）で除外する
   \item 既にコミット済みのものは、\cmd{.gitignore} に足すだけでは消えません。対処が必要なら管理者に相談してください
 \end{itemize}
 
@@ -228,18 +208,3 @@ git add . && git commit -m "メモ"
 git push
 \end{code}
 \end{codebox}
-
-% ---------------------------------------------------------------------
-\section*{この章のまとめ}
-\addcontentsline{toc}{section}{この章のまとめ}
-
-\begin{itemize}[leftmargin=1.4em]
-  \item \textbf{困ったらまず \cmd{git status}}。エラーメッセージは次の一手を教えてくれる
-  \item \textbf{コミット済みは基本安全}。怖いのは未コミットの変更を捨てる操作だけ
-  \item push 拒否は \textbf{\cmd{pull} してから \cmd{push}}
-  \item 共有済みの取り消しは、履歴を消す \cmd{reset} ではなく\textbf{打ち消す \cmd{revert}}
-  \item 泥沼化した競合は \textbf{\cmd{git merge -{}-abort}} で開始前に戻れる
-  \item 秘密情報の流出は、消す前に\textbf{まず鍵の無効化・再発行}
-\end{itemize}
-
-コマンドだけ手早く引きたいときは第5章「逆引きチートシート」を、各操作の背景を知りたいときは第1〜3章の本文を参照してください。

@@ -1,0 +1,214 @@
+% =====================================================================
+% 別冊 第2章 コンフリクト解決
+% 元原稿: 03_ブランチ・PR編.md（後半：コンフリクト解決）
+% =====================================================================
+\chapter{コンフリクト（競合）を解決する}
+
+\textbf{コンフリクト（競合）}は、\textbf{同じファイルの同じ箇所を、2つの流れが別々に変更した}ときに起こります。Gitが「どちらを採用すべきか自動で判断できない」ため、あなたに解決を求めてきます。前章のブランチ運用の中で、マージのときに表面化します。
+
+% ---------------------------------------------------------------------
+\section{なぜ起きるのか}
+
+共有リポジトリを元にAさんとBさんが別々に作業し、同じ行を違う内容に書き換えたとします。片方が先にマージした後、もう片方が \cmd{pull} や \cmd{merge} をすると、履歴が食い違ってコンフリクトになります（図\ref{fig:conflict-why}）。
+
+\begin{numfig}{同じ行を別々に変更した2つの流れを合流させるとコンフリクトになる}{fig:conflict-why}
+\begin{tikzpicture}
+  \node[flownode, fill=gitBlue, text width=3cm] (S) {共有の出発点\\著者: 山田};
+  \node[flownode, fill=gitPurple, text width=3.2cm, below left=1.3cm and 0.3cm of S] (A)
+        {Aさんが変更\\著者: 山田, 佐藤, 鈴木};
+  \node[flownode, fill=gitOrange, text width=3.2cm, below right=1.3cm and 0.3cm of S] (B)
+        {Bさんが変更\\著者: 山田, 田中};
+  \node[decisionnode, fill=gitAmber, text width=3cm, below=3.4cm of S] (M)
+        {同じ行が2通りに…\\どちらが正しい？};
+  \node[flownode, fill=gitRed, below=1.2cm of M] (C) {コンフリクト発生};
+  \draw[flowarrow] (S) -- (A);
+  \draw[flowarrow] (S) -- (B);
+  \draw[flowarrow] (A) -- (M);
+  \draw[flowarrow] (B) -- (M);
+  \draw[flowarrow] (M) -- (C);
+\end{tikzpicture}
+\end{numfig}
+
+\begin{hintbox}
+\textbf{予防が最善です。} 「1タスク＝1ブランチ」「作業前に \cmd{main} を \cmd{pull}」「触るファイルをタスクごとに分ける」を守ると、コンフリクトは大きく減ります。ただしLaTeXの原稿など、同じファイルを複数人で触る場面では起きやすいので、直し方を知っておきましょう。
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{発生したときの見え方}
+
+\cmd{git pull} や \cmd{git merge} の際に、次のようなメッセージが出ます。
+
+\begin{codebox}[text]
+\begin{code}
+Auto-merging report.tex
+CONFLICT (content): Merge conflict in report.tex
+Automatic merge failed; fix conflicts and then commit the result.
+\end{code}
+\end{codebox}
+
+\cmd{git status} を打つと、\cmd{Unmerged paths} として競合したファイルが表示されます。
+
+\begin{codebox}[text]
+\begin{code}
+hoge@n171h147 git-practice % git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both added:      hoge1.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+\end{code}
+\end{codebox}
+
+% ---------------------------------------------------------------------
+\section{マーカーの読み方}
+
+競合したファイルを開くと、ぶつかった箇所が次のようなマーカーで囲まれています。ここでは \cmd{report.tex} の著者行を、\textbf{自分は「山田・佐藤・鈴木」}、\textbf{相手は「山田・田中」}に変えてぶつかった例で見ます。
+
+\noindent\textbf{① 発生時の実際の見え方}
+
+\begin{codebox}[text]
+\begin{code}
+<<<<<<< HEAD
+\author{山田, 佐藤, 鈴木}
+=======
+\author{山田, 田中}
+>>>>>>> origin/main
+\end{code}
+\end{codebox}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \cmd{<<<<<<< HEAD} 〜 \cmd{=======} … \textbf{自分側}（今いるブランチ）の内容 → \cmd{\textbackslash author\{山田, 佐藤, 鈴木\}}
+  \item \cmd{=======} 〜 \cmd{>>>>>>> origin/main} … \textbf{相手側}（取り込もうとした内容）→ \cmd{\textbackslash author\{山田, 田中\}}
+\end{itemize}
+
+\cmd{HEAD} は「今の自分」を指す目印だと覚えておくと、上が自分・下が相手だと迷いません。
+
+\noindent\textbf{② 手で編集する}
+
+\textbf{どちらを残すか（または両方を活かすか）を決め}、\cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>} の\textbf{3行をすべて削除}して、正しい1行の状態にします。
+
+\noindent\textbf{③ 解決後の完成形}
+
+たとえば「両方を活かす」なら、最終的にファイルはこうなります。
+
+\begin{codebox}[text]
+\begin{code}
+\author{山田, 佐藤, 鈴木, 田中}
+\end{code}
+\end{codebox}
+
+マーカーは1文字も残さず、\textbf{そのまま原稿として通る状態}にするのがゴールです。
+
+% ---------------------------------------------------------------------
+\section{解決の手順}
+
+全体の流れは次の通りです。\textbf{発生 → 中身を見て「どれを残すか」決める → マーカーを消して正しい状態に → \cmd{add} → \cmd{commit}}。決めるところで、図\ref{fig:conflict-resolve}のように3択に枝分かれします。
+
+\begin{numfig}{コンフリクト解決の流れ（3択に枝分かれ）}{fig:conflict-resolve}
+\begin{tikzpicture}[node distance=0.5cm and 1.4cm]
+  \node[flownode, fill=gitRed, text width=2cm] (A) {コンフリクト発生};
+  \node[decisionnode, fill=gitAmber, text width=2.2cm, right=of A] (C) {どれを残すか決める};
+  \node[flownode, fill=gitPurple, text width=2.6cm, right=of C] (C2) {相手側\\山田, 田中};
+  \node[flownode, fill=gitBlue, text width=2.6cm, above=of C2] (C1) {自分側\\山田, 佐藤, 鈴木};
+  \node[flownode, fill=gitTeal, text width=2.6cm, below=of C2] (C3) {両方\\山田, 佐藤, 鈴木, 田中};
+  \node[flownode, fill=gitOrange, text width=2.2cm, right=of C2] (D) {マーカー3行を削除};
+  \node[flownode, fill=gitGreen, right=of D] (E) {git add → commit};
+  \draw[flowarrow] (A) -- (C);
+  \draw[flowarrow] (C) -- (C1);
+  \draw[flowarrow] (C) -- (C2);
+  \draw[flowarrow] (C) -- (C3);
+  \draw[flowarrow] (C1) -- (D);
+  \draw[flowarrow] (C2) -- (D);
+  \draw[flowarrow] (C3) -- (D);
+  \draw[flowarrow] (D) -- (E);
+\end{tikzpicture}
+\end{numfig}
+
+解決のやり方は2通りあります。チーム開発ではコンフリクトはPR上で表面化するので、\textbf{PR画面のまま直せる方法A（GitHub上）を基本}にしましょう。手元でじっくり直したいときや、ブラウザで扱えない複雑な競合のときは方法B（VS Code）を使います。
+
+\subsection{方法A：GitHub（ブラウザ）で解決する（推奨）}
+
+PRを作った後にコンフリクトが起きると、PR画面に \textbf{「This branch has conflicts that must be resolved」} という警告と \textbf{「Resolve conflicts」} ボタンが表示されます。ローカルに戻らず、ブラウザだけで直せる手軽な方法です。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item PR画面の \textbf{「Resolve conflicts」} ボタンを押す。競合したファイルがブラウザ上のエディタで開きます。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/conflicts_first_window.png}{コンフリクト発生時のPR画面}
+
+\begin{enumerate}[leftmargin=1.6em, start=2]
+  \item \textbf{\cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>} のマーカー}が表示されるので、\textbf{正しい状態に直し、マーカー3行をすべて削除}します。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/conflict_fix_file.png}{コンフリクト解決の編集画面}
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item ファイル上部の \textbf{「Mark as resolved」} を押す。競合ファイルが複数あれば、すべて同様に処理します。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/resolve_conflict.png}{コンフリクト解決後のマーク}
+
+\begin{enumerate}[leftmargin=1.6em, start=4]
+  \item すべて解決したら \textbf{「Commit merge」} を押して確定します。これで競合が解消され、PRをマージできる状態になります。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/commit_merge.png}{コンフリクト解決後のコミット}
+
+\begin{warnbox}
+\textbf{「Resolve conflicts」ボタンが出ないことがあります。} 競合が複雑すぎる場合、GitHubはブラウザでの解決を許可しません。そのときは方法B（VS Code）で、ローカルに取り込んでから解決します。
+\end{warnbox}
+
+\subsection{方法B：VS Codeで解決する}
+
+VS Codeは競合を検知すると、専用のボタンで解決を手伝ってくれます。\textbf{マーカーを自分で消す必要はありません。}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{競合したファイルを開く。} サイドバーの \textbf{ソース管理（Source Control）} パネルに、競合ファイルが \textbf{「Merge Changes」} としてまとめて表示されます。エクスプローラー上では、そのファイル名の後ろに \cmd{!}（Conflict）マークが付きます。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/vscode_conflict_file.png}{VS Codeでのコンフリクト画面}
+
+\begin{enumerate}[leftmargin=1.6em, start=2]
+  \item \textbf{ファイルを開くと、「マージエディターで解決」ボタンが表示されます。} この状態で \cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>} のマーカーを削除し、正しい内容に書き換えることもできます。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/vscode_open_conflict_file.png}{VS Codeでのマージエディター起動}
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item VS Codeのマージエディターを使うと、\textbf{左＝自分側／右＝相手側／下＝結果}の3ペインで、どちらを採用するかをチェックボックスで選べます。両方を活かして手直ししたいときは、下段を直接編集します。完了したら左側のソース管理パネルで \cmd{+}（ステージ）を押してコミットすれば解決完了です（コマンドの \cmd{git add} → \cmd{git commit} と同じ操作です）。
+\end{enumerate}
+\screenshot[0.62]{03_branch・PR/vscode_merge_editor.png}{VS Codeのマージエディター（3ペイン）}
+
+どちらの方法でも、複数ファイルで起きた場合は\textbf{すべてのファイルを解決してから}マージを確定します。
+
+\begin{hintbox}
+\textbf{コマンドラインだけで解決したい場合}は、ファイルを直接開いてマーカーを消し、\cmd{git add <ファイル>} → \cmd{git commit} で確定します。方法A・Bのボタン操作も、内部ではこれと同じことをしています。
+\begin{codebox}[bash]
+\begin{code}
+# 解決したファイルを「解決済み」として登録する
+git add report.tex
+
+# コミットして競合の解決を確定する（メッセージは自動で用意される）
+git commit
+\end{code}
+\end{codebox}
+\end{hintbox}
+
+\begin{warnbox}
+途中で「やっぱりやめたい」ときは \cmd{git merge -{}-abort} で、マージ開始前の状態に戻せます。慌てて壊す前に、まず落ち着いてこのコマンドを思い出してください。
+\end{warnbox}
+
+% ---------------------------------------------------------------------
+\section*{この章のまとめ}
+\addcontentsline{toc}{section}{この章のまとめ}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{コンフリクト}は同じ箇所の二重変更で起きる
+  \item 直し方は \textbf{マーカー3行を消して正しい状態にし、\cmd{add} → \cmd{commit}}
+  \item チーム開発では\textbf{GitHubのブラウザ上（方法A）}が基本。複雑なときはVS Code（方法B）
+  \item 泥沼化したら \textbf{\cmd{git merge -{}-abort}} で開始前に戻れる
+  \item 何より、\textbf{最新の \cmd{main} から枝を出す}ことが予防の要
+\end{itemize}
+
+これで、ブランチ運用（第1章）とコンフリクト解決（第2章）が揃いました。チームの運用ルールやPRの書き方は付録Aに、コマンドを忘れたら『逆引きチートシート』、エラーやトラブルに出くわしたら『トラブルシューティング』を辞書代わりに使ってください。

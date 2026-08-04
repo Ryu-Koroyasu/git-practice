@@ -1,18 +1,13 @@
 % =====================================================================
-% 第5章 逆引きチートシート — 「〜したい」からコマンドを引く
-% 元原稿: 05_逆引きチートシート.md
+% 独立冊子『逆引きチートシート』本文
+% 元原稿: 05_逆引きチートシート.md（全範囲）＋ 02_GitHub編.md（SSH/PAT）
 % =====================================================================
-\chapter{逆引きチートシート —「〜したい」からコマンドを引く—}
+\chapter{逆引きチートシート}
 
-本章は、第1〜3章で登場したコマンドを \textbf{「〜したい → このコマンド」} の形で引けるようにまとめた辞書です。使い方や背景をしっかり知りたいときは、各節末尾に示した該当章を参照してください。
+本編『はじめてのバージョン管理』と別冊『チームで安全に開発する』で登場したコマンドを \textbf{「〜したい → このコマンド」} の形で引ける辞書です。あわせて、本編では扱わなかった\textbf{SSH鍵・パーソナルアクセストークン（PAT）}による認証の設定方法も、本書の最後にまとめます。使い方や背景を知りたいときは、各節末尾に示した参照先を見てください。
 
 \begin{hintbox}
-\textbf{この章の読み方}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{やりたいことが決まっている} → 各表の左列で探す
-  \item \textbf{意味や背景を知りたい} → 各節末尾のリンク（第1〜3章）へ
-  \item \textbf{迷ったらまず \cmd{git status}}：今どのファイルがどのエリアにあるかが分かり、次の一手が見えます
-\end{itemize}
+\textbf{迷ったらまず \cmd{git status}}：今どのファイルがどのエリアにあるかが分かり、次の一手が見えます。
 \end{hintbox}
 
 % ---------------------------------------------------------------------
@@ -32,7 +27,7 @@ Gitのバージョンを確認する & \cmd{git -{}-version} \\
 \end{tabularx}
 \end{center}
 
-詳しくは第1章「最初の設定」を参照。
+詳しくは本編「最初の設定」を参照。
 
 % ---------------------------------------------------------------------
 \section{変更を記録する（黄金フロー）}
@@ -53,11 +48,7 @@ Gitのバージョンを確認する & \cmd{git -{}-version} \\
 \end{tabularx}
 \end{center}
 
-詳しくは第1章「【実践】はじめてのコミット」を参照。
-
-\begin{hintbox}
-\cmd{git add .} の \cmd{.}（ドット）は「今いるフォルダ以下のすべての変更」という意味です。\cmd{push} は\textbf{コミット済みの内容だけ}を送ります。手元の編集を反映したいときは、必ず先に \cmd{add} → \cmd{commit} します。
-\end{hintbox}
+詳しくは本編「はじめてのコミット」を参照。
 
 % ---------------------------------------------------------------------
 \section{状態・履歴を確認する}
@@ -78,14 +69,12 @@ Gitのバージョンを確認する & \cmd{git -{}-version} \\
 \end{tabularx}
 \end{center}
 
-詳しくは第1章「状態を確認するコマンド」を参照（\cmd{git log} の表示は \cmd{q} キーで終了）。
+詳しくは本編「状態を確認するコマンド」を参照（\cmd{git log} の表示は \cmd{q} キーで終了）。
 
 % ---------------------------------------------------------------------
-\section{認証を設定する（GitHub連携の準備）}
+\section{認証・リモートとつなぐ・同期する}
 
-\cmd{push} する前に、\textbf{HTTPS か SSH のどちらか一方}を1度だけ設定します。
-
-\noindent\textbf{HTTPS（GitHub CLI を使う・おすすめ）}
+\cmd{push} する前に、GitHub CLI（\cmd{gh}）で1度だけログインします。
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}X X@{}}
@@ -93,45 +82,8 @@ Gitのバージョンを確認する & \cmd{git -{}-version} \\
 したいこと & コマンド \\
 \midrule
 \cmd{gh} がインストール済みか確認する & \cmd{gh -{}-version} \\
-\cmd{gh} をインストールする（Mac / Homebrew） & \cmd{brew install gh} \\
-\cmd{gh} をインストールする（Linux / apt） & \cmd{sudo apt install gh} \\
 GitHubにログインする & \cmd{gh auth login} \\
 ログイン状態を確認する & \cmd{gh auth status} \\
-権限（スコープ）を追加する & \cmd{gh auth refresh -s スコープ名} \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-\noindent\textbf{SSH鍵}
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}X X@{}}
-\toprule
-したいこと & コマンド \\
-\midrule
-鍵ペアを作る & \cmd{ssh-keygen -t ed25519 -C "you@example.com"} \\
-公開鍵をコピーする（Mac） & \cmd{pbcopy < \textasciitilde/.ssh/id\_ed25519.pub} \\
-公開鍵をコピーする（Windows / Git Bash） & \cmd{cat \textasciitilde/.ssh/id\_ed25519.pub | clip} \\
-公開鍵を表示する（Linux） & \cmd{cat \textasciitilde/.ssh/id\_ed25519.pub} \\
-GitHubへの接続を確認する & \cmd{ssh -T git@github.com} \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-詳しくは第2章「認証を設定する（HTTPS と SSH）」を参照。
-
-\begin{warnbox}
-秘密鍵（\cmd{.pub} が付かない方）は絶対に他人に渡さないでください。GitHubに登録するのは公開鍵（\cmd{.pub}）だけです。
-\end{warnbox}
-
-% ---------------------------------------------------------------------
-\section{リモートとつなぐ・同期する}
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}X X@{}}
-\toprule
-したいこと & コマンド \\
-\midrule
 GitHubのリポジトリを丸ごと複製する & \cmd{git clone URL} \\
 手元のリポジトリにリモートを登録する & \cmd{git remote add origin URL} \\
 リモートのURLを付け替える & \cmd{git remote set-url origin 新しいURL} \\
@@ -140,15 +92,14 @@ GitHubのリポジトリを丸ごと複製する & \cmd{git clone URL} \\
 2回目以降のアップロード & \cmd{git push} \\
 リモートの最新を取得して手元に反映する & \cmd{git pull} \\
 リモートの最新を取得だけする（反映しない） & \cmd{git fetch} \\
-取得済みの内容を手元に統合する & \cmd{git merge origin/main} \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
-詳しくは第2章「ローカルとリモートをつなぐ」を参照。
+詳しくは本編「GitHubにログインする」「ローカルとリモートをつなぐ」を参照。SSH鍵・PATを使う場合は本書末尾「認証の別方式」へ。
 
 \begin{hintbox}
-\textbf{始めに \cmd{pull}、終わりに \cmd{push}} を習慣にすると、コンフリクトが起きにくくなります。
+\textbf{始めに \cmd{pull}、終わりに \cmd{push}} を習慣にすると、トラブルが起きにくくなります。
 \end{hintbox}
 
 % ---------------------------------------------------------------------
@@ -170,16 +121,16 @@ GitHubのリポジトリを丸ごと複製する & \cmd{git clone URL} \\
 \end{tabularx}
 \end{center}
 
-詳しくは第3章「ブランチの基本操作」を参照。
+詳しくは別冊『チームで安全に開発する』の「ブランチの基本操作」を参照。
 
 \begin{warnbox}
 作業を始める前に、\textbf{\cmd{main} を最新にしてから枝分かれ}するのが安全です（\cmd{git switch main} → \cmd{git pull} → \cmd{git switch -c 新ブランチ}）。
 \end{warnbox}
 
 % ---------------------------------------------------------------------
-\section{プルリクエスト（PR）とマージ後の後片付け}
+\section{PRとマージ後の後片付け・コンフリクト解決}
 
-PRの作成・レビュー・マージは\textbf{GitHubの画面（ブラウザ）で操作}します。マージ後の後片付けはコマンドで行います。
+PRの作成・レビュー・マージは\textbf{GitHubの画面（ブラウザ）で操作}します。後片付けとコンフリクト解決はコマンドで行います。
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}X X@{}}
@@ -191,22 +142,6 @@ PRに変更を追加する & 同じブランチで \cmd{add} → \cmd{commit} �
 マージ後にローカルの \cmd{main} を最新化する & \cmd{git switch main} → \cmd{git pull} \\
 マージ済みのローカルブランチを消す & \cmd{git branch -d feature/xxx} \\
 マージ済みのリモートブランチを消す & \cmd{git push origin -{}-delete feature/xxx} \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-詳しくは第3章「プルリクエスト（PR）を作る」を参照。
-
-% ---------------------------------------------------------------------
-\section{コンフリクト（競合）を解決する}
-
-同じ箇所を別々に変更したとき、\cmd{pull} / \cmd{merge} で発生します。
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}X X@{}}
-\toprule
-したいこと & コマンド \\
-\midrule
 どのファイルが競合したか確認する & \cmd{git status} \\
 解決したファイルを「解決済み」として登録する & \cmd{git add ファイル名} \\
 解決を確定する（メッセージは自動用意） & \cmd{git commit} \\
@@ -215,13 +150,7 @@ PRに変更を追加する & 同じブランチで \cmd{add} → \cmd{commit} �
 \end{tabularx}
 \end{center}
 
-\textbf{解決の手順}：ファイルを開き、マーカー3行（\cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>}）を削除して正しい状態にする → \cmd{add} → \cmd{commit}。
-
-詳しくは第3章「コンフリクト（競合）を解決する」を参照。
-
-\begin{hintbox}
-VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボタンでマーカーごと処理できます。
-\end{hintbox}
+詳しくは別冊『チームで安全に開発する』の該当章（「プルリクエスト（PR）を作る」・「コンフリクト（競合）を解決する」）を参照。
 
 % ---------------------------------------------------------------------
 \section{やり直し・取り消し}
@@ -244,11 +173,7 @@ VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボ
 \end{tabularx}
 \end{center}
 
-各操作の使い分けや事故からの復旧は第4章「トラブルシューティング編」を参照。
-
-\begin{hintbox}
-\cmd{git restore} は\textbf{まだコミットしていない}変更を捨てるコマンドです。捨てた変更は元に戻せないので注意してください。
-\end{hintbox}
+各操作の使い分けや事故からの復旧は『トラブルシューティング』を参照。
 
 % ---------------------------------------------------------------------
 \section{困ったときのフローチャート}
@@ -275,4 +200,115 @@ VS Codeなら、競合箇所の「Accept Current / Incoming / Both Changes」ボ
 \end{tikzpicture}
 \end{numfig}
 
-各コマンドの「なぜそうするのか」は、第1〜3章の本文で図とともに説明しています。手が止まったら、まずこのチートシートで当たりをつけ、詳しく知りたくなったら該当章へ戻ってください。
+各コマンドの「なぜそうするのか」は、本編・別冊の本文で図とともに説明しています。手が止まったら、まずこのチートシートで当たりをつけ、詳しく知りたくなったら該当箇所へ戻ってください。
+
+% ---------------------------------------------------------------------
+\section{認証の別方式（SSH鍵・PAT）}
+
+本編では、最も手軽な \textbf{GitHub CLI（\cmd{gh}）によるHTTPS認証}だけを扱いました。ここでは、頻繁に使う人向けの \textbf{SSH鍵}と、トークンを手動管理する \textbf{PAT（パーソナルアクセストークン）}の設定方法を補足します。\textbf{どれか1つを設定すればOK}です。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+方式 & URLの形 & 特徴 \\
+\midrule
+\textbf{HTTPS（gh）} & \cmd{https://github.com/\ldots.git} & \textbf{本編で採用}。\cmd{gh auth login} だけで使えて最も手軽 \\
+\textbf{SSH鍵} & \cmd{git@github.com:\ldots.git} & 鍵を1度登録すれば以降は認証不要。複数リポジトリで使い回せる \\
+\textbf{PAT} & \cmd{https://github.com/\ldots.git} & トークンを手動で発行・管理したい場合 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{SSH鍵}
+
+SSHは、\textbf{鍵ペア（秘密鍵と公開鍵）}を使う方式です。公開鍵をGitHubに登録しておくと、以降は認証情報の入力なしで \cmd{push} できます。
+
+\noindent\textbf{手順1：鍵ペアを作る}（メールアドレスはGitHubのもの）
+
+\begin{codebox}[bash]
+\begin{code}
+ssh-keygen -t ed25519 -C "you@example.com"
+\end{code}
+\end{codebox}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item 保存先を聞かれたら、そのまま \textbf{Enter}（デフォルトの \verb|~/.ssh/id_ed25519| に保存されます）
+  \item パスフレーズは、設定してもしなくても構いません（設定するとより安全）
+\end{itemize}
+
+これで秘密鍵 \verb|id_ed25519| と公開鍵 \verb|id_ed25519.pub| が \verb|~/.ssh/| に作られます。
+
+\begin{warnbox}
+\textbf{秘密鍵（\cmd{.pub} が付かない方）は絶対に他人に渡さないでください。} GitHubに登録するのは公開鍵（\cmd{.pub} が付く方）だけです。
+\end{warnbox}
+
+\noindent\textbf{手順2：公開鍵の中身をコピーする}
+
+\begin{codebox}[bash]
+\begin{code}
+# macOS
+pbcopy < ~/.ssh/id_ed25519.pub
+
+# Windows（Git Bash）
+cat ~/.ssh/id_ed25519.pub | clip
+
+# Linux（表示された内容を手動でコピー）
+cat ~/.ssh/id_ed25519.pub
+\end{code}
+\end{codebox}
+
+\noindent\textbf{手順3：GitHubに公開鍵を登録する}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item GitHubの \textbf{Settings} → \textbf{SSH and GPG keys} を開きます。
+  \item \textbf{New SSH key} をクリックします。
+  \item \textbf{Title} に分かりやすい名前（例：\cmd{my-laptop}）、\textbf{Key} に手順2でコピーした内容を貼り付けます。
+  \item \textbf{Add SSH key} で登録完了です。
+\end{enumerate}
+
+\screenshot[0.62]{02_github/ssh_key_add.png}{SSH and GPG keys の New SSH key 登録画面}
+
+\noindent\textbf{手順4：接続を確認する}
+
+\begin{codebox}[bash]
+\begin{code}
+ssh -T git@github.com
+\end{code}
+\end{codebox}
+
+次のように表示されれば成功です（\cmd{yes} を求められたら \cmd{yes} と入力）。
+
+\begin{codebox}[text]
+\begin{code}
+Hi your-github-name! You've successfully authenticated, but GitHub does not provide shell access.
+\end{code}
+\end{codebox}
+
+\subsection{パーソナルアクセストークン（PAT）}
+
+\cmd{gh} を使わずHTTPSで \cmd{push} すると、ユーザー名とパスワードを聞かれます。ここで\textbf{GitHubのログインパスワードは使えません}。代わりに \textbf{PAT} という専用の文字列を発行して使います。
+
+\noindent\textbf{トークンの発行手順}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item GitHubにログインし、右上のアイコン → \textbf{Settings} を開きます。
+  \item 左メニュー最下部の \textbf{Developer settings} をクリックします。
+  \item \textbf{Personal access tokens} → \textbf{Tokens (classic)} → \textbf{Generate new token (classic)} を選びます。
+  \item \textbf{Note}（用途のメモ）、\textbf{Expiration}（有効期限）を設定し、\textbf{Select scopes} で \cmd{repo} にチェックして発行します。
+  \item \textbf{Generate token} を押すと、\verb|ghp_xxxx…| という文字列が表示されます。
+\end{enumerate}
+
+\screenshot[0.62]{02_github/pat_scopes.png}{トークン発行画面（repoスコープにチェック）}
+
+\begin{warnbox}
+\textbf{トークンは発行直後の1回しか表示されません。} その場でコピーし、パスワードマネージャ等に保管してください。画面を閉じると二度と確認できず、再発行が必要になります。
+\end{warnbox}
+
+\noindent\textbf{トークンの使い方}：\cmd{push} 時にユーザー名とパスワードを聞かれたら、\textbf{パスワードの欄に、先ほどのトークンを貼り付けます}。一度入力すれば記憶され、次回以降は不要になります。
+
+\begin{codebox}[text]
+\begin{code}
+Username: your-github-name
+Password: ghp_xxxxxxxxxxxxxxxxxxxx   ← ログインパスワードではなくトークンを入力
+\end{code}
+\end{codebox}

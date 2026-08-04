@@ -4,14 +4,14 @@
 % =====================================================================
 \chapter{Git編 —自分のPCの中でGitを使う—}
 
-本章は「Gitを一度も使ったことがない人」を対象に、\textbf{自分のPCの中だけで完結するGitの基本}を説明します。GitHub（クラウド）と繋ぐ話は第2章で扱います。まずはここで「変更を記録する」感覚をつかみましょう。
+この章では、\textbf{自分のPCの中だけで完結するGitの基本}を説明します。GitHub（クラウド）とつなぐ話は第2章で扱います。まずはここで「変更を記録する」感覚をつかみましょう。
 
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
   \item とりあえず動かしたい人 → 「インストール」→「最初の設定」→「【実践】はじめてのコミット」だけ写経すればOK
-  \item コマンドをド忘れした人 → 第5章「逆引きチートシート」へ
-  \item エラーが出て困った人 → 第4章「トラブルシューティング編」へ
+  \item コマンドをド忘れした人 → 『逆引きチートシート』へ
+  \item エラーが出て困った人 → 『トラブルシューティング』へ
 \end{itemize}
 \end{hintbox}
 
@@ -20,7 +20,7 @@
 
 Gitは\textbf{ファイルの変更履歴を記録・管理するツール}です。一言でいうと「\textbf{いつでも戻れるセーブポイントを作れる仕組み}」です。
 
-たとえば、レポートをこんなふうに管理していませんか？（\textbf{ファイル管理のよくないやり方}）
+たとえば、レポートをこんなふうに管理していませんか。
 
 \begin{codebox}[text]
 \begin{code}
@@ -34,14 +34,14 @@ Gitは\textbf{ファイルの変更履歴を記録・管理するツール}で�
 このやり方だと、次のことに困ります。
 
 \begin{itemize}[leftmargin=1.4em]
-  \item \textbf{どれが本当に最新か分からない}（「本当に最終」の後にまた直したら？）
+  \item \textbf{どれが本当に最新か分からない}
   \item \textbf{ファイルが増え続けて散らかる}
-  \item \textbf{いつ・誰が・どこを・なぜ変えたのか分からない}（中身を開いて見比べるしかない）
+  \item \textbf{いつ・誰が・どこを・なぜ変えたのか分からない}
 \end{itemize}
 
-コピーを取っておけば「昔の状態に戻す」ことはできます。しかし、\textbf{「どこが違うのか」「なぜ変えたのか」までは分かりません}。ここがGitとの決定的な違いです。
+コピーを取っておけば「昔の状態に戻す」ことはできます。でも「\textbf{どこが違うのか}」「\textbf{なぜ変えたのか}」までは分かりません。ここがGitとの決定的な違いです。
 
-Gitを使うと、\textbf{ファイルは1つのまま}、変更の節目ごとに「\textbf{コミット}」という記録（いつでも戻れるセーブポイント）を残せます。各コミットには「いつ・誰が・何を・なぜ変えたか」に加えて、\textbf{前回との差分（どの行をどう変えたか）}まで残るので、後からいつでも正確にたどれます。
+Gitを使うと、\textbf{ファイルは1つのまま}、変更の節目ごとに「\textbf{コミット}」という記録（セーブポイント）を残せます。各コミットには「いつ・誰が・何を・なぜ変えたか」に加えて、\textbf{前回との差分}まで残るので、後からいつでも正確にたどれます。
 
 \begin{numfig}{コミットを積み重ねると、変更履歴が1本の線としてつながる}{fig:commit-chain}
 \begin{tikzpicture}[node distance=1.1cm]
@@ -53,27 +53,25 @@ Gitを使うと、\textbf{ファイルは1つのまま}、変更の節目ごと�
 \end{tikzpicture}
 \end{numfig}
 
-図\ref{fig:commit-chain}のように、コミットを積み重ねることで、変更の歴史が1本の線としてつながっていきます。
-
 % ---------------------------------------------------------------------
 \section{Gitの3つのエリア（最重要の概念）}
 
-Gitを理解する上で\textbf{ここだけは必ず押さえてください}。Gitでは、ファイルは次の3つの場所を通って記録されていきます。
+Gitでは、ファイルは次の3つのエリアを通って記録されます。\textbf{ここだけは必ず押さえてください。}
 
 \begin{hintbox}
-下の図に出てくる \cmd{git add} と \cmd{git commit} は、この後の「実践」で実際に使うGitのコマンドです。ここでは深く考えず、\textbf{エリアの間を移す操作の名前}とだけ捉えてください。
+下の図に出てくる \cmd{git add} と \cmd{git commit} は、この後の「実践」で実際に使うコマンドです。ここでは\textbf{エリアの間を移す操作の名前}とだけ捉えてください。
 \end{hintbox}
 
-作業ツリーは作業机です。ステージングは作業机（作業ツリー）で作った変更を段ボール箱に詰める場所です。ローカルリポジトリはラベル付けした段ボール箱を倉庫に保管する場所です。\textbf{写しを取って次の場所に置く}イメージで覚えると分かりやすいです（図\ref{fig:areas-concept}）。
+3つのエリアは、\textbf{机 → 段ボール箱 → 倉庫}にたとえると分かりやすいです（図\ref{fig:areas-concept}）。作業ツリーは原本を広げた\textbf{作業机}、ステージングは変更を詰める\textbf{段ボール箱}、ローカルリポジトリは箱を保管する\textbf{倉庫}です。
 
 \figimage[0.95]{01_git/git_area.png}{3つのエリアの概念図（机 → 段ボール箱 → 倉庫）}{fig:areas-concept}
 
-この流れをGitのコマンドで表すと、図\ref{fig:areas-flow}のように \cmd{git add} と \cmd{git commit} で次のエリアへ写しを送っていくことになります。
+この流れをコマンドで表すと、\cmd{git add} と \cmd{git commit} で次のエリアへ送っていくことになります（図\ref{fig:areas-flow}）。
 
 \begin{numfig}{3つのエリアと、それらをつなぐ \texttt{git add} / \texttt{git commit}}{fig:areas-flow}
 \begin{tikzpicture}
   \node[flownode, fill=gitRed, text width=2.4cm] (W)
-        {作業ツリー\\{\scriptsize (Working Tree)}\\原本を編集する場所};
+        {作業ツリー\\{\scriptsize (Working Tree)}\\原本を広げた作業机};
   \node[flownode, fill=gitOrange, text width=2.4cm, right=3.6cm of W] (S)
         {ステージング\\{\scriptsize (Staging Area)}\\写しを詰める段ボール箱};
   \node[flownode, fill=gitGreen, text width=2.4cm, right=3.6cm of S] (R)
@@ -83,37 +81,35 @@ Gitを理解する上で\textbf{ここだけは必ず押さえてください}�
 \end{tikzpicture}
 \end{numfig}
 
-ポイントは、各操作が「\textbf{写し（コピー）を取って次の場所に置く}」というイメージだという点です。\textbf{元のエリアには元のまま残る}ので、先に進めても空になりません。
-
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}l X X@{}}
 \toprule
 エリア & これは何か & たとえると \\
 \midrule
-\textbf{作業ツリー} & 実際にファイルを編集している、いつものフォルダ & 原本の書類を広げた作業机の上 \\
-\textbf{ステージング} & 「次のコミットに含める変更」を選んで詰める場所 & 書類の写しを詰める、コミット1回分の段ボール箱 \\
-\textbf{ローカルリポジトリ} & コミットとして履歴が保存される場所（\cmd{.git} フォルダの中） & 箱の写しを保管する倉庫 \\
+\textbf{作業ツリー} & 実際にファイルを編集している、いつものフォルダ & 原本を広げた作業机 \\
+\textbf{ステージング} & 「次のコミットに含める変更」を詰めるエリア & コミット1回分の段ボール箱 \\
+\textbf{ローカルリポジトリ} & コミットとして履歴が保存されるエリア（\cmd{.git} の中） & 箱を保管する倉庫 \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
+大事なのは、\cmd{git add} も \cmd{git commit} も「\textbf{写しを取って次のエリアに置く}」操作だという点です。元のエリアには元のまま残るので、先に進めても空になりません。
+
 \begin{itemize}[leftmargin=1.4em]
-  \item \cmd{git add}：机の上の原本の\textbf{写しを取って}箱に入れる（原本は机に残る）
-  \item \cmd{git commit}：箱の中身の\textbf{写しを取って}倉庫に保管する（箱の中身も残る）
+  \item \cmd{git add}：机の上の原本の写しを箱に入れる（原本は机に残る）
+  \item \cmd{git commit}：箱の中身の写しを倉庫に保管する（箱の中身も残る）
 \end{itemize}
 
-倉庫に保管されたコミットは、いつでもその時点の状態として取り出せます。
-
 \begin{notebox}
-\cmd{add} や \cmd{commit} をしても、\textbf{元のエリアが空になって消えることはありません}。どちらも「元を運び出す」のではなく「\textbf{写しを取って次に置く}」操作だからです。Gitは各エリアが「その時点の写し（スナップショット）」を持つように動くため、コミットは\textbf{差分ではなくスナップショット}として記録されます。
+Gitは各エリアが「その時点の写し（スナップショット）」を持つように動きます。だからコミットは\textbf{差分ではなくスナップショット}として記録されます。
 \end{notebox}
 
-つまり基本操作は \textbf{「編集する → \cmd{add} で写しを詰める → \cmd{commit} で写しを保管する」} の繰り返しです。本書ではこの流れを\textbf{黄金フロー}と呼びます。この3ステップが分かれば、Gitの8割は理解できたようなものです。
+つまり基本操作は \textbf{「編集する → \cmd{add} → \cmd{commit}」} の繰り返しです。本書ではこれを\textbf{黄金フロー}と呼びます。この3ステップが分かれば、Gitの8割は理解できたようなものです。
 
 % ---------------------------------------------------------------------
 \section{Gitのインストール}
 
-お使いのPCのOSに合わせて進めてください。インストールが終わったら、ターミナルで次を実行し、バージョンが表示されれば成功です。
+まず、Gitが\textbf{すでに入っていないか}を確認しましょう。ターミナル（WindowsはPowerShellやコマンドプロンプト）で次を実行します。
 
 \begin{codebox}[bash]
 \begin{code}
@@ -122,126 +118,47 @@ git --version
 \end{code}
 \end{codebox}
 
+\begin{hintbox}
+上のように\textbf{バージョンが表示されたら、Gitはすでにインストール済み}です。以下のOS別のインストール手順は\textbf{飛ばして}、次の「最初の設定」へ進んでください。\cmd{command not found}（見つからない）と出た場合だけ、お使いのOSの手順に従ってインストールします。インストール後にもう一度 \cmd{git --version} を実行し、バージョンが表示されれば成功です。
+\end{hintbox}
+
+\begin{warnbox}
+\textbf{インストール直後は、開いていたターミナルではまだ \cmd{git --version} が反映されないことがあります。} PATH（コマンドの置き場所を示す設定）がターミナルの起動時に読み込まれるためです。\cmd{command not found} のままなら、\textbf{ターミナルをいったん閉じて開き直して}から、もう一度実行してください。
+\end{warnbox}
+
 \subsection{Windows}
 
 Windowsでは「Git for Windows」をインストールします。これには \textbf{Git Bash} という、macOS/Linux風のコマンドが使えるターミナルが付いてきます。本書のWindowsの説明はこの Git Bash を使う前提です。
 
 \begin{enumerate}[leftmargin=1.6em]
-  \item 下記URLからインストーラをダウンロードします。\\
-        \url{https://git-scm.com/download/win}
-  \item ダウンロードしたインストーラをダブルクリックして起動します。
+  \item \url{https://git-scm.com/download/win} からインストーラをダウンロードし、ダブルクリックで起動します。
+  \item インストーラの画面が続きます。\textbf{基本はすべてデフォルトのまま「Next」で進めて問題ありません。} ただし次の3つの画面だけは選択を確認してください。
 \end{enumerate}
 
-以下、インストーラの選択画面を順に説明します。
+\noindent\textbf{① 既定のエディタ}
 
-\begin{hintbox}
-\textbf{基本はどの画面もデフォルトのまま「Next」で進めて問題ありません。} 以下では、特に選択に注意したい画面を中心に説明します。
-\end{hintbox}
-
-\noindent\textbf{1. 「Next」をクリックする}
-\screenshot[0.62]{01_git/win_install_01.png}{インストール開始画面}
-
-\noindent\textbf{2. インストール先フォルダを選択する}（特に問題がなければデフォルトのまま「Next」）
-\screenshot[0.62]{01_git/win_install_02.png}{インストール先の選択}
-
-\noindent\textbf{3. インストールするコンポーネントを選択する}（研究用途では追加不要なのでデフォルトのまま「Next」）
-\screenshot[0.62]{01_git/win_install_03.png}{コンポーネントの選択}
-
-各項目の意味（参考）:
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.4cm} X@{}}
-\toprule
-項目 & 意味 \\
-\midrule
-Additional icons → On the Desktop & デスクトップにGitアイコンを置くか \\
-Windows Explorer integration & 右クリックメニューからGit Bash/GUIを使えるようにするか \\
-Git LFS & 動画・画像など大きなファイルを扱えるようにするか \\
-Associate .git* configuration files… & \cmd{.git}で始まる設定ファイルを既定のエディタに関連付けるか \\
-Associate .sh files… & \cmd{.sh}ファイルをGit Bashで実行するか \\
-Check daily for Git for Windows updates & 毎日アップデートを確認するか \\
-Add a Git Bash Profile to Windows Terminal & Windows TerminalでGit Bashを使えるようにするか \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-\noindent\textbf{4. スタートメニューに表示する名前を決める}（デフォルトのまま「Next」）
-
-\begin{hintbox}
-「スタートメニュー」とは、画面左下の Windows アイコンをクリックすると開く、アプリの一覧のことです。
-\end{hintbox}
-
-\screenshot[0.62]{01_git/win_install_04.png}{スタートメニューフォルダ}
-
-\noindent\textbf{5. 既定のエディタを選択する}
-
-デフォルトはVimですが、不慣れだと操作が難しいため、\textbf{VS Codeを使う予定なら「Use Visual Studio Code as Git's default editor」を選択}します。
+デフォルトはVimですが不慣れだと難しいため、VS Codeを使う予定なら \textbf{「Use Visual Studio Code as Git's default editor」} を選びます。
 \screenshot[0.62]{01_git/win_install_05.png}{既定エディタの選択}
 
-\noindent\textbf{6. 新規リポジトリの初期ブランチ名を指定する}
+\noindent\textbf{② 初期ブランチ名}
 
-\textbf{「Override the default branch name…」を選び、\cmd{main} と入力する}のがおすすめです（世界的に \cmd{main} が標準）。こだわりがなければ「Let Git decide」でも構いません。
+\textbf{「Override the default branch name…」} を選び、\cmd{main} と入力します（世界的に \cmd{main} が標準）。
 \screenshot[0.62]{01_git/win_install_06.png}{初期ブランチ名の設定}
 
-\noindent\textbf{7. 環境変数（PATH）を設定する}（デフォルトのまま「Next」）
-\screenshot[0.62]{01_git/win_install_07.png}{PATH環境の設定}
+\noindent\textbf{③ 改行コードの扱い}
 
-\noindent\textbf{8. SSH実行ファイルを選択する}（外部のSSHを使う特別な理由がなければデフォルト「Use bundled OpenSSH」のまま「Next」）
-\screenshot[0.62]{01_git/win_install_08.png}{SSHの選択}
-
-\noindent\textbf{9. HTTPS通信に使う証明書を選択する}（デフォルト「OpenSSL library」のまま「Next」で問題ありません）
-
-将来、独自の認証局を使う企業のサーバーにアクセスする場合のみ、Windowsの証明書ストアを使う後者を選びます。
-\screenshot[0.62]{01_git/win_install_09.png}{HTTPS証明書の選択}
-
-\noindent\textbf{10. 改行コードの扱いを選択する}
-
-Windowsと他OSで改行コードが異なるため重要です。複数人・複数環境で開発するなら \textbf{「Checkout as-is, commit Unix-style line endings」} を選びます。
+WindowsとほかのOSで改行コードが異なるため重要です。複数環境で開発するなら \textbf{「Checkout as-is, commit Unix-style line endings」} を選びます。
 \screenshot[0.62]{01_git/win_install_10.png}{改行コードの設定}
 
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}X l@{}}
-\toprule
-選択肢 & 動作 \\
-\midrule
-Checkout Windows-style, commit Unix-style & 取得時CRLFに、コミット時LFに変換 \\
-\textbf{Checkout as-is, commit Unix-style}（推奨） & 取得時はそのまま、コミット時のみLFに変換 \\
-Checkout as-is, commit as-is & 一切変換しない \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-\noindent\textbf{11. ターミナルエミュレータを選択する}（Linuxのコマンドも使える \textbf{「Use MinTTY」}（デフォルト）がおすすめ）
-\screenshot[0.62]{01_git/win_install_11.png}{ターミナルエミュレータの選択}
-
-\noindent\textbf{12. \cmd{git pull} の動作を選択する}（デフォルト「Fast-forward or merge」のまま「Next」）
-
-\begin{hintbox}
-\cmd{git pull} は、後の第2章で扱う「クラウド側の変更を手元に取り込むコマンド」です。ここでは意味が分からなくても問題ありません。
-\end{hintbox}
-
-\screenshot[0.62]{01_git/win_install_12.png}{pullの動作設定}
-
-\noindent\textbf{13. 認証情報の保存方法を選択する}（デフォルトの \textbf{「Git Credential Manager」} のまま「Next」。パスワードを毎回入力せずに済みます）
-\screenshot[0.62]{01_git/win_install_13.png}{認証情報ヘルパーの選択}
-
-\noindent\textbf{14. 追加オプションを選択する}
-
-\textbf{「Enable file system caching」}（高速化）にチェック。macOS等とリポジトリを共有するなら \textbf{「Enable symbolic links」} もチェックします。
-\screenshot[0.62]{01_git/win_install_14.png}{追加オプションの選択}
-
-\noindent\textbf{15. 実験的オプションを確認してインストールする}（予期せぬ不具合を避けるため\textbf{何もチェックせず}「Install」をクリック）
-\screenshot[0.62]{01_git/win_install_15.png}{実験的オプションとインストール}
-
-インストール後、スタートメニューから \textbf{Git Bash} を起動し、\cmd{git --version} でバージョンが出れば完了です。
+残りの画面はデフォルトのまま進め、最後に「Install」をクリックします。インストール後、スタートメニューから \textbf{Git Bash} を起動し、\cmd{git --version} でバージョンが出れば完了です。
 
 \subsection{macOS}
 
-macOSには2つの方法があります。\textbf{どちらか一方}でOKです。
+次のどちらか一方でOKです。
 
 \noindent\textbf{方法A: Xcode Command Line Tools（最も手軽）}
 
-ターミナル（\cmd{アプリケーション > ユーティリティ > ターミナル.app}）を開き、次を実行します。Gitを含む開発ツール一式が入ります。
+ターミナル（\cmd{アプリケーション > ユーティリティ > ターミナル.app}）を開き、次を実行します。
 
 \begin{codebox}[bash]
 \begin{code}
@@ -261,11 +178,11 @@ brew install git
 \end{code}
 \end{codebox}
 
-どちらの場合も、ターミナルで \cmd{git --version} を実行してバージョンが表示されれば完了です。
+どちらの場合も、\cmd{git --version} でバージョンが表示されれば完了です。
 
 \subsection{Linux}
 
-Linuxでは、お使いの\textbf{ディストリビューション}（Ubuntu、Fedora など Linux の種類）に付属する\textbf{パッケージマネージャ}（ソフトを導入・管理する仕組み）を使います。自分の環境に合うものを1つ選んで実行します。
+お使いのディストリビューションのパッケージマネージャを使います。自分の環境に合うものを1つ選んで実行します。
 
 \begin{codebox}[bash]
 \begin{code}
@@ -280,7 +197,7 @@ sudo pacman -S git
 \end{code}
 \end{codebox}
 
-端末（ターミナル）で \cmd{git --version} を実行してバージョンが表示されれば完了です。
+\cmd{git --version} でバージョンが表示されれば完了です。
 
 % ---------------------------------------------------------------------
 \section{最初の設定}
@@ -309,7 +226,7 @@ git config --global --list
 \cmd{--global} は「このPC全体の共通設定」という意味です。一度やれば、以降すべてのリポジトリに適用されます。
 
 \begin{hintbox}
-おすすめの追加設定（初期ブランチ名を \cmd{main} に統一）
+おすすめの追加設定（新規リポジトリの初期ブランチ名を \cmd{main} に統一）
 \begin{codebox}[bash]
 \begin{code}
 git config --global init.defaultBranch main
@@ -320,7 +237,7 @@ git config --global init.defaultBranch main
 % ---------------------------------------------------------------------
 \section{【実践】はじめてのコミット}
 
-ここが本番です。先ほどの\textbf{黄金フロー（編集 → \cmd{add} → \cmd{commit}）}を、実際に手を動かして体験します。\textbf{この通りに写経すれば、最初のコミットが作れます。} 練習用のフォルダで試してみましょう。
+ここが本番です。\textbf{黄金フロー（編集 → \cmd{add} → \cmd{commit}）}を、実際に手を動かして体験します。\textbf{この通りに写経すれば、最初のコミットが作れます。}
 
 \subsection{ステップ0：作業フォルダを用意して移動する}
 
@@ -344,7 +261,7 @@ git init
 \end{code}
 \end{codebox}
 
-これで今のフォルダに \cmd{.git} という隠しフォルダが作られ、Gitでの管理が始まります。\textbf{これが、あなたのPCの中の「ローカルリポジトリ」}です。\cmd{.git} の中に履歴（コミット）が保存されます（中身を直接触る必要はありません）。
+これで今のフォルダに \cmd{.git} という隠しフォルダが作られ、Gitでの管理が始まります。\textbf{これが、あなたのPCの中の「ローカルリポジトリ」}です。履歴（コミット）はこの \cmd{.git} の中に保存されます（中身を直接触る必要はありません）。
 
 \begin{codebox}[bash]
 \begin{code}
@@ -354,10 +271,7 @@ Initialized empty Git repository in /Users/hoge/git-practice/.git/
 \end{code}
 \end{codebox}
 
-\begin{notebox}
-\cmd{git init} 後にフォルダ内へ \cmd{.git} フォルダができた様子（Windowsはエクスプローラで隠しファイル表示ON、macOSは Finder で \cmd{Cmd+Shift+.}、Linuxはファイルマネージャで隠しファイル表示）。
-\end{notebox}
-\screenshot[0.62]{01_git/01_git_init_folder.png}{git init後の.gitフォルダ}
+\screenshot[0.62]{01_git/01_git_init_folder.png}{git init後の.gitフォルダ（隠しファイル表示をONにすると見えます）}
 
 \subsection{ステップ2：ファイルを作る}
 
@@ -415,7 +329,7 @@ git log
 
 \subsection{黄金フローのまとめ}
 
-上の\textbf{ステップ4（\cmd{git add}）→ ステップ5（\cmd{git commit}）}が、この黄金フローの中核です。図にすると、図\ref{fig:golden-flow}のように3つの繰り返しになります。
+上の\textbf{ステップ4（\cmd{git add}）→ ステップ5（\cmd{git commit}）}が黄金フローの中核です。図にすると、図\ref{fig:golden-flow}のように3つの繰り返しになります。
 
 \begin{numfig}{黄金フロー：編集 → \texttt{git add} → \texttt{git commit} の繰り返し}{fig:golden-flow}
 \begin{tikzpicture}[scale=1.5, transform shape]
@@ -443,6 +357,32 @@ git commit -m "変更内容のメモ"   # コミットとして記録
 \cmd{git add .} の \cmd{.}（ドット）は「今いるフォルダ以下のすべての変更」という意味です。
 \end{hintbox}
 
+\subsection{いつ \texttt{add} / \texttt{commit} すればいい？}
+
+最初に迷うのが\textbf{コミットするタイミング}です。目安はシンプルで、\textbf{「1つの作業に区切りがついたら」コミットする}——これだけです。たとえば次のような節目です。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item 機能を1つ作り終えた
+  \item 文章を1節書けた／図を1つ追加した
+  \item バグを1つ直した
+  \item 設定を変えて、動くことを確認できた
+\end{itemize}
+
+ポイントは、\textbf{後から見て「何をしたか」を一言で言えるまとまり}にすることです。その一言が、そのまま\textbf{コミットメッセージ}（例：\cmd{ログイン画面を追加}）になります。
+
+\begin{hintbox}
+\textbf{こまめに、小さくコミットするのがおすすめ}です。小さく区切っておくと、\textbf{後で戻したいときにその1コミットだけ取り消せ}、\textbf{不具合が入った箇所も見つけやすく}なります。逆に何日分もためて1回でコミットすると、後から分けられず、メッセージも「いろいろ修正」のように曖昧になりがちです。
+\end{hintbox}
+
+\textbf{\cmd{add} と \cmd{commit} の役割の違い}も、このタイミングで押さえておきましょう。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \cmd{git add}：これから作るコミットに\textbf{含める変更を選ぶ}（コミット直前の準備）
+  \item \cmd{git commit}：選んだ変更で\textbf{セーブポイントを確定する}（区切りをつける）
+\end{itemize}
+
+ふだんは \cmd{git add .} → \cmd{git commit} を\textbf{続けて実行すればOK}です。「変更した中の一部だけをコミットしたい」ときにだけ、\cmd{add} で\textbf{選ぶ}意味が出てきます。
+
 % ---------------------------------------------------------------------
 \section{状態を確認するコマンド}
 
@@ -462,45 +402,25 @@ Gitは「今どういう状態か」をこまめに確認しながら使うの�
 \end{tabularx}
 \end{center}
 
-このうち \textbf{\cmd{git diff}} は「どこをどう書き換えたか」を確認するのに特によく使います。実際に実行してみましょう。
-
-\begin{codebox}[bash]
-\begin{code}
-git diff
-\end{code}
-\end{codebox}
-
-\cmd{git diff} では、追加された行が \cmd{+} 付きの緑、削除された行が \cmd{-} 付きの赤で表示されます。
+このうち \textbf{\cmd{git diff}} は「どこをどう書き換えたか」を確認するのによく使います。追加された行が \cmd{+} 付きの緑、削除された行が \cmd{-} 付きの赤で表示されます。
 
 \begin{notebox}
-\cmd{git log} と \cmd{git diff} の出力画面（差分の色分けが分かるもの）。
+\cmd{git add} でステージングした後は \cmd{git diff} に何も出なくなります。そのときは \cmd{git diff -{}-staged} を使います。さらに \cmd{git commit} した後は、\cmd{git log} で確認します。
 \end{notebox}
 \screenshot[0.92]{01_git/01_git_log_diff.png}{git logとgit diffの出力}
-
-\begin{notebox}
-\cmd{git add} でステージングに追加した後は、\cmd{git diff} では何も表示されなくなります。ステージング済みの変更を確認するには \cmd{git diff -{}-staged} を使います。
-\end{notebox}
-\screenshot[0.92]{01_git/01_git_diff_staged.png}{git diff -{}-stagedの出力}
-
-\begin{notebox}
-\cmd{git commit} でコミットした後は、\cmd{git diff} でも \cmd{git diff -{}-staged} でも何も表示されなくなります。コミット済みの変更を確認するには \cmd{git log} を使います。
-\end{notebox}
-\screenshot[0.92]{01_git/01_git_log.png}{git logの出力}
 
 % ---------------------------------------------------------------------
 \section{.gitignore：記録したくないファイルを除外する}
 
-プロジェクトには「Gitで記録（コミット）したくないファイル」があります。たとえば次のようなものです。
+プロジェクトには「Gitで記録したくないファイル」があります。たとえば次のようなものです。
 
 \begin{itemize}[leftmargin=1.4em]
-  \item パスワードやAPIキーなどの\textbf{秘密情報}（誤って公開すると危険なので、そもそも記録しない）
-  \item 自動生成される一時ファイル（\cmd{.DS\_Store}、\cmd{\_\_pycache\_\_/}、LaTeXの \cmd{.aux} \cmd{.log} など。\textbf{元から作り直せる}ので記録する意味がない）
-  \item サイズの大きいデータやビルド成果物（\textbf{リポジトリが重くなる}うえ、GitHubにはアップロードできる容量の上限もある。これらも必要なときに生成し直せることが多い）
+  \item パスワードやAPIキーなどの\textbf{秘密情報}（誤って公開すると危険）
+  \item 自動生成される一時ファイル（\cmd{.DS\_Store}、\cmd{\_\_pycache\_\_/}、LaTeXの \cmd{.aux} など。作り直せるので記録する意味がない）
+  \item サイズの大きいデータやビルド成果物（リポジトリが重くなる。GitHubには容量の上限もある）
 \end{itemize}
 
-これらは \cmd{.gitignore} というファイルに書いておくと、Gitが\textbf{最初から無視}してくれます（\cmd{git status} にも出てこなくなります）。
-
-リポジトリの一番上の階層に \cmd{.gitignore} という名前のファイルを作り、無視したいものを1行ずつ書きます。
+これらは \cmd{.gitignore} というファイルに書いておくと、Gitが\textbf{最初から無視}してくれます（\cmd{git status} にも出てきません）。リポジトリの一番上の階層に \cmd{.gitignore} を作り、無視したいものを1行ずつ書きます。
 
 \begin{codebox}[text]
 \begin{code}
@@ -523,11 +443,11 @@ secrets.txt
 \end{codebox}
 
 \begin{warnbox}
-\textbf{重要}: 一度コミットしてしまったファイルは、後から \cmd{.gitignore} に書いても無視されません。秘密情報は\textbf{最初のコミット前}に \cmd{.gitignore} へ登録してください。
+\textbf{一度コミットしてしまったファイルは、後から \cmd{.gitignore} に書いても無視されません。} 秘密情報は\textbf{最初のコミット前}に \cmd{.gitignore} へ登録してください。
 \end{warnbox}
 
 \begin{hintbox}
-言語やフレームワークごとの \cmd{.gitignore} テンプレートは \url{https://github.com/github/gitignore} で公開されています。また、使用する言語やフレームワークが決まっている場合は、\url{https://www.toptal.com/developers/gitignore} を使うと、必要な \cmd{.gitignore} を自動生成できます。
+言語やフレームワークごとの \cmd{.gitignore} テンプレートは \url{https://github.com/github/gitignore} で、自動生成は \url{https://www.toptal.com/developers/gitignore} で手に入ります。
 \end{hintbox}
 
 % ---------------------------------------------------------------------

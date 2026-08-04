@@ -1,0 +1,37 @@
+% =====================================================================
+% 独立冊子『Git & GitHub トラブルシューティング』
+% エンジン: LuaLaTeX（jlreq / book）
+% ビルド:   latexmk -lualatex main_trouble.tex
+%
+% 本編・別冊とは独立した、困ったとき用のリファレンス。
+% =====================================================================
+\documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
+
+\input{preamble}
+
+\usepackage[unicode, hidelinks]{hyperref}
+
+\title{Git \& GitHub トラブルシューティング}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\sffamily\bfseries\Huge トラブルシューティング\par}
+  \vspace{1.2cm}
+  {\sffamily\Large Git \& GitHub 困ったときの逆引き\par}
+  \vspace{0.6cm}
+  {\sffamily\normalsize ── 本編『はじめてのバージョン管理』／別冊『チームで安全に開発する』の副読本 ──\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+\input{chapters/trouble}
+
+\end{document}
