@@ -21,17 +21,13 @@ git --version
 
 \textbf{この結果によって、次に進む先が変わります。}
 
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.8cm} X@{}}
-\toprule
-\cmd{git -{}-version} の結果 & あなたが次にすること \\
-\midrule
-\textbf{バージョンが表示された}\newline{\small（例：\cmd{git version 2.45.0}）} & Gitは\textbf{すでに入っています}。この後のOS別の手順は\textbf{すべて飛ばして}、\ref{sec:first-config}節「最初の設定」へ進んでください \\
-\addlinespace
-\textbf{\cmd{command not found}}\newline{\small（見つからない）と出た} & Gitが\textbf{入っていません}。お使いのOSの手順へ進んでください（Windows：\ref{sec:install-win}項／macOS：\ref{sec:install-mac}項／Linux：\ref{sec:install-linux}項） \\
-\bottomrule
-\end{tabularx}
-\end{center}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{バージョンが表示された人}（例：\cmd{git version 2.45.0}）\\
+        → Gitは\textbf{すでに入っています}。この後のOS別の手順は\textbf{すべて飛ばして}、\ref{sec:first-config}節\textbf{「最初の設定」}へ進んでください。
+  \item \textbf{\cmd{command not found}（見つからない）と出た人}\\
+        → Gitが\textbf{入っていません}。お使いのOSの手順へ進んでください。\\
+        \textbf{Windows} → \ref{sec:install-win}項　／　\textbf{macOS} → \ref{sec:install-mac}項　／　\textbf{Linux} → \ref{sec:install-linux}項
+\end{itemize}
 
 インストールが終わったら、もう一度 \cmd{git -{}-version} を実行してください。バージョンが表示されれば成功です。
 

@@ -47,17 +47,12 @@ gh --version
 \end{code}
 \end{codebox}
 
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.8cm} X@{}}
-\toprule
-\cmd{gh -{}-version} の結果 & あなたが次にすること \\
-\midrule
-\textbf{バージョンが表示された} & \cmd{gh} は\textbf{すでに入っています}。下のインストールは飛ばして、\textbf{手順2「ログインする」}へ進んでください \\
-\addlinespace
-\textbf{\cmd{command not found}}\newline{\small（見つからない）と出た} & 下のコマンドのうち、\textbf{お使いのOSのものを1つだけ}実行してください \\
-\bottomrule
-\end{tabularx}
-\end{center}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{バージョンが表示された人}（例：\cmd{gh version 2.62.0}）\\
+        → \cmd{gh} は\textbf{すでに入っています}。下のインストールは飛ばして、\textbf{手順2「ログインする」}へ進んでください。
+  \item \textbf{\cmd{command not found}（見つからない）と出た人}\\
+        → 下のコマンドのうち、\textbf{お使いのOSのものを1つだけ}実行してください。
+\end{itemize}
 
 \begin{codebox}[bash]
 \begin{code}
