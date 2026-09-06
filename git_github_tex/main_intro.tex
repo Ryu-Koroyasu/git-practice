@@ -39,11 +39,14 @@
 
 本書は、\textbf{Git・GitHub をはじめて使う人}のための入門書です。特別な前提知識は要りません。読み終えると、\textbf{自分のPCと GitHub アカウントだけ}で、次のことができるようになります。
 
+\begin{warnbox}
+\textbf{はじめる前に：} 本書は、\textbf{Gitのインストール・初期設定・GitHubアカウント・\cmd{gh} でのログインが済んでいる前提}で進みます。まだの人は、先に別冊『セットアップ編 —はじめる前の環境準備—』を済ませてください。一度やれば終わりの作業です。
+\end{warnbox}
+
 \begin{itemize}[leftmargin=1.6em]
   \item Git で、ファイルの変更を「コミット」として記録し、履歴を残せる
   \item 変更の履歴や差分を確認できる（\cmd{git status} / \cmd{git log} / \cmd{git diff}）
   \item \cmd{.gitignore} で、記録したくないファイルを除外できる
-  \item GitHub アカウントを作り、\cmd{gh} でログイン（認証）できる
   \item 手元のリポジトリを GitHub に上げ（\cmd{push}）、最新を取り込める（\cmd{pull} / \cmd{fetch}）
   \item \textbf{「\cmd{pull} → 編集 → \cmd{add} → \cmd{commit} → \cmd{push}」} の日常の流れを回せる
 \end{itemize}

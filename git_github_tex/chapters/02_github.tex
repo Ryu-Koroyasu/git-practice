@@ -8,10 +8,15 @@
 
 扱うのは「ローカルとGitHubをつなぎ、同期するところまで」です。ブランチを分けた共同作業・プルリクエスト（PR）・コンフリクトの解決は、別冊『チームで安全に開発する』で扱います。
 
+\begin{warnbox}
+この章は、\textbf{GitHubアカウントの作成と \cmd{gh auth login} でのログインが済んでいる前提}で進みます。まだの人は、先に別冊『セットアップ編』を済ませてください。ターミナルで \cmd{gh auth status} を実行して \cmd{Logged in to github.com} と表示されれば準備OKです。
+\end{warnbox}
+
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
-  \item まず一度つないでみたい人 → 「アカウントを作る」→「ログイン」→「リモートリポジトリを用意する」→「つなぐ」を順に写経
+  \item まず一度つないでみたい人 → 「リモートリポジトリを用意する」→「つなぐ」を順に写経
+  \item アカウント作成・ログインがまだの人 → 別冊『セットアップ編』へ
   \item コマンドをド忘れした人 → 『逆引きチートシート』へ
   \item エラーが出て困った人 → 『トラブルシューティング』へ
 \end{itemize}
@@ -90,96 +95,6 @@
 \begin{hintbox}
 \cmd{git add} / \cmd{git commit}（第1章）は\textbf{ローカルの中だけ}の操作でした。GitHubと通信するのは、この \cmd{clone} / \cmd{push} / \cmd{fetch} / \cmd{pull} のときだけです。
 \end{hintbox}
-
-% ---------------------------------------------------------------------
-\section{GitHubアカウントを作る}
-
-まだアカウントがなければ作成します。
-
-\begin{enumerate}[leftmargin=1.6em]
-  \item \url{https://github.com/} を開き、\textbf{「Sign up」} をクリックします。
-  \item メールアドレス・パスワード・ユーザー名を入力して進めます。
-  \item 登録したメールアドレスに届く確認コードを入力すれば完了です。
-\end{enumerate}
-
-\begin{hintbox}
-ここで登録する\textbf{メールアドレスは、第1章の \cmd{git config -{}-global user.email} で設定したものに揃える}のがおすすめです。揃えておくと、コミットとGitHubアカウントが正しく結びつきます。
-\end{hintbox}
-
-% ---------------------------------------------------------------------
-\section{GitHubにログインする（認証）}
-
-GitHubに \cmd{push}（アップロード）するときは、「本当にあなたか」を確認する\textbf{認証}が必要です。本書では、いちばん手軽な \textbf{GitHub CLI（\cmd{gh}）でのログイン}を使います。これで一度ログインしておくと、\cmd{gh} がGitの認証を裏で肩代わりしてくれるため、\textbf{トークンを自分で発行しなくても \cmd{push} / \cmd{pull} がそのまま通ります}。
-
-\begin{hintbox}
-SSH鍵やトークン（PAT）を手動で使う方式もあります。頻繁に使うようになったら、『逆引きチートシート』の「認証の別方式（SSH / PAT）」を参照してください。まずは \cmd{gh} だけでOKです。
-\end{hintbox}
-
-\noindent\textbf{手順1：\cmd{gh} をインストールする}
-
-\begin{warnbox}
-\textbf{\cmd{gh} はGit本体には含まれていません。} 第1章でGitを入れても \cmd{gh} は入らないので、別途インストールが必要です。まず \cmd{gh -{}-version} を実行し、\cmd{command not found} なら下記で入れてください。
-\end{warnbox}
-
-\begin{codebox}[bash]
-\begin{code}
-# macOS（Homebrew）
-brew install gh
-
-# Windows（winget）
-winget install --id GitHub.cli
-
-# Linux（Debian / Ubuntu 系）
-sudo apt install gh
-\end{code}
-\end{codebox}
-
-インストール後、\cmd{gh --version} でバージョンが表示されれば成功です（うまくいかない場合は公式手順 \url{https://cli.github.com/} を参照）。
-
-\noindent\textbf{手順2：ログインする}
-
-\begin{codebox}[bash]
-\begin{code}
-gh auth login
-\end{code}
-\end{codebox}
-
-対話形式で聞かれるので、次のように選びます。
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}l X@{}}
-\toprule
-質問 & 選ぶもの \\
-\midrule
-Where do you use GitHub? & \textbf{GitHub.com} \\
-preferred protocol for Git operations? & \textbf{HTTPS} \\
-Authenticate Git with your GitHub credentials? & \textbf{Y} \\
-How would you like to authenticate? & \textbf{Login with a web browser} \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-\begin{hintbox}
-質問文や順序は \cmd{gh} のバージョンによって少し変わることがあります。完全に一致しなくても、\textbf{同じ意味の選択肢}（GitHub.com／HTTPS／ブラウザでログイン）を選べば問題ありません。
-\end{hintbox}
-
-最後の選択でワンタイムコードが表示され、Enterを押すとブラウザが開きます。表示されたコードを入力し、\textbf{Continue} を押せば認証完了です。
-
-\screenshot[0.62]{02_github/gh_auth_login.png}{GitHubログイン画面（Continueを押す）}
-\screenshot[0.62]{02_github/gh_authorize_window.png}{GitHub認証画面（ワンタイムコードを入力）}
-
-これで \cmd{gh} がGitの認証を肩代わりし、\textbf{以降 \cmd{git push} / \cmd{git pull} で認証を聞かれなくなります}。
-
-\begin{codebox}[bash]
-\begin{code}
-# ログイン状態を確認する
-gh auth status
-\end{code}
-\end{codebox}
-
-\begin{warnbox}
-トークンの有効期限が切れたり、GitHub側でアクセスを取り消したりすると、認証を聞かれるようになります。そのときは \cmd{gh auth login} で入り直してください。
-\end{warnbox}
 
 % ---------------------------------------------------------------------
 \section{リモートリポジトリを用意する}
@@ -414,7 +329,7 @@ git push
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Git（手元の道具）と GitHub（クラウドのサービス）は別物}。GitHubはローカルリポジトリの「もう一つの倉庫」
   \item リモートとの通信は \textbf{\cmd{clone} / \cmd{push} / \cmd{fetch} / \cmd{pull}} の4つ
-  \item \cmd{push} する前に \textbf{\cmd{gh auth login}} で1度だけログインする
+  \item \cmd{push} する前に \textbf{\cmd{gh auth login}} で1度だけログインしておく（別冊『セットアップ編』）
   \item つなぎ方は2パターン：\textbf{GitHubから始めるなら \cmd{clone}}、\textbf{手元を上げるなら \cmd{remote add} + \cmd{push -u}}
   \item 日常は \textbf{「\cmd{pull} → 編集 → \cmd{add} → \cmd{commit} → \cmd{push}」} の繰り返し
 \end{itemize}

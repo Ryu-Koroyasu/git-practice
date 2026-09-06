@@ -6,10 +6,15 @@
 
 この章では、\textbf{自分のPCの中だけで完結するGitの基本}を説明します。GitHub（クラウド）とつなぐ話は第2章で扱います。まずはここで「変更を記録する」感覚をつかみましょう。
 
+\begin{warnbox}
+本書は、\textbf{Gitのインストールと初期設定（名前・メールアドレスの登録）が済んでいる前提}で進みます。まだの人は、先に別冊『セットアップ編』を済ませてください。ターミナルで \cmd{git -{}-version} を実行してバージョンが表示されれば準備OKです。
+\end{warnbox}
+
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
-  \item とりあえず動かしたい人 → 「インストール」→「最初の設定」→「【実践】はじめてのコミット」だけ写経すればOK
+  \item とりあえず動かしたい人 → 「【実践】はじめてのコミット」だけ写経すればOK
+  \item Gitがまだ入っていない人 → 別冊『セットアップ編』へ
   \item コマンドをド忘れした人 → 『逆引きチートシート』へ
   \item エラーが出て困った人 → 『トラブルシューティング』へ
 \end{itemize}
@@ -86,12 +91,54 @@ Gitでは、ファイルは次の3つのエリアを通って記録されます�
 \toprule
 エリア & これは何か & たとえると \\
 \midrule
-\textbf{作業ツリー} & 実際にファイルを編集している、いつものフォルダ & 原本を広げた作業机 \\
-\textbf{ステージング} & 「次のコミットに含める変更」を詰めるエリア & コミット1回分の段ボール箱 \\
-\textbf{ローカルリポジトリ} & コミットとして履歴が保存されるエリア（\cmd{.git} の中） & 箱を保管する倉庫 \\
+\textbf{作業ツリー} & いま自分が開いて編集している\textbf{フォルダの中身そのもの} & 原本を広げた作業机 \\
+\textbf{ステージング} & \cmd{git add} で指定したファイルの\textbf{写しを詰めておく箱} & コミット1回分の段ボール箱 \\
+\textbf{ローカルリポジトリ} & 箱にラベルを貼って保管する場所（\cmd{.git} の中） & 箱を保管する倉庫 \\
 \bottomrule
 \end{tabularx}
 \end{center}
+
+「作業ツリー」「ステージング」と言われてもピンとこないと思いますので、1つずつ具体的に見ていきます。
+
+\subsection{作業ツリー＝いま使っているフォルダそのもの}
+
+作業ツリー（Working Tree）は、\textbf{あなたが今ファイルを編集している、そのフォルダの中身そのもの}です。特別な場所ではありません。
+
+たとえば \cmd{C:\textbackslash Users\textbackslash yamada\textbackslash myproject}（Windows）や \cmd{\textasciitilde/myproject}（Mac）といったプロジェクトフォルダを開いて、原稿やソースコードを書き換えて保存したり、ファイルの名前を変えたり、削除したりしますよね。その\textbf{エクスプローラーやFinderで見えている状態}が作業ツリーです。3つのエリアのうち、\textbf{目で見て触れるのはここだけ}です。
+
+\begin{warnbox}
+\textbf{作業ツリーで編集して保存しただけでは、Gitはまだ何も記録していません。} 「ファイルを保存する」ことと「Gitに履歴として残す」ことは別の操作です。履歴に残すには、この後の \cmd{git add} と \cmd{git commit} が必要です。
+\end{warnbox}
+
+\subsection{ステージングエリア＝addしたものを詰める箱}
+
+ステージングエリア（Staging Area）は、\textbf{\cmd{git add} で指定したファイルやフォルダの写し（コピー）を詰めておく箱}です。「次のコミットに何を含めるか」を、この箱の中で組み立てます。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{入るのは写し（コピー）です。} 原本は作業ツリーに残ったままなので、\cmd{git add} しても作業ツリーのファイルが消えたり移動したりはしません。
+  \item \textbf{入るのは \cmd{git add} した瞬間の状態です。} \cmd{git add} した後にさらに編集しても、箱の中身は古いまま更新されません。編集し直したら、もう一度 \cmd{git add} して箱に入れ直します。
+  \item \textbf{何を入れるかは自分で選べます。} 10個のファイルを編集していても、\cmd{git add} で3個だけ指定すれば、箱に入るのはその3個だけです。
+\end{itemize}
+
+\begin{hintbox}
+\textbf{なぜわざわざ箱を経由するのか？} 「機能Aの修正」と「誤字の直し」を同時に作業してしまったとき、箱があれば片方だけを選んで記録できるからです。1つのコミットに関係のない変更が混ざらないので、後から履歴を読み返しやすくなります。全部まとめて入れたいときは \cmd{git add .} で一括指定できます。
+\end{hintbox}
+
+\subsection{ローカルリポジトリ＝ラベル付きの箱をしまう倉庫}
+
+\cmd{git commit} を実行すると、箱の中身に\textbf{ラベル}（コミットメッセージ＝「何のための変更か」の説明。加えて、誰が・いつ変更したかも自動で記録されます）を貼って、倉庫にしまいます。この倉庫がローカルリポジトリで、その実体はプロジェクトフォルダの中にある \cmd{.git} という\textbf{隠しフォルダ}です。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item 倉庫にしまわれたラベル付きの箱、これが\textbf{1つのコミット}です。しまった箱は勝手に消えないので、\textbf{いつでもその時点の状態を取り出せます}（＝過去に戻れる）。
+  \item 箱は倉庫に\textbf{しまった順に一列に}並んでいきます。だから後から「いつ・何を・なぜ変えたか」を順にたどれます。
+  \item \textbf{「ローカル」は「自分のパソコンの中」という意味}です。\cmd{git commit} した時点では、まだ自分のPCの中に保管されているだけで、インターネット上のGitHub（リモートリポジトリ）には届いていません。共有するには、第2章で扱う \cmd{git push} が必要です。
+\end{itemize}
+
+\begin{warnbox}
+\cmd{.git} フォルダは倉庫そのものです。\textbf{手で開いて中身を編集したり、削除したりしないでください。} 削除すると、そのプロジェクトの履歴がすべて失われます。
+\end{warnbox}
+
+\subsection{3つのエリアのまとめ}
 
 大事なのは、\cmd{git add} も \cmd{git commit} も「\textbf{写しを取って次のエリアに置く}」操作だという点です。元のエリアには元のまま残るので、先に進めても空になりません。
 
@@ -105,134 +152,6 @@ Gitは各エリアが「その時点の写し（スナップショット）」�
 \end{notebox}
 
 つまり基本操作は \textbf{「編集する → \cmd{add} → \cmd{commit}」} の繰り返しです。本書ではこれを\textbf{黄金フロー}と呼びます。この3ステップが分かれば、Gitの8割は理解できたようなものです。
-
-% ---------------------------------------------------------------------
-\section{Gitのインストール}
-
-まず、Gitが\textbf{すでに入っていないか}を確認しましょう。ターミナル（WindowsはPowerShellやコマンドプロンプト）で次を実行します。
-
-\begin{codebox}[bash]
-\begin{code}
-git --version
-# 出力例: git version 2.45.0
-\end{code}
-\end{codebox}
-
-\begin{hintbox}
-上のように\textbf{バージョンが表示されたら、Gitはすでにインストール済み}です。以下のOS別のインストール手順は\textbf{飛ばして}、次の「最初の設定」へ進んでください。\cmd{command not found}（見つからない）と出た場合だけ、お使いのOSの手順に従ってインストールします。インストール後にもう一度 \cmd{git --version} を実行し、バージョンが表示されれば成功です。
-\end{hintbox}
-
-\begin{warnbox}
-\textbf{インストール直後は、開いていたターミナルではまだ \cmd{git --version} が反映されないことがあります。} PATH（コマンドの置き場所を示す設定）がターミナルの起動時に読み込まれるためです。\cmd{command not found} のままなら、\textbf{ターミナルをいったん閉じて開き直して}から、もう一度実行してください。
-\end{warnbox}
-
-\subsection{Windows}
-
-Windowsでは「Git for Windows」をインストールします。これには \textbf{Git Bash} という、macOS/Linux風のコマンドが使えるターミナルが付いてきます。本書のWindowsの説明はこの Git Bash を使う前提です。
-
-\begin{enumerate}[leftmargin=1.6em]
-  \item \url{https://git-scm.com/download/win} からインストーラをダウンロードし、ダブルクリックで起動します。
-  \item インストーラの画面が続きます。\textbf{基本はすべてデフォルトのまま「Next」で進めて問題ありません。} ただし次の3つの画面だけは選択を確認してください。
-\end{enumerate}
-
-\noindent\textbf{① 既定のエディタ}
-
-デフォルトはVimですが不慣れだと難しいため、VS Codeを使う予定なら \textbf{「Use Visual Studio Code as Git's default editor」} を選びます。
-\screenshot[0.62]{01_git/win_install_05.png}{既定エディタの選択}
-
-\noindent\textbf{② 初期ブランチ名}
-
-\textbf{「Override the default branch name…」} を選び、\cmd{main} と入力します（世界的に \cmd{main} が標準）。
-\screenshot[0.62]{01_git/win_install_06.png}{初期ブランチ名の設定}
-
-\noindent\textbf{③ 改行コードの扱い}
-
-WindowsとほかのOSで改行コードが異なるため重要です。複数環境で開発するなら \textbf{「Checkout as-is, commit Unix-style line endings」} を選びます。
-\screenshot[0.62]{01_git/win_install_10.png}{改行コードの設定}
-
-残りの画面はデフォルトのまま進め、最後に「Install」をクリックします。インストール後、スタートメニューから \textbf{Git Bash} を起動し、\cmd{git --version} でバージョンが出れば完了です。
-
-\subsection{macOS}
-
-次のどちらか一方でOKです。
-
-\noindent\textbf{方法A: Xcode Command Line Tools（最も手軽）}
-
-ターミナル（\cmd{アプリケーション > ユーティリティ > ターミナル.app}）を開き、次を実行します。
-
-\begin{codebox}[bash]
-\begin{code}
-xcode-select --install
-\end{code}
-\end{codebox}
-
-ダイアログが出たら「インストール」をクリックします。
-
-\noindent\textbf{方法B: Homebrew（最新版を使いたい場合）}
-
-Homebrew（\url{https://brew.sh/index_ja}）が入っていれば、次で最新のGitが入ります。
-
-\begin{codebox}[bash]
-\begin{code}
-brew install git
-\end{code}
-\end{codebox}
-
-どちらの場合も、\cmd{git --version} でバージョンが表示されれば完了です。
-
-\subsection{Linux}
-
-お使いのディストリビューションのパッケージマネージャを使います。自分の環境に合うものを1つ選んで実行します。
-
-\begin{codebox}[bash]
-\begin{code}
-# Debian / Ubuntu 系
-sudo apt update && sudo apt install git
-
-# Fedora / RHEL 系
-sudo dnf install git
-
-# Arch 系
-sudo pacman -S git
-\end{code}
-\end{codebox}
-
-\cmd{git --version} でバージョンが表示されれば完了です。
-
-% ---------------------------------------------------------------------
-\section{最初の設定}
-
-インストール直後に\textbf{一度だけ}行う設定です。コミットに記録される「あなたの名前とメールアドレス」を登録します。ここで設定した名前・メールが、後でGitHub上の履歴にも表示されます。
-
-ターミナル（Windowsは Git Bash）を開き、次を順に実行します。
-
-\begin{codebox}[bash]
-\begin{code}
-# あなたの名前を登録（GitHubのアカウント名に合わせるのがおすすめ）
-git config --global user.name "your-name"
-
-# あなたのメールアドレスを登録（GitHubで使う予定のメール）
-git config --global user.email "you@example.com"
-
-# 設定内容を確認する
-git config --global --list
-\end{code}
-\end{codebox}
-
-\begin{warnbox}
-名前やメールにスペースが含まれる場合は、上のように \textbf{ダブルクォート \cmd{"} で囲んでください}。
-\end{warnbox}
-
-\cmd{--global} は「このPC全体の共通設定」という意味です。一度やれば、以降すべてのリポジトリに適用されます。
-
-\begin{hintbox}
-おすすめの追加設定（新規リポジトリの初期ブランチ名を \cmd{main} に統一）
-\begin{codebox}[bash]
-\begin{code}
-git config --global init.defaultBranch main
-\end{code}
-\end{codebox}
-\end{hintbox}
 
 % ---------------------------------------------------------------------
 \section{【実践】はじめてのコミット}

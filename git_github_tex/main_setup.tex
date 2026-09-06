@@ -1,0 +1,65 @@
+% =====================================================================
+% 別冊『Git & GitHub セットアップ — はじめる前の環境準備』
+% エンジン: LuaLaTeX（jlreq / book）
+% ビルド:   latexmk -lualatex main_setup.tex
+%
+% 対象: これから本編『はじめてのバージョン管理』を読む人。
+% Gitのインストール・初期設定・GitHubアカウント・gh認証だけを扱う。
+% =====================================================================
+\documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
+
+\input{preamble}
+
+% hyperref はプリアンブルの最後（他パッケージ読込後）に置くのが安全。
+\usepackage[unicode, hidelinks]{hyperref}
+
+% --- 書誌情報 ---------------------------------------------------------
+\title{Git \& GitHub セットアップ}
+\author{}
+\date{\today}
+
+\begin{document}
+
+% --- 表紙 -------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\sffamily\bfseries\Huge Git \& GitHub セットアップ\par}
+  \vspace{1.2cm}
+  {\sffamily\Large はじめる前の環境準備\par}
+  \vspace{0.6cm}
+  {\sffamily\normalsize ── 本編『はじめてのバージョン管理』を始める前に ──\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+% --- この本のねらい ---------------------------------------------------
+\thispagestyle{empty}
+\vspace*{1.5cm}
+{\sffamily\LARGE\bfseries はじめに —この冊子でやること—\par}
+\vspace{1em}
+
+本書は、Git・GitHub を使いはじめる前の\textbf{環境の準備だけ}をまとめた冊子です。\textbf{一度やれば終わり}の作業なので、済んだらこの冊子は棚にしまって構いません。
+
+\begin{itemize}[leftmargin=1.6em]
+  \item 自分のPCに Git をインストールする
+  \item コミットに記録される名前とメールアドレスを登録する
+  \item GitHub のアカウントを作る
+  \item \cmd{gh}（GitHub CLI）をインストールし、GitHub にログインする
+\end{itemize}
+
+\begin{hintbox}
+\textbf{Gitの使い方そのもの}（コミットの取り方、GitHubへのアップロード）は、本編『はじめてのバージョン管理』で扱います。準備が終わったらそちらへ進んでください。
+\end{hintbox}
+
+\clearpage
+
+% --- 目次 -------------------------------------------------------------
+\tableofcontents
+\clearpage
+
+% --- 本文 -------------------------------------------------------------
+\input{chapters/S1_git_setup}
+\input{chapters/S2_github_setup}
+
+\end{document}
