@@ -55,9 +55,7 @@
   \item \textbf{公開}：コードや手引書を世界に公開できる
 \end{itemize}
 
-\begin{hintbox}
-「リモート（remote）」は\textbf{クラウド側}、「ローカル（local）」は\textbf{あなたのPCの中}を指す言葉です。以降ずっと出てきます。
-\end{hintbox}
+なお、\textbf{「リモート（remote）」はクラウド側、「ローカル（local）」はあなたのPCの中}を指す言葉です。この2つは以降ずっと出てくるので、ここで押さえておいてください。
 
 % ---------------------------------------------------------------------
 \section{ローカルとリモートの全体像}
@@ -92,9 +90,7 @@
 \end{tabularx}
 \end{center}
 
-\begin{hintbox}
-\cmd{git add} / \cmd{git commit}（第1章）は\textbf{ローカルの中だけ}の操作でした。GitHubと通信するのは、この \cmd{clone} / \cmd{push} / \cmd{fetch} / \cmd{pull} のときだけです。
-\end{hintbox}
+ここで大事なのは、\cmd{git add} / \cmd{git commit}（第1章）が\textbf{ローカルの中だけ}の操作だったという点です。\textbf{GitHubと通信するのは、この \cmd{clone} / \cmd{push} / \cmd{fetch} / \cmd{pull} のときだけ}です。
 
 % ---------------------------------------------------------------------
 \section{リモートリポジトリを用意する}
@@ -274,8 +270,10 @@ git pull
 \end{tabularx}
 \end{center}
 
+\textbf{ふだんは \cmd{git pull} で十分}です。\cmd{git fetch} は「取り込む前に、何が変わったか先に確認したい」ときに使います（\cmd{git fetch} → \cmd{git log origin/main} で確認 → 問題なければ \cmd{git pull}）。
+
 \begin{hintbox}
-\textbf{ふだんは \cmd{git pull} で十分}です。\cmd{git fetch} は「取り込む前に、何が変わったか先に確認したい」ときに使います（\cmd{git fetch} → \cmd{git log origin/main} で確認 → 問題なければ \cmd{git pull}）。また、\textbf{作業を始める前に \cmd{git pull} する}のを習慣にすると、手元を常に最新から始められ、トラブルが起きにくくなります。
+\textbf{作業を始める前に \cmd{git pull}} を習慣にすると、手元を常に最新の状態から始められ、トラブルが起きにくくなります。
 \end{hintbox}
 
 \begin{notebox}

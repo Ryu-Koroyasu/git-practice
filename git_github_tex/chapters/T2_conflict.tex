@@ -131,7 +131,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
 \end{tikzpicture}
 \end{numfig}
 
-解決のやり方は2通りあります。チーム開発ではコンフリクトはPR上で表面化するので、\textbf{PR画面のまま直せる方法A（GitHub上）を基本}にしましょう。手元でじっくり直したいときや、ブラウザで扱えない複雑な競合のときは方法B（VS Code）を使います。
+解決のやり方は3通りあります。チーム開発ではコンフリクトはPR上で表面化するので、\textbf{PR画面のまま直せる方法A（GitHub上）を基本}にしましょう。手元でじっくり直したいときや、ブラウザで扱えない複雑な競合のときは方法B（VS Code）を、エディタを使わず自分で直したいときは方法C（コマンドライン）を使います。
 
 \subsection{方法A：GitHub（ブラウザ）で解決する（推奨）}
 
@@ -180,10 +180,10 @@ VS Codeは競合を検知すると、専用のボタンで解決を手伝って�
 \end{enumerate}
 \screenshot[0.62]{03_branch・PR/vscode_merge_editor.png}{VS Codeのマージエディター（3ペイン）}
 
-どちらの方法でも、複数ファイルで起きた場合は\textbf{すべてのファイルを解決してから}マージを確定します。
+\subsection{方法C：コマンドラインだけで解決する}
 
-\begin{hintbox}
-\textbf{コマンドラインだけで解決したい場合}は、ファイルを直接開いてマーカーを消し、\cmd{git add <ファイル>} → \cmd{git commit} で確定します。方法A・Bのボタン操作も、内部ではこれと同じことをしています。
+エディタを使わずに解決することもできます。ファイルを直接開いてマーカーを消し、\cmd{git add <ファイル>} → \cmd{git commit} で確定します。方法A・Bのボタン操作も、内部ではこれと同じことをしています。
+
 \begin{codebox}[bash]
 \begin{code}
 # 解決したファイルを「解決済み」として登録する
@@ -193,7 +193,8 @@ git add report.tex
 git commit
 \end{code}
 \end{codebox}
-\end{hintbox}
+
+どの方法で解決する場合も、複数ファイルで競合が起きたときは\textbf{すべてのファイルを解決してから}マージを確定します。
 
 \begin{warnbox}
 途中で「やっぱりやめたい」ときは \cmd{git merge -{}-abort} で、マージ開始前の状態に戻せます。慌てて壊す前に、まず落ち着いてこのコマンドを思い出してください。
