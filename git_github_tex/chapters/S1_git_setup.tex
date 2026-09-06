@@ -40,27 +40,140 @@ git --version
 
 Windowsでは「Git for Windows」をインストールします。これには \textbf{Git Bash} という、macOS/Linux風のコマンドが使えるターミナルが付いてきます。本シリーズのWindowsの説明は、この Git Bash を使う前提です。
 
-\begin{enumerate}[leftmargin=1.6em]
-  \item \url{https://git-scm.com/download/win} からインストーラをダウンロードし、ダブルクリックで起動します。
-  \item インストーラの画面が続きます。\textbf{基本はすべてデフォルトのまま「Next」で進めて問題ありません。} ただし次の3つの画面だけは選択を確認してください。
-\end{enumerate}
+まず、\url{https://git-scm.com/download/win} からインストーラをダウンロードし、ダブルクリックで起動します。ここから\textbf{15枚の設定画面}が続きますが、\textbf{ほとんどはデフォルトのまま「Next」で問題ありません}。
 
-\noindent\textbf{① 既定のエディタ}
+\begin{hintbox}
+\textbf{選択を変えるのは、次の3画面だけ}です。急いでいる人は、この3つだけ気をつけて、あとは「Next」を押し続けてください。
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{画面5}：既定のエディタ（VS Codeを選ぶ）
+  \item \textbf{画面6}：初期ブランチ名（\cmd{main} にする）
+  \item \textbf{画面10}：改行コードの扱い（\cmd{Checkout as-is, commit Unix-style} を選ぶ）
+\end{itemize}
+\end{hintbox}
 
-デフォルトはVimですが不慣れだと難しいため、VS Codeを使う予定なら \textbf{「Use Visual Studio Code as Git's default editor」} を選びます。
-\screenshot[0.62]{01_git/win_install_05.png}{既定エディタの選択}
+以下、画面を1枚ずつ見ていきます。
 
-\noindent\textbf{② 初期ブランチ名}
+\medskip
+\noindent\textbf{画面1：ライセンスの確認}（そのまま「Next」）
 
-\textbf{「Override the default branch name…」} を選び、\cmd{main} と入力します（世界的に \cmd{main} が標準）。
-\screenshot[0.62]{01_git/win_install_06.png}{初期ブランチ名の設定}
+最初に表示されるのはライセンス（GNU GPL）の確認画面です。内容を確認して「Next」をクリックします。
+\screenshot[0.6]{01_git/win_install_01.png}{インストール開始（ライセンスの確認）}
 
-\noindent\textbf{③ 改行コードの扱い}
+\medskip
+\noindent\textbf{画面2：インストール先フォルダ}（そのまま「Next」）
 
-WindowsとほかのOSで改行コードが異なるため重要です。複数環境で開発するなら \textbf{「Checkout as-is, commit Unix-style line endings」} を選びます。
-\screenshot[0.62]{01_git/win_install_10.png}{改行コードの設定}
+Gitを入れる場所です。特に理由がなければ、表示されているパスのまま進めます。
+\screenshot[0.6]{01_git/win_install_02.png}{インストール先フォルダの選択}
 
-残りの画面はデフォルトのまま進め、最後に「Install」をクリックします。インストール後、スタートメニューから \textbf{Git Bash} を起動し、\cmd{git --version} でバージョンが出れば完了です。
+\medskip
+\noindent\textbf{画面3：インストールするコンポーネント}（そのまま「Next」）
+
+一緒に入れる機能を選ぶ画面です。研究や個人利用では追加は不要なので、デフォルトのまま進めて構いません。各項目の意味は次のとおりです。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+項目 & 意味 \\
+\midrule
+Additional icons → On the Desktop & デスクトップにGitのアイコンを置くか \\
+Windows Explorer integration & 右クリックメニューから Git Bash / Git GUI を開けるようにするか \\
+Git LFS & 動画・画像など大きなファイルを扱えるようにするか \\
+Associate .git* configuration files\ldots & \cmd{.git} で始まる設定ファイルを既定のエディタに関連付けるか \\
+Associate .sh files\ldots & \cmd{.sh} ファイルを Git Bash で実行できるようにするか \\
+Check daily for Git for Windows updates & 毎日アップデートを確認するか \\
+Add a Git Bash Profile to Windows Terminal & Windows Terminal から Git Bash を使えるようにするか \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\screenshot[0.6]{01_git/win_install_03.png}{コンポーネントの選択}
+
+\medskip
+\noindent\textbf{画面4：スタートメニューに表示する名前}（そのまま「Next」）
+
+スタートメニュー（画面左下のWindowsアイコンから開くアプリ一覧）に、どの名前で登録するかを決める画面です。変更する必要はありません。
+\screenshot[0.6]{01_git/win_install_04.png}{スタートメニューフォルダの指定}
+
+\medskip
+\noindent\textbf{画面5：既定のエディタ}\quad\textbf{★ここは選びます}
+
+コミットメッセージなどを書くときに開くエディタを選びます。デフォルトは \textbf{Vim} ですが、不慣れだと入力も終了も難しいため、\textbf{VS Codeを使う予定なら「Use Visual Studio Code as Git's default editor」を選んでください}。
+\screenshot[0.6]{01_git/win_install_05.png}{既定エディタの選択（VS Code を選ぶ）}
+
+\medskip
+\noindent\textbf{画面6：初期ブランチ名}\quad\textbf{★ここは選びます}
+
+新しくリポジトリを作ったときの、最初のブランチの名前です。\textbf{「Override the default branch name for new repositories」を選び、\cmd{main} と入力します}（世界的に \cmd{main} が標準です）。
+\screenshot[0.6]{01_git/win_install_06.png}{初期ブランチ名の設定（main と入力）}
+
+\medskip
+\noindent\textbf{画面7：環境変数（PATH）の設定}（そのまま「Next」）
+
+Gitのコマンドをどこから使えるようにするかの設定です。真ん中の推奨（\cmd{Git from the command line and also from 3rd-party software}）のまま進めます。
+\screenshot[0.6]{01_git/win_install_07.png}{PATH環境の設定}
+
+\medskip
+\noindent\textbf{画面8：SSH実行ファイルの選択}（そのまま「Next」）
+
+通信に使うSSHをどれにするかです。外部のSSHを使う特別な理由がなければ、\cmd{Use bundled OpenSSH}（同梱のもの）のままで問題ありません。
+\screenshot[0.6]{01_git/win_install_08.png}{SSH実行ファイルの選択}
+
+\medskip
+\noindent\textbf{画面9：HTTPS通信に使う証明書}（そのまま「Next」）
+
+\cmd{Use the OpenSSL library} のままで問題ありません。企業の独自認証局を使う場合だけ、もう一方（Windowsの証明書ストア）を選びます。
+\screenshot[0.6]{01_git/win_install_09.png}{HTTPS証明書の選択}
+
+\medskip
+\noindent\textbf{画面10：改行コードの扱い}\quad\textbf{★ここは選びます}
+
+WindowsとmacOS/Linuxでは、行の終わりを表す文字（改行コード）が違います。ここを揃えておかないと、\textbf{中身は同じなのに「全行が変更された」と表示される}ことがあります。複数人・複数環境で開発するなら \textbf{「Checkout as-is, commit Unix-style line endings」} を選んでください。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+選択肢 & 動作 \\
+\midrule
+Checkout Windows-style, commit Unix-style & 取得時はCRLFに変換し、コミット時はLFに変換する \\
+\textbf{Checkout as-is, commit Unix-style}（推奨） & 取得時はそのまま、コミット時だけLFに変換する \\
+Checkout as-is, commit as-is & 一切変換しない \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\screenshot[0.6]{01_git/win_install_10.png}{改行コードの設定（Checkout as-is を選ぶ）}
+
+\medskip
+\noindent\textbf{画面11：ターミナルエミュレータ}（そのまま「Next」）
+
+Git Bashをどの画面で動かすかです。Linux風のコマンドがそのまま使える \textbf{\cmd{Use MinTTY}}（デフォルト）のままにします。
+\screenshot[0.6]{01_git/win_install_11.png}{ターミナルエミュレータの選択}
+
+\medskip
+\noindent\textbf{画面12：\cmd{git pull} の動作}（そのまま「Next」）
+
+\cmd{Fast-forward or merge}（デフォルト）のままにします。\cmd{git pull} は本編『はじめてのバージョン管理』で扱う「クラウド側の変更を手元に取り込むコマンド」です。ここでは意味が分からなくても問題ありません。
+\screenshot[0.6]{01_git/win_install_12.png}{git pull の動作設定}
+
+\medskip
+\noindent\textbf{画面13：認証情報の保存方法}（そのまま「Next」）
+
+\textbf{Git Credential Manager}（デフォルト）のままにします。これが入っていると、パスワードやトークンを毎回入力せずに済みます。
+\screenshot[0.6]{01_git/win_install_13.png}{認証情報ヘルパーの選択}
+
+\medskip
+\noindent\textbf{画面14：追加オプション}（そのまま「Next」）
+
+\cmd{Enable file system caching}（高速化）にチェックが入っていることを確認します。macOSなどとリポジトリを共有する予定があれば、\cmd{Enable symbolic links} もチェックしておくと安心です。
+\screenshot[0.6]{01_git/win_install_14.png}{追加オプションの選択}
+
+\medskip
+\noindent\textbf{画面15：実験的オプション}（何もチェックせず「Install」）
+
+試験中の機能です。予期せぬ不具合を避けるため、\textbf{何もチェックせずに「Install」をクリック}します。
+\screenshot[0.6]{01_git/win_install_15.png}{実験的オプションの確認とインストール開始}
+
+インストールが終わったら、スタートメニューから \textbf{Git Bash} を起動し、\cmd{git --version} を実行します。バージョンが表示されれば完了です。
 
 \subsection{macOS}
 \label{sec:install-mac}
