@@ -178,9 +178,9 @@ Git Bashをどの画面で動かすかです。Linux風のコマンドがその�
 \subsection{macOS}
 \label{sec:install-mac}
 
-次のどちらか一方でOKです。
+次のどちらか一方でOKです。\textbf{こだわりがなければ方法Aで十分}です。
 
-\noindent\textbf{方法A: Xcode Command Line Tools（最も手軽）}
+\noindent\textbf{方法A：Xcode Command Line Tools（最も手軽）}
 
 ターミナル（\cmd{アプリケーション > ユーティリティ > ターミナル.app}）を開き、次を実行します。
 
@@ -190,9 +190,9 @@ xcode-select --install
 \end{code}
 \end{codebox}
 
-ダイアログが出たら「インストール」をクリックします。
+ダイアログが出たら「インストール」をクリックします。完了後、\cmd{git --version} でバージョンが表示されれば終わりです。
 
-\noindent\textbf{方法B: Homebrew（最新版を使いたい場合）}
+\noindent\textbf{方法B：Homebrew（最新版を使いたい場合）}
 
 Homebrew（\url{https://brew.sh/index_ja}）が入っていれば、次で最新のGitが入ります。
 
@@ -202,7 +202,49 @@ brew install git
 \end{code}
 \end{codebox}
 
-どちらの場合も、\cmd{git --version} でバージョンが表示されれば完了です。
+\begin{warnbox}
+\textbf{\cmd{brew install git} をしても、それだけでは使われるGitが切り替わらないことがあります。} macOSには最初からApple版のGit（\cmd{/usr/bin/git}）が入っており、\textbf{どちらが使われるかは PATH という設定の順番で決まる}ためです。Homebrewの場所（Appleシリコンでは \cmd{/opt/homebrew/bin}）がPATHに入っていないと、\textbf{新しく入れたはずのGitではなく、Apple版が動き続けます}。
+\end{warnbox}
+
+\noindent\textbf{手順1：いま動いているGitがどちらかを確認する}
+
+\begin{codebox}[bash]
+\begin{code}
+which git      # 実際に動く git の場所を表示する
+git --version  # そのバージョンを表示する
+\end{code}
+\end{codebox}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \cmd{/opt/homebrew/bin/git} または \cmd{/usr/local/bin/git} と出た人\\
+        → \textbf{Homebrewで入れたGitが使われています}。設定は不要です。\ref{sec:first-config}節「最初の設定」へ進んでください。
+  \item \cmd{/usr/bin/git} と出た人\\
+        → \textbf{Apple版のGitが使われています}。Homebrew版を使いたい場合は、次の手順2に進みます。
+\end{itemize}
+
+\noindent\textbf{手順2：HomebrewのPATHを通す（Appleシリコンの場合）}
+
+Appleシリコン（M1以降）のMacでは、Homebrewの置き場所 \cmd{/opt/homebrew/bin} が最初はPATHに入っていません。次の1行を、ログイン時に読み込まれる設定ファイル \cmd{\textasciitilde/.zprofile} に追記します。
+
+\begin{codebox}[bash]
+\begin{code}
+# .zprofile に追記する（ファイルが無ければ新しく作られる）
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+
+# 追記した内容を、いま開いているターミナルにも反映する
+source ~/.zprofile
+\end{code}
+\end{codebox}
+
+反映できたら、もう一度 \cmd{which git} を実行します。\cmd{/opt/homebrew/bin/git} と表示されれば切り替え完了です。
+
+\begin{notebox}
+IntelのMacではHomebrewの置き場所が \cmd{/usr/local/bin} で、ここは最初からPATHに入っているため、この設定は基本的に不要です。また、\cmd{\textasciitilde/.zprofile} はターミナルを開いたとき（ログインシェル）に読み込まれる設定ファイルです。\cmd{\textasciitilde/.zshrc} に書く流儀もありますが、Homebrewの公式手順に合わせて本書では \cmd{\textasciitilde/.zprofile} を使います。
+\end{notebox}
+
+\begin{warnbox}
+\textbf{Apple版のGitが残っていても問題はありません。} 消す必要はなく、PATHの順番で「どちらを使うか」が決まるだけです。逆に、Homebrew版を入れたつもりで \cmd{git -{}-version} の数字が古いままのときは、たいていこのPATHの設定が原因です。
+\end{warnbox}
 
 \subsection{Linux}
 \label{sec:install-linux}
