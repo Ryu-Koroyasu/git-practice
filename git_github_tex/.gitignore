@@ -1,4 +1,7 @@
-# LaTeX の中間・出力ファイル
+# LaTeX の生成物（PDF・中間ファイル）はすべて output/ に出力される
+output/
+
+# 念のため（latexmk を使わずに直接コンパイルした場合）
 *.aux
 *.log
 *.out
@@ -10,8 +13,4 @@
 *.blg
 *.lof
 *.lot
-main_intro.pdf
-main_team.pdf
-main_trouble.pdf
-main_cheat.pdf
-main_setup.pdf
+*.pdf
