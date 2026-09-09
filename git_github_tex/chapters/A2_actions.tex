@@ -1,0 +1,177 @@
+% =====================================================================
+% 応用編 第2章 GitHub Actionsで自動化する
+% ステータス: 雛形（見出しと執筆メモのみ。本文はこれから書く）
+% =====================================================================
+\chapter{GitHub Actionsで自動化する}
+
+前章までで、\textbf{Issueで作業を決め、ブランチを切り、PRでマージする}という流れができました。この章では、その流れの上に\textbf{自動チェック}を載せます。「\cmd{push} するたびにテストが走る」「PRを出すと、通らない限りマージできない」という状態を、\textbf{GitHub Actions} で作ります。
+
+\begin{draftbox}
+\textbf{この章のゴール}（清書時にこの枠は削除する）
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item ワークフローファイル（\cmd{.github/workflows/*.yml}）の構造を読める
+  \item \cmd{push} / PR をきっかけに動く、最初のワークフローを作れる
+  \item 失敗したときに、どこを見て直せばよいか分かる
+  \item ブランチ保護と組み合わせて、\textbf{チェックが通らないとマージできない}状態にできる
+\end{itemize}
+\textbf{書くときの注意}：Actionsは機能が広いので、\textbf{「PRのたびに自動チェックを走らせる」1本に絞る}。
+デプロイ・リリース自動化には深入りせず、最後に「次に何を学べばよいか」として名前だけ挙げる。
+\end{draftbox}
+
+\begin{hintbox}
+\textbf{この章の読み方}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item とりあえず動かしたい人 → 「最初のワークフローを作る」を写経すればOK
+  \item YAMLの読み方が不安な人 → 先に「ワークフローファイルの構造」へ
+\end{itemize}
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{GitHub Actionsとは何か}
+
+\begin{draftbox}
+\textbf{書くこと}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Actions＝\textbf{GitHub上に住んでいる「自動作業係」}。「\cmd{push} されたら」「PRが出たら」といった\textbf{きっかけ}で、決めておいた作業を実行する
+  \item 動く場所は\textbf{GitHubが用意する使い捨てのPC（ランナー）}であり、自分のPCではないこと
+  \item うれしいこと：\textbf{レビュー前に機械が確認してくれる}／\textbf{人によって手順がぶれない}／\textbf{確認忘れがなくなる}
+  \item シリーズのたとえに接続：Actionsは「\textbf{倉庫に荷物を入れる前の検品係}」
+  \item 料金の注意：Publicリポジトリは無料、Privateは無料枠あり（\textbf{枠を超えると課金}）。最新の条件は公式を見るよう促す
+\end{itemize}
+\textbf{入れる図}：push / PR（きっかけ）→ ランナー起動 → ジョブ実行 → 結果がPRに緑✓／赤×で出る、の流れ図。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{ワークフローファイルの構造}
+
+\begin{draftbox}
+\textbf{書くこと}：\cmd{.github/workflows/} に置いたYAMLファイルが、そのままワークフローになる。
+下の骨組みを1行ずつ分解して説明する（\cmd{name} / \cmd{on} / \cmd{jobs} / \cmd{runs-on} / \cmd{steps} / \cmd{uses} / \cmd{run}）。
+
+\textbf{入れる表}：キーワードと意味の対応表（\cmd{on}＝いつ動くか、\cmd{jobs}＝何をするかのまとまり、
+\cmd{steps}＝ジョブの中の手順、\cmd{uses}＝公開部品を使う、\cmd{run}＝コマンドを実行する）。
+
+\textbf{YAMLの注意}：\textbf{字下げが意味を持つ}こと、タブではなく半角スペースを使うことを警告枠で。
+\end{draftbox}
+
+\begin{codebox}[yaml]
+\begin{code}
+# .github/workflows/ci.yml
+name: CI                      # ワークフローの名前（Actionsタブに表示される）
+
+on:                           # いつ動かすか（きっかけ）
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:                         # 何をするか
+  test:                       # ジョブの名前（自由に付けられる）
+    runs-on: ubuntu-latest    # どのOSのランナーで動かすか
+    steps:                    # 上から順に実行される手順
+      - uses: actions/checkout@v4   # リポジトリを取ってくる（定番の1手目）
+      - run: echo "ここに実際のチェックを書く"
+\end{code}
+\end{codebox}
+
+% ---------------------------------------------------------------------
+\section{最初のワークフローを作る}
+
+\begin{draftbox}
+\textbf{書くこと}：写経して1本動かすまで。ここが章の中心。
+
+\textbf{手順の骨子}
+\begin{enumerate}[leftmargin=1.6em, nosep]
+  \item ブランチを切る（\cmd{feature/add-ci}）
+  \item \cmd{.github/workflows/ci.yml} を作る（中身は上の骨組み）
+  \item \cmd{add} → \cmd{commit} → \cmd{push} → PRを出す
+  \item PR画面の下部に\textbf{チェック結果}が出るのを確認する
+  \item 緑✓になったらマージする
+\end{enumerate}
+
+\textbf{必要なスクリーンショット}（\cmd{images/04\_advanced/} に置く）
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \cmd{actions\_tab.png}：Actionsタブの実行一覧
+  \item \cmd{pr\_checks\_running.png}：PR下部で実行中のチェック
+  \item \cmd{pr\_checks\_passed.png}：緑✓になった状態
+\end{itemize}
+
+\textbf{題材の候補}：本シリーズの読者に合わせるなら、\textbf{LaTeX原稿のビルド}か\textbf{textlintによる文章チェック}が題材として自然。
+Pythonのテスト（\cmd{pytest}）を例にするかは、想定読者を決めてから選ぶ。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{よくある使いどころ}
+
+\begin{draftbox}
+\textbf{書くこと}：「何を自動化すると効くか」を、\textbf{表で一覧}にする（きっかけ／やること／うれしさ の3列）。
+
+候補：
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item PRのたびに\textbf{テスト}を走らせる
+  \item PRのたびに\textbf{文法・書式チェック}（lint、textlint）を走らせる
+  \item \cmd{main} が更新されたら\textbf{ドキュメント（PDF）をビルド}して成果物を残す
+  \item タグを打ったら\textbf{リリースを作る}
+\end{itemize}
+それぞれ\textbf{どのきっかけ（\cmd{on}）で動かすか}を対応づけて書く。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{実行結果の見方と、失敗したときの直し方}
+
+\begin{draftbox}
+\textbf{書くこと}：赤×が出たときに読者が自力で進めるようにする節。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Actionsタブ → 対象の実行 → ジョブ → \textbf{失敗したステップを開いてログを読む}
+  \item ログは\textbf{上から読むのではなく、赤い行と最後の数十行}を見るのがコツ
+  \item よくある失敗を表に：YAMLの字下げミス／ファイルの置き場所が違う（\cmd{.github/workflows/} 直下か）／
+        ブランチ名が \cmd{on} の条件と一致していない／依存パッケージの入れ忘れ
+  \item 直したら\textbf{同じブランチに \cmd{push} すれば自動で再実行}される（PRを作り直さなくてよい）
+\end{itemize}
+\textbf{必要なスクリーンショット}：\cmd{actions\_failed\_log.png}（失敗ログを開いた画面）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{ブランチ保護と組み合わせる}
+
+\begin{draftbox}
+\textbf{書くこと}：自動チェックを\textbf{マージの条件}にして、はじめて効果が出る。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Settings → Branches → \textbf{ブランチ保護ルール}で \cmd{main} を守る
+  \item 設定する項目：\textbf{PR必須}／\textbf{チェックの成功を必須}／\textbf{レビュー承認を必須}／\cmd{main} への直接pushを禁止
+  \item 別冊で書いた「\cmd{main} は直接編集しない」という\textbf{約束を、仕組みとして強制する}のがこの節、という位置づけを明示する
+  \item 少人数のうちは厳しくしすぎない、という運用上の注意も書く
+\end{itemize}
+\textbf{必要なスクリーンショット}：\cmd{branch\_protection.png}（保護ルールの設定画面）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{秘密情報の扱い（Secrets）}
+
+\begin{draftbox}
+\textbf{書くこと}：APIキーやトークンをワークフローで使うときの置き場所。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{YAMLに直接書かない}。Settings → Secrets and variables → Actions に登録し、\cmd{\$\{\{ secrets.NAME \}\}} で参照する
+  \item ログに出さない工夫（\cmd{echo} しない）
+  \item 本編『はじめてのバージョン管理』の \cmd{.gitignore} の話とつなげる：\textbf{秘密情報はリポジトリに置かない}という原則は同じ
+\end{itemize}
+\textbf{枠は warnbox を使う}（ヒントではなく注意）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section*{この章のまとめ}
+\addcontentsline{toc}{section}{この章のまとめ}
+
+\begin{draftbox}
+本文を書き終えてから、次の骨子でまとめを作る。
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Actionsは「きっかけ（\cmd{on}）」と「やること（\cmd{jobs}）」を書くだけ
+  \item ファイルの置き場所は \cmd{.github/workflows/} 直下
+  \item 失敗したら\textbf{赤いステップのログ}を読む。直して \cmd{push} すれば再実行される
+  \item ブランチ保護と組み合わせて、はじめて「壊れたものがマージされない」状態になる
+\end{itemize}
+\textbf{次に学ぶとよいもの}として名前だけ挙げる：自作アクション、再利用可能ワークフロー、
+マトリクスビルド、デプロイ（GitHub Pages など）。
+\end{draftbox}

@@ -71,6 +71,15 @@
   coltitle=gitRed, fonttitle=\sffamily\bfseries\small,
   title=注意, attach title to upper=\quad,
 }
+% 執筆メモ（雛形用の枠）。原稿を清書したら、この枠ごと削除する。
+\newtcolorbox{draftbox}{%
+  enhanced, breakable,
+  colback=gitAmber!6, colframe=white, boxrule=0pt, arc=2pt,
+  borderline={0.9pt}{0pt}{gitAmber, dashed},
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  coltitle=gitAmber, fonttitle=\sffamily\bfseries\small,
+  title=執筆メモ, attach title to upper=\quad,
+}
 \newtcolorbox{notebox}{%
   enhanced, breakable,
   colback=gray!8, colframe=gray!60!black, boxrule=0.8pt, arc=2pt,

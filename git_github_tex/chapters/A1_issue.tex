@@ -1,0 +1,173 @@
+% =====================================================================
+% 応用編 第1章 Issueで作業を管理する
+% ステータス: 雛形（見出しと執筆メモのみ。本文はこれから書く）
+% =====================================================================
+\chapter{Issueで作業を管理する}
+
+別冊『チームで安全に開発する』では、\textbf{ブランチを分けてPRでマージする}という「変更の流し方」を扱いました。この章で扱うのは、その1つ手前にある\textbf{「何を、誰が、いつやるのか」}の管理です。GitHubでは、これを\textbf{Issue（イシュー）}という機能で行います。
+
+\begin{draftbox}
+\textbf{この章のゴール}（清書時にこの枠は削除する）
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Issueを立てて、作業をチームで見える化できる
+  \item ラベル・担当者・マイルストーンで、Issueを整理できる
+  \item IssueとPRを結びつけ、マージと同時にIssueを閉じられる
+  \item Projects（ボード）で進捗を一覧できる
+\end{itemize}
+\textbf{想定読者}：別冊『チームで安全に開発する』を終えた人。ブランチとPRは分かっている前提で書く。
+\end{draftbox}
+
+\begin{hintbox}
+\textbf{この章の読み方}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item まず動かしたい人 → 「Issueを立てる」→「IssueとPRをつなぐ」だけ読めばOK
+  \item チームの運用ルールを決めたい人 → 「運用の型」へ
+\end{itemize}
+\end{hintbox}
+
+% ---------------------------------------------------------------------
+\section{Issueとは何か}
+
+\begin{draftbox}
+\textbf{書くこと}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Issue＝\textbf{リポジトリに貼る「作業の付箋」}。バグ報告・機能要望・やることメモを1件1枚で管理する
+  \item PRとの違い：\textbf{Issueは「やること」、PRは「やった変更」}。Issueが先、PRが後
+  \item チャットやメールで作業を頼むのとの違い：\textbf{リポジトリに残り、検索でき、変更履歴とひも付く}
+  \item シリーズ共通の倉庫のたとえに接続する：Issueは「\textbf{倉庫に貼る作業指示書}」
+\end{itemize}
+\textbf{入れる図}：Issue（やること）→ ブランチ → PR（やった変更）→ マージ、の流れ図。
+TikZ の \cmd{flownode} / \cmd{flowarrow} を使い、既存の図と体裁を揃える。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{Issueを立てる}
+
+\begin{draftbox}
+\textbf{書くこと}：GitHubのIssuesタブ →「New issue」→ タイトルと本文を書いて作成、までの手順。
+\textbf{必要なスクリーンショット}（\cmd{images/04\_advanced/} に置く）
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \cmd{issue\_new\_button.png}：Issuesタブと「New issue」ボタン
+  \item \cmd{issue\_form.png}：タイトル・本文の入力画面
+  \item \cmd{issue\_created.png}：作成後のIssue画面（番号 \cmd{\#12} が付くことを示す）
+\end{itemize}
+\end{draftbox}
+
+\subsection{タイトルと本文の書き方}
+
+\begin{draftbox}
+\textbf{書くこと}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item タイトルは\textbf{「何をどうしたいか」が一言で分かる形}にする（例：\cmd{ログイン画面のエラー表示が出ない}）
+  \item 本文に書く3点：\textbf{現状／期待する状態／再現手順（またはやること）}
+  \item 悪い例と良い例を並べて示す（「バグ直す」→ 何のバグか分からない）
+  \item コミットメッセージの書き方（本編）と同じ考え方であることに触れる
+\end{itemize}
+\end{draftbox}
+
+\subsection{Issueテンプレートを用意する}
+
+\begin{draftbox}
+\textbf{書くこと}：\cmd{.github/ISSUE\_TEMPLATE/} にテンプレートを置くと、New issue のときに雛形が出る。
+付録A（別冊のPRテンプレート）と同じ形式で、\textbf{そのままコピーして使えるテンプレート}を載せる。
+
+最低限、次の2種類を用意する：
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \cmd{bug\_report.md}：不具合の報告用（現象／再現手順／期待する動作／環境）
+  \item \cmd{task.md}：やること用（背景／完了条件／関連Issue）
+\end{itemize}
+\end{draftbox}
+
+\begin{codebox}[markdown]
+\begin{code}
+（ここに bug_report.md の中身を貼る）
+---
+name: バグ報告
+about: 動かない・想定と違う挙動を報告する
+labels: bug
+---
+
+## 現象
+
+## 再現手順
+
+## 期待する動作
+
+## 環境
+\end{code}
+\end{codebox}
+
+% ---------------------------------------------------------------------
+\section{ラベル・担当者・マイルストーンで整理する}
+
+\begin{draftbox}
+\textbf{書くこと}：Issueが増えたときに迷子にならないための3つの道具。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{ラベル}：種類で色分けする（\cmd{bug} / \cmd{enhancement} / \cmd{question} / \cmd{good first issue}）。おすすめの初期セットを表で示す
+  \item \textbf{担当者（Assignees）}：誰がやるかを1人に決める。空のままにしない
+  \item \textbf{マイルストーン}：締め切りやリリース単位でまとめる（例：\cmd{v1.0 提出}）
+\end{itemize}
+\textbf{入れる表}：ラベル名・色・使う場面の3列。
+\textbf{必要なスクリーンショット}：\cmd{issue\_labels.png}（サイドバーでラベル・担当者を設定している画面）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{IssueとPRをつなぐ}
+
+\begin{draftbox}
+\textbf{この節がこの章の山場}。PR本文に \cmd{Closes \#12} と書くと、\textbf{マージと同時にIssueが自動で閉じる}ことを示す。
+
+\textbf{書くこと}
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item 使えるキーワード（\cmd{Closes} / \cmd{Fixes} / \cmd{Resolves}）と、単に参照だけしたいときの \cmd{\#12}
+  \item ブランチ名にIssue番号を入れる運用（例：\cmd{feature/12-add-login}）
+  \item Issue画面から直接ブランチを作る方法（\textbf{Create a branch} リンク）
+  \item 「Issueを立てる → ブランチを切る → PRを出す → マージでIssueが閉じる」の一周を、実際の画面で通す
+\end{itemize}
+\textbf{入れる図}：この一周のフロー図（別冊 第1章のPRフロー図と体裁を揃える）。
+\textbf{必要なスクリーンショット}：\cmd{issue\_linked\_pr.png}（PR本文の \cmd{Closes \#12} と、Issue側に出るリンク表示）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{Projectsでボードにする}
+
+\begin{draftbox}
+\textbf{書くこと}：Issueを「未着手／作業中／レビュー中／完了」の列に並べて、進捗を一覧する。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Projects（ボード）の作り方と、Issueの追加方法
+  \item ステータスの自動更新（PRがマージされたら「完了」に動かす設定）
+  \item 少人数なら\textbf{ラベル運用だけでも足りる}こと。Projectsは人数と件数が増えてから入れるのがおすすめ、と\textbf{使いどころを限定}して書く
+\end{itemize}
+\textbf{必要なスクリーンショット}：\cmd{project\_board.png}（ボード全体）。
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section{運用の型}
+
+\begin{draftbox}
+\textbf{書くこと}：そのまま真似できる運用ルールを、別冊 付録Aと同じ調子で示す。
+
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item \textbf{作業を始める前に必ずIssueを立てる}（口頭で決めたことも1行で残す）
+  \item \textbf{1 Issue = 1 ブランチ = 1 PR} を基本にする
+  \item 週に1度、\textbf{開いたままのIssueを棚卸し}する（閉じ忘れの防止）
+  \item 議論はチャットではなく\textbf{Issueのコメントに書く}（後から経緯を追えるようにする）
+\end{itemize}
+\end{draftbox}
+
+% ---------------------------------------------------------------------
+\section*{この章のまとめ}
+\addcontentsline{toc}{section}{この章のまとめ}
+
+\begin{draftbox}
+本文を書き終えてから、次の骨子でまとめを作る。
+\begin{itemize}[leftmargin=1.4em, nosep]
+  \item Issueは「やること」、PRは「やった変更」
+  \item Issueは\textbf{タイトルで内容が分かる}ように書く
+  \item \cmd{Closes \#12} でPRとIssueをつなぐと、マージで自動的に閉じる
+  \item 1 Issue = 1 ブランチ = 1 PR
+\end{itemize}
+次章は、この流れに\textbf{自動チェック}を足す話（GitHub Actions）につなげる。
+\end{draftbox}
