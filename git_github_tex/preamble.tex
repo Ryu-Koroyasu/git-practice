@@ -98,6 +98,17 @@
   \end{center}%
 }
 
+% \screenshottrim[幅の割合]{ファイル}{キャプション}{trim指定}
+% 余白の多いスクリーンショットを切り詰めて大きく見せる。
+% trim は「左 下 右 上」の順で、画像1ピクセル = 1bp として指定する
+% （例: 1920x1080 の下半分を捨てる → {0 540bp 0 0}）。
+\newcommand{\screenshottrim}[4][0.95]{%
+  \begin{center}
+    \includegraphics[width=#1\linewidth, trim=#4, clip]{#2}\\[3pt]
+    {\small\itshape #3}%
+  \end{center}%
+}
+
 % --- TikZ 共通スタイル ------------------------------------------------
 % Mermaid のフロー図を再現するためのノード／矢印スタイル。
 \tikzset{

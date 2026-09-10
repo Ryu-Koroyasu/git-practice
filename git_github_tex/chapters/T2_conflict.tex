@@ -140,22 +140,22 @@ PRを作った後にコンフリクトが起きると、PR画面に \textbf{「T
 \begin{enumerate}[leftmargin=1.6em]
   \item PR画面の \textbf{「Resolve conflicts」} ボタンを押す。競合したファイルがブラウザ上のエディタで開きます。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/conflicts_first_window.png}{コンフリクト発生時のPR画面}
+\screenshottrim[1.0]{03_branch・PR/conflicts_first_window.png}{コンフリクト発生時のPR画面}{0 240bp 0 0}
 
 \begin{enumerate}[leftmargin=1.6em, start=2]
   \item \textbf{\cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>} のマーカー}が表示されるので、\textbf{正しい状態に直し、マーカー3行をすべて削除}します。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/conflict_fix_file.png}{コンフリクト解決の編集画面}
+\screenshottrim[1.0]{03_branch・PR/conflict_fix_file.png}{コンフリクト解決の編集画面}{0 520bp 700bp 0}
 
 \begin{enumerate}[leftmargin=1.6em, start=3]
   \item ファイル上部の \textbf{「Mark as resolved」} を押す。競合ファイルが複数あれば、すべて同様に処理します。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/resolve_conflict.png}{コンフリクト解決後のマーク}
+\screenshottrim[1.0]{03_branch・PR/resolve_conflict.png}{コンフリクト解決後のマーク}{0 320bp 0 0}
 
 \begin{enumerate}[leftmargin=1.6em, start=4]
   \item すべて解決したら \textbf{「Commit merge」} を押して確定します。これで競合が解消され、PRをマージできる状態になります。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/commit_merge.png}{コンフリクト解決後のコミット}
+\screenshottrim[1.0]{03_branch・PR/commit_merge.png}{コンフリクト解決後のコミット}{0 430bp 0 0}
 
 \begin{warnbox}
 \textbf{「Resolve conflicts」ボタンが出ないことがあります。} 競合が複雑すぎる場合、GitHubはブラウザでの解決を許可しません。そのときは方法B（VS Code）で、ローカルに取り込んでから解決します。
