@@ -51,6 +51,54 @@ PRは小さく保つ & 変更が小さいほどレビューが速く、正確に
 
 \medskip
 
+\medskip
+
+% ---------------------------------------------------------------------
+\section{ブランチ構成の流儀（\texttt{main} 1本か、\texttt{develop} を挟むか）}
+
+ここまでは、\cmd{main} と作業ブランチだけを使う、いちばん単純な構成を前提にしてきました。これは \textbf{GitHub Flow} と呼ばれる流儀で、\textbf{少人数のチーム}や、\textbf{いつ出しても構わないもの}（研究のコード・原稿、社内ツール、継続的に更新するWebサービス）に向いています。本シリーズが採用しているのもこの構成です。
+
+一方、システム開発の現場では \cmd{develop} や \cmd{test} といったブランチを挟む構成もよく使われます。代表が \textbf{Git Flow} と呼ばれる流儀です。名前だけでも知っておくと、チームのリポジトリを見たときに戸惑いません。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} X@{}}
+\toprule
+ブランチ & 役割 \\
+\midrule
+\cmd{main} & \textbf{本番}。リリース済みの、動くと保証された状態だけを置く \\
+\addlinespace[3pt]
+\cmd{develop} & \textbf{開発の集約先}。次のリリースに入れる変更をここに溜める。作業ブランチはここから切り、ここへ戻す \\
+\addlinespace[3pt]
+\cmd{feature/...} & 個々のタスク。\cmd{develop} から切る \\
+\addlinespace[3pt]
+\cmd{release/...} & リリース準備。溜まった \cmd{develop} を固め、最終調整をしてから \cmd{main} へ入れる \\
+\addlinespace[3pt]
+\cmd{hotfix/...} & 本番で見つかった緊急の修正。\cmd{main} から切り、\cmd{main} と \cmd{develop} の両方へ戻す \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+\subsection{\texttt{test} / \texttt{staging} ブランチ}
+
+\cmd{test}（\cmd{staging}）は、\textbf{ブランチを「動かす環境」と1対1に対応させる}運用で出てきます。\cmd{test} ブランチにマージするとテスト環境へ、\cmd{main} にマージすると本番環境へ、それぞれ自動で反映される——という作りです。
+
+この場合、ブランチは\textbf{「作業の単位」ではなく「環境の入れ物」}になります。自動で反映する仕組みは、別冊『応用編』で扱うGitHub Actionsで組みます。
+
+\subsection{どちらを選ぶか}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{\cmd{main} 1本でよい場合}：人数が少ない／完成したものから順に出していく／テスト環境を分けていない
+  \item \textbf{\cmd{develop} を足したほうがよい場合}：リリース日を決めて中身を固めたい／複数の機能を溜めてから一度に出す／本番と開発中のものを明確に分ける必要がある
+\end{itemize}
+
+迷ったら、\textbf{\cmd{main} 1本から始めてください}。必要になってから \cmd{develop} を足せば十分です。最初から複雑な構成にすると、守る手間ばかりが増えて続きません。
+
+\begin{warnbox}
+\textbf{すでにあるチームに参加したときは、そのチームの流儀に合わせます。} 流儀は選べるものではなく、リポジトリごとに決まっているものだと考えてください。どの流儀でも共通しているのは、\textbf{\cmd{main}（本番）を直接編集しない}ことと、\textbf{1タスク＝1ブランチ}の2つです。まずこの2つを守れば、どのチームでも困りません。
+\end{warnbox}
+
 % ---------------------------------------------------------------------
 \section{伝わるPRの書き方}
 
