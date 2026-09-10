@@ -10,26 +10,33 @@
 \section{おすすめのブランチ運用ルール}
 
 \begin{center}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.2cm} X@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.6cm} X@{}}
 \toprule
 ルール & なぜそうするか \\
 \midrule
 \cmd{main} は直接編集しない & \cmd{main} を常に「動く・完成した状態」に保つため。GitHubの設定で \cmd{main} への直接 \cmd{push} を禁止することもできる \\
+\addlinespace[3pt]
 1タスク＝1ブランチ & 目的が1つに絞られ、レビューとマージがきれいにまとまる \\
+\addlinespace[3pt]
 作業前に最新の \cmd{main} から枝を出す & 古い \cmd{main} から分岐すると、後でコンフリクトが起きやすい \\
+\addlinespace[3pt]
 こまめにコミット・こまめに \cmd{push} & 事故ってもすぐ戻せる。作業内容を他のメンバーが確認できる \\
+\addlinespace[3pt]
 PRは小さく保つ & 変更が小さいほどレビューが速く、正確になる \\
+\addlinespace[3pt]
 マージが済んだらブランチを削除する & 使わないブランチが増えて散らかるのを防ぐ \\
 \bottomrule
 \end{tabularx}
 \end{center}
+
+\medskip
 
 \subsection{ブランチ命名のおすすめ}
 
 ブランチ名は \textbf{\cmd{種類/内容}} の形（英小文字・単語はハイフン区切り）にすると、一覧で目的がひと目で分かります。
 
 \begin{center}
-\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{5.4cm} X@{}}
 \toprule
 接頭辞 & 用途 & 例 \\
 \midrule
@@ -41,6 +48,8 @@ PRは小さく保つ & 変更が小さいほどレビューが速く、正確に
 \bottomrule
 \end{tabularx}
 \end{center}
+
+\medskip
 
 % ---------------------------------------------------------------------
 \section{伝わるPRの書き方}
