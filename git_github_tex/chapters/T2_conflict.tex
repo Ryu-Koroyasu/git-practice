@@ -168,17 +168,17 @@ VS Codeは競合を検知すると、専用のボタンで解決を手伝って�
 \begin{enumerate}[leftmargin=1.6em]
   \item \textbf{競合したファイルを開く。} サイドバーの \textbf{ソース管理（Source Control）} パネルに、競合ファイルが \textbf{「Merge Changes」} としてまとめて表示されます。エクスプローラー上では、そのファイル名の後ろに \cmd{!}（Conflict）マークが付きます。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/vscode_conflict_file.png}{VS Codeでのコンフリクト画面}
+\screenshottrim[1.0]{03_branch・PR/vscode_conflict_file.png}{VS Codeでのコンフリクト画面（ファイル名の後ろに \texttt{!} が付く）}{0 359bp 0 0}
 
 \begin{enumerate}[leftmargin=1.6em, start=2]
   \item \textbf{ファイルを開くと、「マージエディターで解決」ボタンが表示されます。} この状態で \cmd{<<<<<<<} / \cmd{=======} / \cmd{>>>>>>>} のマーカーを削除し、正しい内容に書き換えることもできます。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/vscode_open_conflict_file.png}{VS Codeでのマージエディター起動}
+\screenshottrim[1.0]{03_branch・PR/vscode_open_conflict_file.png}{VS Codeでのマージエディター起動}{0 359bp 0 0}
 
 \begin{enumerate}[leftmargin=1.6em, start=3]
   \item VS Codeのマージエディターを使うと、\textbf{左＝自分側／右＝相手側／下＝結果}の3ペインで、どちらを採用するかをチェックボックスで選べます。両方を活かして手直ししたいときは、下段を直接編集します。完了したら左側のソース管理パネルで \cmd{+}（ステージ）を押してコミットすれば解決完了です（コマンドの \cmd{git add} → \cmd{git commit} と同じ操作です）。
 \end{enumerate}
-\screenshot[0.62]{03_branch・PR/vscode_merge_editor.png}{VS Codeのマージエディター（3ペイン）}
+\screenshottrim[1.0]{03_branch・PR/vscode_merge_editor.png}{VS Codeのマージエディター（3ペイン）}{0 569bp 0 0}
 
 \subsection{方法C：コマンドラインだけで解決する}
 
