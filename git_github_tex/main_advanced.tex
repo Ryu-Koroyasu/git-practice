@@ -4,7 +4,7 @@
 % ビルド:   latexmk main_advanced.tex   （出力は output/main_advanced.pdf）
 %           全冊まとめて作るときは、このフォルダで latexmk のみ実行
 %
-% ステータス: 雛形。各章は見出しと執筆メモ（draftbox）のみで、本文は未執筆。
+% 本文のスクリーンショットは \shotplaceholder で仮置き（images/04_advanced/ に置いて差し替える）。
 % 対象: 別冊『チームで安全に開発する』を終え、運用を一段引き上げたい人。
 % =====================================================================
 \documentclass[book, paper=a4, fontsize=10.5pt, titlepage]{jlreq}
@@ -31,8 +31,6 @@
   \vspace{0.6cm}
   {\sffamily\normalsize ── 別冊『チームで安全に開発する』の続き ──\par}
   \vfill
-  {\sffamily\large （雛形：本文は執筆中）\par}
-  \vspace{0.6cm}
   {\large \today\par}
 \end{titlepage}
 
@@ -46,6 +44,8 @@
 
 \begin{itemize}[leftmargin=1.6em]
   \item \textbf{Issue} で「やること」を見える化し、担当と期限を管理できる
+  \item \textbf{マイルストーン}で締め切りを決め、完了率で遅れに早く気づける
+  \item \textbf{Projects} で、Issueをボードや\textbf{ガントチャート}にして進み具合を共有できる
   \item Issue とブランチ・PR を結びつけ、\textbf{マージと同時にIssueを閉じられる}
   \item \textbf{GitHub Actions} で、\cmd{push} やPRのたびに自動チェックを走らせられる
   \item ブランチ保護と組み合わせ、\textbf{チェックが通らないとマージできない}状態にできる
@@ -57,19 +57,14 @@
 \textbf{前提：} 本書は、別冊『チームで安全に開発する』の内容（ブランチ・PR・コンフリクト解決）が済んでいる前提で進みます。まだの人は、先にそちらを読んでください。
 \end{warnbox}
 
-\begin{draftbox}
-\textbf{この冊子の執筆方針}（清書時にこの枠は削除する）
+\begin{hintbox}
+\textbf{この本の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
-  \item 既刊と同じ構成にする：章の冒頭に「この章の読み方」、章末に「この章のまとめ」
-  \item たとえは\textbf{シリーズ共通の「倉庫」}に接続する（Issue＝作業指示書、Actions＝検品係）
-  \item 扱う範囲を欲張らない。\textbf{Issue と「PRのたびの自動チェック」に絞る}
-  \item 扱わないと決めたもの（デプロイ、self-hosted runner、GitHub Apps）は、
-        巻末で\textbf{名前と参照先だけ}示す
-  \item スクリーンショットは \cmd{images/04\_advanced/} に置く（既存の \cmd{01\_git} などと同じ流儀）
+  \item 作業の管理（Issue・マイルストーン・ガントチャート）を整えたい人 → 第1章へ
+  \item PRのたびに自動でテストを走らせたい人 → 第2章へ（第1章の「IssueとPRをつなぐ」だけ先に読むと流れがつかみやすい）
+  \item 本書の先に何を学べばよいか知りたい人 → 付録A「この先に進むための地図」へ
 \end{itemize}
-\textbf{未定事項}：自動チェックの題材（LaTeXビルド／textlint／pytest のどれを本文の例にするか）。
-想定読者を決めてから確定する。
-\end{draftbox}
+\end{hintbox}
 
 \clearpage
 
@@ -86,18 +81,50 @@
 
 \chapter{この先に進むための地図}
 
-\begin{draftbox}
-本書で\textbf{あえて扱わなかったもの}を、名前と一言だけ並べる付録にする。
-読者が「次に何を調べればよいか」を分かる状態にするのが目的で、手順は書かない。
+本書では、範囲を\textbf{Issueによる作業の管理}と\textbf{PRのたびの自動チェック}に絞りました。この付録では、あえて扱わなかったものを\textbf{名前と一言だけ}並べます。手順は書きません。「こういうことがしたくなった」と思ったら、右の列の言葉でGitHubの公式ドキュメント（\cmd{docs.github.com}）を検索してください。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{デプロイの自動化}：GitHub Pages への公開、サーバへの配信
-  \item \textbf{再利用可能ワークフロー}：複数リポジトリで同じ設定を使い回す
-  \item \textbf{マトリクスビルド}：複数OS・複数バージョンでまとめて確認する
-  \item \textbf{Dependabot}：依存パッケージの更新を自動でPRにする
-  \item \textbf{CODEOWNERS}：ファイルごとにレビュー担当を決める
-  \item \textbf{self-hosted runner}：自前のマシンでActionsを動かす
-\end{itemize}
-\end{draftbox}
+\section{作業の管理をもっと便利にする}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.8cm} X >{\raggedright\arraybackslash}p{3.8cm}@{}}
+\toprule
+名前 & こんなときに & 調べる言葉 \\
+\midrule
+Issueフォーム & テンプレートを、入力欄やプルダウンのある\textbf{記入フォーム}にしたい & issue forms \\
+\addlinespace[3pt]
+Projectsのインサイト & 完了したIssueの数の推移を\textbf{グラフ}で見たい & project insights \\
+\addlinespace[3pt]
+GitHub CLI（\cmd{gh}） & Issueの作成やPRの確認を\textbf{ターミナルから}行いたい & gh issue, gh pr \\
+\addlinespace[3pt]
+CODEOWNERS & ファイルやフォルダごとに\textbf{レビュー担当を自動で割り当て}たい & CODEOWNERS \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{自動化をもっと広げる}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.8cm} X >{\raggedright\arraybackslash}p{3.8cm}@{}}
+\toprule
+名前 & こんなときに & 調べる言葉 \\
+\midrule
+デプロイの自動化 & \cmd{main} が更新されたら、Webページや文書を\textbf{自動で公開}したい & GitHub Pages, deployment \\
+\addlinespace[3pt]
+マトリクスビルド & 複数のOS・複数のPythonのバージョンで\textbf{まとめて}テストしたい & matrix strategy \\
+\addlinespace[3pt]
+キャッシュ & パッケージのインストールに時間がかかるので\textbf{速く}したい & dependency caching \\
+\addlinespace[3pt]
+再利用可能ワークフロー & 複数のリポジトリで\textbf{同じワークフローを使い回し}たい & reusable workflows \\
+\addlinespace[3pt]
+Dependabot & 使っているパッケージの更新を\textbf{自動でPRにして}ほしい & Dependabot \\
+\addlinespace[3pt]
+self-hosted runner & GPUのある研究室のPCなど、\textbf{自前のマシン}でActionsを動かしたい & self-hosted runners \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+どれも、本書で身につけた\textbf{「Issueで決めて、PRで出して、機械に確かめさせる」}という流れの上に足していくものです。困りごとが出てきたときに、1つずつ試してみてください。
 
 \end{document}
