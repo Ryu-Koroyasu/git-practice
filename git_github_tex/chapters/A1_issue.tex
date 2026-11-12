@@ -309,7 +309,7 @@ Issueが10枚、20枚と増えてくると、「どれがバグで、誰がや�
 
 3つとも、Issue画面の\textbf{右側のサイドバー}から設定します。項目名の横の歯車（または項目名そのもの）を押すと、候補が一覧で出ます。
 
-\shotplaceholder{04_advanced/issue_labels.png}{サイドバーでラベル・担当者・マイルストーンを設定する}
+\screenshottrim[0.55]{04_advanced/issue_labels.png}{サイドバーでラベル・担当者・マイルストーンを設定する}{2520bp 498bp 20bp 440bp}
 
 \subsection{ラベル：種類で色分けする}
 
@@ -335,7 +335,7 @@ Issueが10枚、20枚と増えてくると、「どれがバグで、誰がや�
 
 \medskip
 
-ラベルは自分たちで増やせます。Issuesタブの \textbf{Labels} → \textbf{New label} で、名前・説明・色を決めて作成します。研究室やチームなら、\cmd{実験}、\cmd{論文}、\cmd{発表資料} のように\textbf{作業の分野}で作るのも便利です。ただし、増やしすぎると付け方に迷うので、\textbf{10個前後まで}にとどめるのがおすすめです。
+ラベルは自分たちで増やせます。Issuesタブの左のメニューの \textbf{Labels} → \textbf{New label} で、名前・説明・色を決めて作成します。研究室やチームなら、\cmd{実験}、\cmd{論文}、\cmd{発表資料} のように\textbf{作業の分野}で作るのも便利です。ただし、増やしすぎると付け方に迷うので、\textbf{10個前後まで}にとどめるのがおすすめです。
 
 \subsection{担当者：誰がやるかを1人に決める}
 
@@ -352,7 +352,7 @@ Issueが10枚、20枚と増えてくると、「どれがバグで、誰がや�
 \subsubsection{マイルストーンを作る}
 
 \begin{enumerate}[leftmargin=1.6em]
-  \item Issuesタブを開き、検索欄の横にある \textbf{Milestones} を押す
+  \item Issuesタブを開き、左のメニューの \textbf{Milestones} を押す
   \item \textbf{New milestone} を押す
   \item 次の3つを入力して、\textbf{Create milestone} を押す
   \begin{itemize}[leftmargin=1.4em, nosep]
@@ -361,24 +361,24 @@ Issueが10枚、20枚と増えてくると、「どれがバグで、誰がや�
     \item \textbf{Description}：この区切りで何を達成するか（1〜2行）
   \end{itemize}
 \end{enumerate}
-\shotplaceholder{04_advanced/milestone_new.png}{マイルストーンの作成画面（Title・Due date・Description）}
+\screenshottrim[0.95]{04_advanced/milestone_new.png}{マイルストーンの作成画面（Title・Due date・Description）}{910bp 810bp 400bp 230bp}
 
 名前の付け方は、\textbf{チームの誰もが分かる出来事}にするのがコツです。研究なら「中間発表」「論文投稿」、開発なら「v1.0」「β版公開」、授業なら「第3回課題提出」のようにします。
 
 \subsubsection{Issueをマイルストーンに入れる}
 
-Issue画面のサイドバーの \textbf{Milestone} から、作ったマイルストーンを選びます。Issueの一覧画面で複数のIssueにチェックを入れ、上部の \textbf{Milestone} からまとめて設定することもできます。
+Issue画面のサイドバーの \textbf{Milestone} から、作ったマイルストーンを選びます。設定すると、サイドバーにマイルストーンの期限と完了率（例：\textit{Due by December 8, 2026, 40\% complete}）も表示されます。Issueの一覧画面で複数のIssueにチェックを入れ、上部の \textbf{Milestone} からまとめて設定することもできます。
 
 \subsubsection{進み具合を見る}
 
 Milestones の一覧を開くと、マイルストーンごとに次の情報が表示されます。
 
 \begin{itemize}[leftmargin=1.4em]
-  \item \textbf{締め切りまでの日数}（期限を過ぎると \textbf{Past due} と赤く出る）
+  \item \textbf{締め切り}（\textbf{Due by} の後の日付）。期限を過ぎると、\textbf{Overdue by 7 day(s)}（7日超過）のように赤く出る
   \item \textbf{進捗バー}と \textbf{\% complete}（閉じたIssueの割合）
-  \item \textbf{open / closed} の件数
+  \item \textbf{open / closed} の件数（開いているIssueと閉じたIssueの数）
 \end{itemize}
-\shotplaceholder{04_advanced/milestone_progress.png}{マイルストーンの一覧。期限・進捗バー・完了率が並ぶ}
+\screenshottrim[0.95]{04_advanced/milestone_progress.png}{マイルストーンの一覧。期限・進捗バー・完了率が並ぶ（一番上は期限切れ）}{910bp 990bp 400bp 230bp}
 
 マイルストーン名を押すと、中に入っているIssueの一覧が開きます。ここで「締め切りまで1週間なのに、まだ半分しか閉じていない」と分かれば、\textbf{作業を減らすか、締め切りを延ばすか}を早めに相談できます。\textbf{遅れに早く気づける}のが、マイルストーンを使う一番の利点です。
 
