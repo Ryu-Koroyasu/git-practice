@@ -213,20 +213,10 @@ git switch -c chore/add-issue-templates
 mkdir -p .github/ISSUE_TEMPLATE
 \end{code}
 \end{codebox}
-  \item フォルダの中に、下の2つのファイル（\cmd{bug\_report.md} と \cmd{task.md}）を作る
-  \item コミット・\cmd{push} して、PRを出す
-\begin{codebox}[bash]
-\begin{code}
-git add .github/ISSUE_TEMPLATE
-git commit -m "chore: 日本語のIssueテンプレートを追加"
-git push -u origin chore/add-issue-templates
-\end{code}
-\end{codebox}
-  \item PRをマージしたら、Issuesタブの \textbf{New issue} を押し、テンプレートの選択肢が出ることを確かめる
+  \item フォルダの中に、2つのファイル（\cmd{bug\_report.md} と \cmd{task.md}）を作る
 \end{enumerate}
-\shotplaceholder{04_advanced/issue_template_chooser.png}{New issue を押すと、作ったテンプレートが選択肢として並ぶ}
 
-ファイルの中身は、次の2つをそのままコピーして使えます。先頭の \cmd{-{}-{}-} で囲まれた部分は\textbf{設定欄}で、\cmd{name} がテンプレートの名前（選択肢に表示される）、\cmd{about} が説明、\cmd{title} がタイトルの書き出し、\cmd{labels} が最初から付けるラベルです。
+2つのファイルの中身は、次をそのままコピーして使えます。先頭の \cmd{-{}-{}-} で囲まれた部分は\textbf{設定欄}で、\cmd{name} がテンプレートの名前（選択肢に表示される）、\cmd{about} が説明、\cmd{title} がタイトルの書き出し、\cmd{labels} が最初から付けるラベルです。
 
 \cmd{bug\_report.md}（不具合の報告用）：
 
@@ -280,6 +270,19 @@ labels: ""
 \end{codebox}
 
 \cmd{- [ ]} は\textbf{チェックリスト}になり、Issueの画面でクリックしてチェックを付けられます。完了条件をチェックリストで書いておくと、「どこまで終わったか」が見えるようになります。
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item コミット・\cmd{push} して、PRを出す
+\begin{codebox}[bash]
+\begin{code}
+git add .github/ISSUE_TEMPLATE
+git commit -m "chore: 日本語のIssueテンプレートを追加"
+git push -u origin chore/add-issue-templates
+\end{code}
+\end{codebox}
+  \item PRをマージしたら、Issuesタブの \textbf{New issue} を押し、テンプレートの選択肢が出ることを確かめる
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_template_chooser.png}{New issue を押すと、作ったテンプレートが選択肢として並ぶ}
 
 \begin{warnbox}
 \cmd{name} は\textbf{4文字以上}にしてください。短すぎる名前のテンプレートは、選択肢に出ないことがあります。また、テンプレートが使えるようになるのは、ファイルが\textbf{\cmd{main}（既定のブランチ）にマージされてから}です。作業ブランチに置いただけでは選択肢に出ません。
