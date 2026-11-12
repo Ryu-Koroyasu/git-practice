@@ -54,6 +54,11 @@
 % 本文中のインラインコード: \code{git status}
 \newcommand{\cmd}[1]{\texttt{#1}}
 
+% ラベルの色見本（表中で使う小さな四角）: \swatch{D73A4A}
+% 白に近い色でも見えるよう、灰色の細い枠を付ける。
+\newcommand{\swatch}[1]{{\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.4pt}%
+  \fcolorbox[HTML]{888888}{#1}{\rule{0pt}{0.9em}\rule{0.9em}{0pt}}}}
+
 % --- 注意書き（admonition）枠 ----------------------------------------
 % ヒント（緑）・注意（赤）・補足（グレー）の3種。emoji は使わずラベルで表す。
 % タイトルは本文（明るい背景）に直接乗るため、白文字だと見えない。
@@ -106,6 +111,22 @@
 \newcommand{\screenshottrim}[4][0.95]{%
   \begin{center}
     \includegraphics[width=#1\linewidth, trim=#4, clip]{#2}\\[3pt]
+    {\small\itshape #3}%
+  \end{center}%
+}
+
+% \shotplaceholder[枠の高さ]{ファイル}{キャプション}
+% 画像がまだ無いスクリーンショットの仮置き。灰色の破線枠に差し替え先のファイル名を表示する。
+% 画像を用意したら \screenshot{同じファイル}{同じキャプション} に置き換える。
+\newcommand{\shotplaceholder}[3][4.2cm]{%
+  \begin{center}
+    \begin{tikzpicture}
+      \node[draw=gray!70, dashed, line width=0.8pt, fill=gray!8,
+            rounded corners=3pt, minimum width=0.85\linewidth,
+            minimum height=#1, align=center,
+            font=\sffamily\small, text=gray!30!black]
+        {スクリーンショット（差し替え予定）\\[2pt]\texttt{\detokenize{#2}}};
+    \end{tikzpicture}\\[3pt]
     {\small\itshape #3}%
   \end{center}%
 }

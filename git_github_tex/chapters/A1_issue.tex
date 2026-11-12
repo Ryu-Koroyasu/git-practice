@@ -1,26 +1,18 @@
 % =====================================================================
 % 応用編 第1章 Issueで作業を管理する
-% ステータス: 雛形（見出しと執筆メモのみ。本文はこれから書く）
+% スクリーンショットは \shotplaceholder で仮置き。画像を images/04_advanced/ に
+% 置いたら \screenshot に差し替える。
 % =====================================================================
 \chapter{Issueで作業を管理する}
 
-別冊『チームで安全に開発する』では、\textbf{ブランチを分けてPRでマージする}という「変更の流し方」を扱いました。この章で扱うのは、その1つ手前にある\textbf{「何を、誰が、いつやるのか」}の管理です。GitHubでは、これを\textbf{Issue（イシュー）}という機能で行います。
-
-\begin{draftbox}
-\textbf{この章のゴール}（清書時にこの枠は削除する）
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Issueを立てて、作業をチームで見える化できる
-  \item ラベル・担当者・マイルストーンで、Issueを整理できる
-  \item IssueとPRを結びつけ、マージと同時にIssueを閉じられる
-  \item Projects（ボード）で進捗を一覧できる
-\end{itemize}
-\textbf{想定読者}：別冊『チームで安全に開発する』を終えた人。ブランチとPRは分かっている前提で書く。
-\end{draftbox}
+別冊『チームで安全に開発する』では、\textbf{ブランチを分けてPRでマージする}という「変更の流し方」を扱いました。この章で扱うのは、その1つ手前にある\textbf{「何を、誰が、いつやるのか」}の管理です。GitHubでは、これを\textbf{Issue（イシュー）}という機能で行います。さらに、Issueを\textbf{マイルストーン}で締め切りごとに束ね、\textbf{Projects}でボードやガントチャートにして、チーム全体の進み具合をひと目で見られるようにします。
 
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
   \item まず動かしたい人 → 「Issueを立てる」→「IssueとPRをつなぐ」だけ読めばOK
+  \item 締め切りに向けて進み具合を管理したい人 → 「マイルストーン」と「Projects」へ
+  \item スケジュールを横棒の図（ガントチャート）で見たい人 → 「ロードマップでガントチャートを作る」へ
   \item チームの運用ルールを決めたい人 → 「運用の型」へ
 \end{itemize}
 \end{hintbox}
@@ -28,146 +20,694 @@
 % ---------------------------------------------------------------------
 \section{Issueとは何か}
 
-\begin{draftbox}
-\textbf{書くこと}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Issue＝\textbf{リポジトリに貼る「作業の付箋」}。バグ報告・機能要望・やることメモを1件1枚で管理する
-  \item PRとの違い：\textbf{Issueは「やること」、PRは「やった変更」}。Issueが先、PRが後
-  \item チャットやメールで作業を頼むのとの違い：\textbf{リポジトリに残り、検索でき、変更履歴とひも付く}
-  \item シリーズ共通の倉庫のたとえに接続する：Issueは「\textbf{倉庫に貼る作業指示書}」
+\textbf{Issue}は、リポジトリに貼る\textbf{「作業の付箋」}です。「ログイン画面でエラーが出る」「READMEにインストール手順を書く」「中間発表のスライドを作る」のように、\textbf{やるべきことを1件につき1枚}書いて貼っておきます。バグの報告、機能の要望、ただのやることメモまで、何でもIssueにして構いません。
+
+本シリーズでは、リポジトリを書類を保管する「倉庫」にたとえてきました。このたとえでは、Issueは\textbf{倉庫の掲示板に貼る作業指示書}です。「この書類をこう直してほしい」と指示書を貼り、担当者が作業棚（ブランチ）で作業し、完成したら本棚（\cmd{main}）に納める申請（PR）を出します。
+
+\subsection{IssueとPRの違い}
+
+IssueとPRは画面がよく似ていますが、役割ははっきり違います。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4cm} X X@{}}
+\toprule
+ & Issue & PR（プルリクエスト） \\
+\midrule
+中身 & \textbf{やること}（これから行う作業） & \textbf{やった変更}（実際に書き換えた差分） \\
+作るタイミング & 作業を始める\textbf{前} & 作業を終えた\textbf{後} \\
+ファイルの変更 & 含まない & 含む（コミットの集まり） \\
+閉じるとき & 作業が終わったとき & マージしたとき（または見送ったとき） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+つまり、\textbf{Issueが先、PRが後}です。Issueで「やること」を決め、ブランチで作業し、PRで「やった変更」を出してマージする、という順番になります（図\ref{fig:issue-flow}）。
+
+\begin{numfig}{Issue（やること）から始まり、PR（やった変更）のマージで終わる}{fig:issue-flow}
+\begin{tikzpicture}
+  \node[flownode, fill=gitBlue] (I) {Issue\\やること};
+  \node[flownode, fill=gitOrange, right=1.4cm of I] (B) {ブランチ\\作業する};
+  \node[flownode, fill=gitPurple, right=1.4cm of B] (P) {PR\\やった変更};
+  \node[flownode, fill=gitGreen, right=1.4cm of P] (M) {マージ\\main に反映};
+  \draw[flowarrow] (I) -- (B);
+  \draw[flowarrow] (B) -- (P);
+  \draw[flowarrow] (P) -- (M);
+\end{tikzpicture}
+\end{numfig}
+
+\subsection{チャットで頼むのと何が違うか}
+
+「チャットで『これお願い』と言えば済むのでは」と思うかもしれません。チャットとIssueには、次の違いがあります。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{リポジトリに残る}：チャットの流れに埋もれず、コードと同じ場所に作業の記録が残る
+  \item \textbf{検索できる}：「あのバグ、どう直したっけ」を後から番号やキーワードで探せる
+  \item \textbf{変更とひも付く}：どのPR（どのコミット）でその作業を終えたかが、Issueから辿れる
+  \item \textbf{状態が分かる}：開いている（未完了）か、閉じている（完了）かが一目で分かる
 \end{itemize}
-\textbf{入れる図}：Issue（やること）→ ブランチ → PR（やった変更）→ マージ、の流れ図。
-TikZ の \cmd{flownode} / \cmd{flowarrow} を使い、既存の図と体裁を揃える。
-\end{draftbox}
+
+チャットは相談や雑談に使い、\textbf{決まった作業はIssueに書く}、と使い分けるのがおすすめです。
 
 % ---------------------------------------------------------------------
 \section{Issueを立てる}
 
-\begin{draftbox}
-\textbf{書くこと}：GitHubのIssuesタブ →「New issue」→ タイトルと本文を書いて作成、までの手順。
-\textbf{必要なスクリーンショット}（\cmd{images/04\_advanced/} に置く）
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \cmd{issue\_new\_button.png}：Issuesタブと「New issue」ボタン
-  \item \cmd{issue\_form.png}：タイトル・本文の入力画面
-  \item \cmd{issue\_created.png}：作成後のIssue画面（番号 \cmd{\#12} が付くことを示す）
-\end{itemize}
-\end{draftbox}
+Issueはブラウザから作ります。次の手順で1枚立ててみましょう。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item GitHubで対象のリポジトリを開き、上部の \textbf{Issues} タブを押す
+  \item 右上の緑の \textbf{New issue} ボタンを押す
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_new_button.png}{Issuesタブと「New issue」ボタン}
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item \textbf{Title} にタイトル、その下の欄に本文を書く（本文はMarkdownで書ける）
+  \item 右下の \textbf{Create}（または \textbf{Submit new issue}）を押して作成する
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_form.png}{タイトルと本文の入力画面}
+
+作成すると、Issueに \cmd{\#12} のような\textbf{番号}が付きます。この番号が、後でPRやブランチとつなぐときの「住所」になります。
+
+\shotplaceholder{04_advanced/issue_created.png}{作成したIssue。タイトルの横に番号（\#12）が付く}
+
+\begin{notebox}
+Issueの番号とPRの番号は\textbf{同じ通し番号}を使います。Issueが \cmd{\#12} なら、次に作ったPRは \cmd{\#13} になります。番号が飛んでいても、間にPRがあるだけなので気にしなくて大丈夫です。
+\end{notebox}
 
 \subsection{タイトルと本文の書き方}
 
-\begin{draftbox}
-\textbf{書くこと}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item タイトルは\textbf{「何をどうしたいか」が一言で分かる形}にする（例：\cmd{ログイン画面のエラー表示が出ない}）
-  \item 本文に書く3点：\textbf{現状／期待する状態／再現手順（またはやること）}
-  \item 悪い例と良い例を並べて示す（「バグ直す」→ 何のバグか分からない）
-  \item コミットメッセージの書き方（本編）と同じ考え方であることに触れる
-\end{itemize}
-\end{draftbox}
+Issueは、\textbf{書いた本人以外が読んで動ける}ことが大切です。タイトルは\textbf{「何をどうしたいか」が一言で分かる形}にします。
 
-\subsection{Issueテンプレートを用意する}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+悪い例 & 良い例 \\
+\midrule
+バグ直す & ログイン画面でエラーメッセージが表示されない \\
+README & READMEにWindowsのインストール手順を追記する \\
+スライド & 中間発表のスライド（背景・目的の章）を作る \\
+\bottomrule
+\end{tabularx}
+\end{center}
 
-\begin{draftbox}
-\textbf{書くこと}：\cmd{.github/ISSUE\_TEMPLATE/} にテンプレートを置くと、New issue のときに雛形が出る。
-付録A（別冊のPRテンプレート）と同じ形式で、\textbf{そのままコピーして使えるテンプレート}を載せる。
+\medskip
 
-最低限、次の2種類を用意する：
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \cmd{bug\_report.md}：不具合の報告用（現象／再現手順／期待する動作／環境）
-  \item \cmd{task.md}：やること用（背景／完了条件／関連Issue）
-\end{itemize}
-\end{draftbox}
+本文には、次の3点を書きます。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{現状}：今どうなっているか
+  \item \textbf{期待する状態}：どうなっていてほしいか（＝何ができたら完了か）
+  \item \textbf{再現手順}（バグのとき）、または\textbf{やること}（作業のとき）
+\end{enumerate}
 
 \begin{codebox}[markdown]
 \begin{code}
-（ここに bug_report.md の中身を貼る）
+## 現状
+ログイン画面でパスワードを間違えても、何も表示されない。
+
+## 期待する状態
+「パスワードが違います」と赤字で表示される。
+
+## 再現手順
+1. ログイン画面を開く
+2. 正しいユーザー名と、間違ったパスワードを入れる
+3. 「ログイン」を押す
+\end{code}
+\end{codebox}
+
+これは本編で扱った\textbf{コミットメッセージの書き方}と同じ考え方です。「後から読んだ人が、説明なしで分かるか」を基準にしてください。
+
+\subsection{Issueテンプレートを用意する}
+
+毎回3点を思い出して書くのは大変なので、\textbf{テンプレート}を用意しておきます。リポジトリの \cmd{.github/ISSUE\_TEMPLATE/} フォルダにMarkdownファイルを置くと、New issue を押したときに\textbf{テンプレートの選択肢}が出て、選ぶと本文に雛形が入った状態で始まります。
+
+\begin{codebox}[text]
+\begin{code}
+my-project/
+└── .github/
+    └── ISSUE_TEMPLATE/
+        ├── bug_report.md   ← 不具合の報告用
+        └── task.md         ← やること用
+\end{code}
+\end{codebox}
+
+次の2つを、そのままコピーして使えます。先頭の \cmd{-{}-{}-} で囲まれた部分は\textbf{設定欄}で、\cmd{name} がテンプレートの名前、\cmd{about} が説明、\cmd{title} がタイトルの書き出し、\cmd{labels} が最初から付けるラベルです。
+
+\begin{codebox}[markdown]
+\begin{code}
 ---
 name: バグ報告
 about: 動かない・想定と違う挙動を報告する
+title: "[Bug] "
 labels: bug
 ---
 
 ## 現象
+<!-- 何が起きているか -->
 
 ## 再現手順
+1.
+2.
+3.
 
 ## 期待する動作
+<!-- 本来どうなるべきか -->
 
 ## 環境
+- OS:
+- ブラウザ / バージョン:
 \end{code}
 \end{codebox}
+
+\begin{codebox}[markdown]
+\begin{code}
+---
+name: タスク
+about: やることを1件登録する
+title: ""
+labels: ""
+---
+
+## 背景
+<!-- なぜこの作業が必要か -->
+
+## 完了条件
+- [ ]
+- [ ]
+
+## 関連Issue
+<!-- 例: #12 -->
+\end{code}
+\end{codebox}
+
+\cmd{- [ ]} は\textbf{チェックリスト}になり、Issueの画面でクリックしてチェックを付けられます。完了条件をチェックリストで書いておくと、「どこまで終わったか」が見えるようになります。
+
+テンプレートのファイルは、普段の変更と同じく\textbf{ブランチを切ってPRでマージ}します。\cmd{main} に入った時点から、New issue で選べるようになります。
 
 % ---------------------------------------------------------------------
 \section{ラベル・担当者・マイルストーンで整理する}
 
-\begin{draftbox}
-\textbf{書くこと}：Issueが増えたときに迷子にならないための3つの道具。
+Issueが10枚、20枚と増えてくると、「どれがバグで、誰がやっていて、いつまでなのか」が分からなくなります。そこで、Issueに\textbf{3つの情報}を付けて整理します。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{ラベル}：種類で色分けする（\cmd{bug} / \cmd{enhancement} / \cmd{question} / \cmd{good first issue}）。おすすめの初期セットを表で示す
-  \item \textbf{担当者（Assignees）}：誰がやるかを1人に決める。空のままにしない
-  \item \textbf{マイルストーン}：締め切りやリリース単位でまとめる（例：\cmd{v1.0 提出}）
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{3.6cm} X@{}}
+\toprule
+道具 & 答える問い & 例 \\
+\midrule
+ラベル（Labels） & これは\textbf{何の}作業？ & \cmd{bug}、\cmd{documentation} \\
+担当者（Assignees） & \textbf{誰が}やる？ & 自分、Aさん \\
+マイルストーン（Milestone） & \textbf{いつまでに}やる？ & 中間発表（12/8）、v1.0 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+3つとも、Issue画面の\textbf{右側のサイドバー}から設定します。項目名の横の歯車（または項目名そのもの）を押すと、候補が一覧で出ます。
+
+\shotplaceholder{04_advanced/issue_labels.png}{サイドバーでラベル・担当者・マイルストーンを設定する}
+
+\subsection{ラベル：種類で色分けする}
+
+ラベルは、Issueに付ける\textbf{色付きの名札}です。新しいリポジトリには、最初から次のラベルが用意されています。全部使う必要はなく、\textbf{最初は上の4つだけ}で十分です。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{1.2cm} X@{}}
+\toprule
+ラベル名 & 色 & 使う場面 \\
+\midrule
+\cmd{bug} & \swatch{D73A4A} & 動かない・想定と違う動きをする \\
+\cmd{enhancement} & \swatch{A2EEEF} & 新しい機能・改善の要望 \\
+\cmd{documentation} & \swatch{0075CA} & READMEや説明書の追加・修正 \\
+\cmd{question} & \swatch{D876E3} & 質問・相談（作業ではないもの） \\
+\midrule
+\cmd{good first issue} & \swatch{7057FF} & 新しく入った人にも取り組みやすい作業 \\
+\cmd{help wanted} & \swatch{008672} & 手伝ってくれる人を募集している \\
+\cmd{duplicate} & \swatch{CFD3D7} & 同じ内容のIssueが既にある \\
+\cmd{wontfix} & \swatch{EEEEEE} & 対応しないと決めた \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+ラベルは自分たちで増やせます。Issuesタブの \textbf{Labels} → \textbf{New label} で、名前・説明・色を決めて作成します。研究室やチームなら、\cmd{実験}、\cmd{論文}、\cmd{発表資料} のように\textbf{作業の分野}で作るのも便利です。ただし、増やしすぎると付け方に迷うので、\textbf{10個前後まで}にとどめるのがおすすめです。
+
+\subsection{担当者：誰がやるかを1人に決める}
+
+\textbf{Assignees} には、そのIssueを担当する人を設定します。自分で引き受けるときは、サイドバーの \textbf{assign yourself} を押すだけです。
+
+担当者は\textbf{原則1人}に決めます。2人以上を設定すると、「相手がやってくれるだろう」と互いに思って止まりがちです。複数人で分担する作業は、Issueそのものを分けてください。また、\textbf{担当者が空のIssue}は「誰もやっていない」という意味になるので、棚卸しのときに優先して見直します。
+
+\subsection{マイルストーン：締め切りごとに束ねる}
+
+\textbf{マイルストーン}は、\textbf{同じ締め切りに向けたIssueをまとめる箱}です。「中間発表（12/8）までに終わらせるもの」「v1.0 で出すもの」のように、\textbf{期限}と\textbf{区切り}を決めて、そこに入るIssueを放り込んでいきます。箱に入ったIssueのうち何枚が閉じたかで、\textbf{進み具合がパーセントで表示}されます。
+
+ラベルとの違いは、\textbf{期限を持てること}と、\textbf{1つのIssueは1つのマイルストーンにしか入れられない}ことです。「何の作業か」はラベル、「いつまでの作業か」はマイルストーン、と分けて考えてください。
+
+\subsubsection{マイルストーンを作る}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Issuesタブを開き、検索欄の横にある \textbf{Milestones} を押す
+  \item \textbf{New milestone} を押す
+  \item 次の3つを入力して、\textbf{Create milestone} を押す
+  \begin{itemize}[leftmargin=1.4em, nosep]
+    \item \textbf{Title}：区切りの名前（例：\cmd{中間発表}、\cmd{v1.0}）
+    \item \textbf{Due date}：締め切り日（省略もできるが、\textbf{必ず入れる}のがおすすめ）
+    \item \textbf{Description}：この区切りで何を達成するか（1〜2行）
+  \end{itemize}
+\end{enumerate}
+\shotplaceholder{04_advanced/milestone_new.png}{マイルストーンの作成画面（Title・Due date・Description）}
+
+名前の付け方は、\textbf{チームの誰もが分かる出来事}にするのがコツです。研究なら「中間発表」「論文投稿」、開発なら「v1.0」「β版公開」、授業なら「第3回課題提出」のようにします。
+
+\subsubsection{Issueをマイルストーンに入れる}
+
+Issue画面のサイドバーの \textbf{Milestone} から、作ったマイルストーンを選びます。Issueの一覧画面で複数のIssueにチェックを入れ、上部の \textbf{Milestone} からまとめて設定することもできます。
+
+\subsubsection{進み具合を見る}
+
+Milestones の一覧を開くと、マイルストーンごとに次の情報が表示されます。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{締め切りまでの日数}（期限を過ぎると \textbf{Past due} と赤く出る）
+  \item \textbf{進捗バー}と \textbf{\% complete}（閉じたIssueの割合）
+  \item \textbf{open / closed} の件数
 \end{itemize}
-\textbf{入れる表}：ラベル名・色・使う場面の3列。
-\textbf{必要なスクリーンショット}：\cmd{issue\_labels.png}（サイドバーでラベル・担当者を設定している画面）。
-\end{draftbox}
+\shotplaceholder{04_advanced/milestone_progress.png}{マイルストーンの一覧。期限・進捗バー・完了率が並ぶ}
+
+マイルストーン名を押すと、中に入っているIssueの一覧が開きます。ここで「締め切りまで1週間なのに、まだ半分しか閉じていない」と分かれば、\textbf{作業を減らすか、締め切りを延ばすか}を早めに相談できます。\textbf{遅れに早く気づける}のが、マイルストーンを使う一番の利点です。
+
+\subsubsection{マイルストーンを閉じる}
+
+締め切りを迎えたら、マイルストーンの一覧で \textbf{Close} を押して閉じます。終わらなかったIssueが残っている場合は、閉じる前に\textbf{次のマイルストーンへ移す}か、\textbf{マイルストーンから外す}かを決めます。開いたままのIssueを古いマイルストーンに置きっぱなしにしないようにしてください。
+
+\begin{notebox}
+\textbf{大きな作業を小分けにする（Sub-issues）}：「中間発表のスライドを作る」のような大きな作業は、Issueの画面下部の \textbf{Create sub-issue} から、「背景の章」「実験結果の章」のような\textbf{子Issue}に分けられます。親Issueには子Issueの完了数が表示されるので、大きな作業の進み具合も追えます。
+\end{notebox}
 
 % ---------------------------------------------------------------------
 \section{IssueとPRをつなぐ}
 
-\begin{draftbox}
-\textbf{この節がこの章の山場}。PR本文に \cmd{Closes \#12} と書くと、\textbf{マージと同時にIssueが自動で閉じる}ことを示す。
+ここがこの章の山場です。IssueとPRをつなぐと、\textbf{PRをマージした瞬間に、対応するIssueが自動で閉じます}。閉じ忘れがなくなり、Issueから「どの変更で終わったか」も辿れるようになります。
 
-\textbf{書くこと}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item 使えるキーワード（\cmd{Closes} / \cmd{Fixes} / \cmd{Resolves}）と、単に参照だけしたいときの \cmd{\#12}
-  \item ブランチ名にIssue番号を入れる運用（例：\cmd{feature/12-add-login}）
-  \item Issue画面から直接ブランチを作る方法（\textbf{Create a branch} リンク）
-  \item 「Issueを立てる → ブランチを切る → PRを出す → マージでIssueが閉じる」の一周を、実際の画面で通す
-\end{itemize}
-\textbf{入れる図}：この一周のフロー図（別冊 第1章のPRフロー図と体裁を揃える）。
-\textbf{必要なスクリーンショット}：\cmd{issue\_linked\_pr.png}（PR本文の \cmd{Closes \#12} と、Issue側に出るリンク表示）。
-\end{draftbox}
+\subsection{PR本文に \texttt{Closes \#12} と書く}
+
+やり方は簡単で、PRの本文に\textbf{キーワードとIssue番号}を書くだけです。
+
+\begin{codebox}[markdown]
+\begin{code}
+## 概要
+ログイン失敗時にエラーメッセージを表示するようにした。
+
+Closes #12
+\end{code}
+\end{codebox}
+
+このPRが \cmd{main}（リポジトリの既定のブランチ）にマージされると、Issue \cmd{\#12} が自動で閉じます。使えるキーワードは次の通りです。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.4cm} X@{}}
+\toprule
+書き方 & 意味 \\
+\midrule
+\cmd{Closes \#12} / \cmd{Fixes \#12} / \cmd{Resolves \#12} & マージしたら \cmd{\#12} を\textbf{閉じる}（どれでも同じ動き） \\
+\cmd{\#12} だけ & \textbf{参照するだけ}。リンクは付くが、閉じない \\
+\cmd{Closes \#12, closes \#13} & 複数を閉じる。\textbf{番号ごとにキーワードが必要} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+使い分けの目安は、「このPRでIssueの作業が\textbf{全部}終わるなら \cmd{Closes}」「一部だけなら \cmd{\#12} で参照のみ」です。英語として自然なので、バグなら \cmd{Fixes}、それ以外なら \cmd{Closes} を使うチームが多いです。
+
+\begin{warnbox}
+キーワードが効くのは、\textbf{既定のブランチ（ふつうは \cmd{main}）へのマージ}だけです。\cmd{develop} など別のブランチへのPRでは、マージしてもIssueは閉じません。また、PRの\textbf{タイトル}ではなく\textbf{本文}に書いてください。
+\end{warnbox}
+
+うまくつながると、PRの画面とIssueの画面の両方に、相手へのリンクが表示されます。Issueのサイドバーの \textbf{Development} 欄にPRが出ていれば成功です。
+
+\shotplaceholder{04_advanced/issue_linked_pr.png}{PR本文の Closes \#12 と、Issue側の Development 欄に出るリンク}
+
+\subsection{ブランチ名にIssue番号を入れる}
+
+ブランチ名にもIssue番号を入れておくと、ブランチ一覧を見たときに「どのIssueの作業か」が分かります。別冊 付録Aの \textbf{\cmd{種類/内容}} の形に、番号を足すだけです。
+
+\begin{codebox}[bash]
+\begin{code}
+# Issue #12 の作業用ブランチを作る
+git switch -c feature/12-show-login-error
+\end{code}
+\end{codebox}
+
+\subsection{Issueの画面からブランチを作る}
+
+Issueのサイドバーの \textbf{Development} 欄にある \textbf{Create a branch} を押すと、\textbf{そのIssueにつながったブランチ}をGitHub上で直接作れます。ブランチ名には自動で番号が入ります（例：\cmd{12-show-login-error}）。作成後に表示されるコマンドを手元で実行すれば、そのブランチで作業を始められます。
+
+\begin{codebox}[bash]
+\begin{code}
+# GitHub上で作ったブランチを手元に取ってきて、切り替える
+git fetch origin
+git switch 12-show-login-error
+\end{code}
+\end{codebox}
+
+この方法で作ったブランチからPRを出すと、本文に \cmd{Closes} を書かなくても、マージ時にIssueが閉じます。
+
+\subsection{一周を通してみる}
+
+ここまでの流れをつなげると、図\ref{fig:issue-loop}のようになります。
+
+\begin{numfig}{Issueを立ててから、マージでIssueが自動で閉じるまでの一周}{fig:issue-loop}
+\begin{tikzpicture}
+  \node[flownode, fill=gitBlue] (I) {① Issueを立てる\\\#12};
+  \node[flownode, fill=gitOrange, right=1.3cm of I] (B) {② ブランチを切る\\feature/12-...};
+  \node[flownode, fill=gitPurple, right=1.3cm of B] (P) {③ PRを出す\\Closes \#12};
+  \node[flownode, fill=gitGreen, right=1.3cm of P] (M) {④ マージ};
+  \node[flownode, fill=gitTeal, below=1.6cm of B, xshift=1.8cm] (C) {⑤ \#12 が自動で閉じる};
+  \draw[flowarrow] (I) -- (B);
+  \draw[flowarrow] (B) -- (P);
+  \draw[flowarrow] (P) -- (M);
+  \draw[flowarrow] (M.south) |- (C.east);
+  \draw[flowarrow, dashed] (C.west) -| node[edgelabel, pos=0.25, below] {記録が残る} (I.south);
+\end{tikzpicture}
+\end{numfig}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Issueを立てる（例：\cmd{\#12 ログイン画面でエラーメッセージが表示されない}）。担当者に自分を設定する
+  \item 最新の \cmd{main} から \cmd{feature/12-show-login-error} を切って作業し、\cmd{commit} → \cmd{push} する
+  \item PRを出し、本文に \cmd{Closes \#12} と書く
+  \item レビューを受けてマージする
+  \item Issue \cmd{\#12} が自動で閉じたことを確認する
+\end{enumerate}
+
+一度この一周を自分で通してみると、以降は「作業の前にIssue、終わりはPRのマージ」が自然に身につきます。
 
 % ---------------------------------------------------------------------
-\section{Projectsでボードにする}
+\section{Projectsで進捗を見える化する}
 
-\begin{draftbox}
-\textbf{書くこと}：Issueを「未着手／作業中／レビュー中／完了」の列に並べて、進捗を一覧する。
+ラベルとマイルストーンで、Issueを「種類」と「締め切り」で整理できるようになりました。ただ、Issueの一覧はあくまで\textbf{縦に並んだリスト}なので、「今だれが何をしていて、どれがレビュー待ちか」「どの作業がいつからいつまでか」は見えません。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Projects（ボード）の作り方と、Issueの追加方法
-  \item ステータスの自動更新（PRがマージされたら「完了」に動かす設定）
-  \item 少人数なら\textbf{ラベル運用だけでも足りる}こと。Projectsは人数と件数が増えてから入れるのがおすすめ、と\textbf{使いどころを限定}して書く
+\textbf{Projects}は、Issueを\textbf{好きな形に並べ替えて眺めるための作業台}です。同じIssueたちを、次の3つの見え方（\textbf{レイアウト}）で表示できます。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{4.6cm} X@{}}
+\toprule
+レイアウト & 見え方 & 向いている使い方 \\
+\midrule
+\textbf{Table}（表） & スプレッドシートのような表 & 担当者・期限などをまとめて編集する \\
+\textbf{Board}（ボード） & 「未着手／作業中／完了」の列に付箋が並ぶ & 今の進み具合を毎日確認する \\
+\textbf{Roadmap}（ロードマップ） & 横軸が日付の横棒グラフ（\textbf{ガントチャート}） & スケジュールと締め切りを確認する \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+倉庫のたとえでいえば、Issue（作業指示書）は掲示板に貼ったままで、Projectsはそれを\textbf{ホワイトボードに書き写した進行表}です。進行表で付箋を動かすと元の指示書の情報も変わるので、二重に管理する必要はありません。
+
+\begin{hintbox}
+Projectsは便利ですが、\textbf{最初から入れる必要はありません}。2〜3人でIssueが十数枚程度なら、\textbf{ラベルとマイルストーンだけで十分}に回ります。「Issueが増えて、一覧では全体が見えなくなった」「締め切りまでの段取りを図で共有したくなった」と感じたら導入してください。
+\end{hintbox}
+
+\subsection{プロジェクトを作ってIssueを入れる}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item リポジトリの \textbf{Projects} タブを開き、\textbf{New project} を押す
+  \item テンプレートの選択画面で、\textbf{Start from scratch} の中から \textbf{Board} を選ぶ（後から他のレイアウトも追加できる）
+  \item \textbf{Project name} に名前（例：\cmd{研究プロジェクト 2026後期}）を入れて、\textbf{Create project} を押す
+\end{enumerate}
+\shotplaceholder{04_advanced/project_new.png}{プロジェクトの作成画面（テンプレートとプロジェクト名）}
+
+プロジェクトは、リポジトリの中ではなく\textbf{自分（または組織）のアカウントの持ち物}として作られます。そのため、\textbf{複数のリポジトリのIssueを1つのプロジェクトにまとめる}こともできます。リポジトリの Projects タブから作った場合は、そのリポジトリに自動でひも付きます。
+
+次に、Issueをプロジェクトに入れます。方法は2つあります。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{プロジェクト側から}：列の一番下の \textbf{+ Add item} を押し、\cmd{\#} を入力するとリポジトリとIssueの候補が出るので選ぶ
+  \item \textbf{Issue側から}：Issueのサイドバーの \textbf{Projects} から、入れたいプロジェクトを選ぶ
 \end{itemize}
-\textbf{必要なスクリーンショット}：\cmd{project\_board.png}（ボード全体）。
-\end{draftbox}
+
+毎回手で入れるのが面倒なら、後で説明する\textbf{自動追加}を設定すると、新しく立てたIssueが自動でプロジェクトに入ります。
+
+\subsection{Boardで進み具合を見る}
+
+Boardレイアウトでは、Issueが\textbf{Status（状態）}ごとの列に並びます。最初は \textbf{Todo}（未着手）、\textbf{In Progress}（作業中）、\textbf{Done}（完了）の3列です。作業を始めたら付箋を \textbf{In Progress} へ、終わったら \textbf{Done} へ\textbf{ドラッグして動かします}。
+
+\shotplaceholder{04_advanced/project_board.png}{Boardレイアウト。Statusごとの列にIssueが並ぶ}
+
+PRでレビューを挟むチームなら、\textbf{In Review}（レビュー中）の列を足しておくと、「作業は終わったがレビュー待ち」の付箋が見えて、レビューの頼み忘れを防げます。列を足すには、ボードの一番右の \textbf{+} を押して選択肢を追加します。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.0cm} X@{}}
+\toprule
+Status & 付箋がここにある意味 \\
+\midrule
+\textbf{Todo} & やることは決まっているが、まだ誰も手を付けていない \\
+\textbf{In Progress} & 担当者がブランチを切って作業している \\
+\textbf{In Review} & PRを出して、レビューを待っている \\
+\textbf{Done} & マージされて、Issueも閉じた \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{フィールドを足す（開始日・終了予定日・イテレーション）}
+
+プロジェクトでは、Issueに\textbf{独自の項目（フィールド）}を足せます。Statusもフィールドの1つです。ガントチャートを作るには、\textbf{いつ始めて、いつ終える予定か}を表すフィールドが必要なので、ここで用意します。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item ビューのタブの横にある \textbf{+ New view} から \textbf{Table} を追加する（表で見るほうが、フィールドを編集しやすい）
+  \item 表の一番右の列見出し \textbf{+} を押し、\textbf{+ New field} を選ぶ
+  \item \textbf{Field name} に \cmd{Start date}、\textbf{Field type} に \textbf{Date} を選んで \textbf{Save} を押す
+  \item 同じ手順で、\cmd{Target date}（終了予定日）も \textbf{Date} で作る
+\end{enumerate}
+\shotplaceholder{04_advanced/project_fields.png}{Tableレイアウトで Start date・Target date のフィールドを足したところ}
+
+作ったら、表の各セルを押して、Issueごとに開始日と終了予定日を入れていきます。フィールドの種類には、ほかに次のものがあります。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} X >{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+種類 & 入れるもの & 例 \\
+\midrule
+\textbf{Date} & 日付 & 開始日、終了予定日 \\
+\textbf{Single select} & 決めた選択肢から1つ & 優先度（高・中・低） \\
+\textbf{Number} & 数値 & 見積もり時間 \\
+\textbf{Text} & 自由な文字 & メモ \\
+\textbf{Iteration} & 一定の長さで区切った期間 & 「第1週」「第2週」… \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+\textbf{Iteration（イテレーション）}は、「1週間」「2週間」のような\textbf{同じ長さの期間を繰り返し区切る}フィールドです。作成時に開始日と長さを決めると、\cmd{Iteration 1}、\cmd{Iteration 2} … が自動で並びます。「今週やること」を決めて毎週見直すチームなら、日付を1件ずつ入れるより手軽です。
+
+\subsection{ロードマップでガントチャートを作る}
+
+いよいよ\textbf{ガントチャート}です。ガントチャートは、縦に作業、横に日付を取り、\textbf{各作業の期間を横棒で表した図}です（図\ref{fig:gantt}）。どの作業がいつ重なっているか、締め切りに間に合いそうかが、ひと目で分かります。
+
+\begin{numfig}{ガントチャートのイメージ。横棒が各Issueの期間、赤い縦線がマイルストーンの締め切り}{fig:gantt}
+\begin{tikzpicture}[x=1.9cm, y=0.95cm]
+  % 日付の目盛りと縦の補助線
+  \foreach \d [count=\i from 0] in {11/3, 11/10, 11/17, 11/24, 12/1, 12/8} {
+    \draw[gray!45, line width=0.6pt] (\i,0.45) -- (\i,-3.5);
+    \node[font=\sffamily\small] at (\i,0.8) {\d};
+  }
+  % 各Issueの行（行番号/名前/開始/終了/色）
+  \foreach \y/\name/\s/\e/\c in {
+      0/{\#12 先行研究を調べる}/0/1.4/gitGreen,
+      1/{\#13 実験プログラムを作る}/1/3.2/gitBlue,
+      2/{\#14 実験を回して集計する}/2.6/4.3/gitBlue,
+      3/{\#15 発表スライドを作る}/3.6/4.9/gitOrange} {
+    \node[anchor=east, font=\sffamily\small] at (-0.15,-\y) {\name};
+    \fill[\c, rounded corners=3pt] (\s,{-\y-0.3}) rectangle (\e,{-\y+0.3});
+  }
+  % マイルストーン（締め切り）の縦線
+  \draw[gitRed, line width=1.8pt, dashed] (5,0.45) -- (5,-3.5);
+  \node[fill=gitRed, text=white, font=\sffamily\small\bfseries,
+        rounded corners=2pt, anchor=north] at (5,-3.6) {マイルストーン：中間発表};
+  % 凡例
+  \node[fill=gitGreen, text=white, font=\sffamily\small, rounded corners=2pt,
+        anchor=north west] (L1) at (-2.6,-3.75) {完了};
+  \node[fill=gitBlue, text=white, font=\sffamily\small, rounded corners=2pt,
+        right=0.2cm of L1] (L2) {作業中};
+  \node[fill=gitOrange, text=white, font=\sffamily\small, rounded corners=2pt,
+        right=0.2cm of L2] {未着手};
+\end{tikzpicture}
+\end{numfig}
+
+GitHubのProjectsでは、\textbf{Roadmapレイアウト}がこのガントチャートにあたります。前の節で入れた開始日と終了予定日から、横棒が自動で描かれます。
+
+\subsubsection{ロードマップのビューを作る}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item ビューのタブの横の \textbf{+ New view} を押し、\textbf{Roadmap} を選ぶ
+  \item 右上の \textbf{Date fields}（カレンダーのアイコン）を押し、\textbf{Start date} に \cmd{Start date}、\textbf{Target date} に \cmd{Target date} を選ぶ
+  \item 横棒が表示されたら、ビューのタブ名を押して名前を付け（例：\cmd{スケジュール}）、\textbf{Save} で保存する
+\end{enumerate}
+\shotplaceholder[5cm]{04_advanced/project_roadmap.png}{Roadmapレイアウト。開始日から終了予定日までが横棒で表示される}
+
+\begin{notebox}
+Date fields には、日付フィールドの代わりに \textbf{Iteration} フィールドも選べます。その場合、横棒はイテレーションの区切り（例：第1週〜第2週）単位で描かれます。日付を1件ずつ決めるのが大変なときに便利です。
+\end{notebox}
+
+\subsubsection{ロードマップを操作する}
+
+ロードマップの上では、次の操作ができます。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{横棒をドラッグ}：作業の期間をずらす。\textbf{棒の端をドラッグ}すると、開始日・終了予定日だけを変えられる。変更はそのまま日付フィールドに反映される
+  \item \textbf{日付が未設定のIssue}：横棒が出ないので、その行の空いている場所を押すと期間を入れられる
+  \item \textbf{表示の幅}：右上の虫めがねのアイコンで、\textbf{Month}（月）／\textbf{Quarter}（四半期）／\textbf{Year}（年）を切り替える。数週間の計画なら Month が見やすい
+  \item \textbf{並べ替え・グループ分け}：検索欄の横の \textbf{View}（歯車）→ \textbf{Sort} で開始日順に、\textbf{Group by} で担当者ごと・マイルストーンごとに分けて表示できる
+\end{itemize}
+
+担当者でグループ分けすると、\textbf{1人に作業が集中している期間}がすぐに分かります。マイルストーンでグループ分けすると、締め切りごとの段取りが見えます。
+
+\subsubsection{マイルストーンを縦線で表示する}
+
+ロードマップには、\textbf{マイルストーンの締め切りを縦線（マーカー）で表示}できます。図\ref{fig:gantt}の赤い縦線がそれです。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item ロードマップ右上の \textbf{Markers} を押す
+  \item 表示したいマーカーの種類として \textbf{Milestones} にチェックを入れる
+\end{enumerate}
+\shotplaceholder{04_advanced/project_markers.png}{Markers メニューでマイルストーンの縦線を表示する}
+
+縦線の\textbf{右側にはみ出している横棒}は、「締め切りまでに終わらない予定の作業」です。計画を立てた段階で見つかれば、作業を減らす・担当を替える・順番を入れ替える、といった手を打てます。Markers では、マイルストーンのほかにイテレーションの区切りや日付フィールドも縦線として出せます。
+
+\subsection{マイルストーンとロードマップの使い分け}
+
+マイルストーンとロードマップは、どちらも「いつまでに」を扱うので混同しがちです。役割は次のように分かれます。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} X X@{}}
+\toprule
+ & マイルストーン & ロードマップ（ガントチャート） \\
+\midrule
+答える問い & \textbf{いつまでに、何を}終わらせるか & 各作業を\textbf{いつからいつまで}やるか \\
+持っている日付 & 締め切り（1つ） & Issueごとの開始日と終了予定日 \\
+進み具合の見え方 & 完了率（\%） & 横棒の位置と、締め切り線との関係 \\
+置き場所 & リポジトリ & プロジェクト \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+おすすめは、\textbf{まずマイルストーンで締め切りを決め、そこに入るIssueをロードマップで段取りする}順番です。締め切り（マイルストーン）がゴール、ロードマップはそこまでの道のり、と考えてください。
+
+\subsection{自動化で付箋を動かす手間を省く}
+
+Boardの付箋を毎回手で動かすのは面倒で、動かし忘れると進行表が実態とずれていきます。Projectsには、決まった出来事で\textbf{フィールドを自動で書き換える仕組み（ワークフロー）}が組み込まれています。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item プロジェクト右上の \textbf{…}（メニュー）→ \textbf{Workflows} を開く
+  \item 左の一覧から設定したいワークフローを選び、右上の \textbf{Edit} を押す
+  \item 設定を変えたら、\textbf{Save and turn on workflow} を押す
+\end{enumerate}
+\shotplaceholder{04_advanced/project_workflows.png}{Workflows の設定画面}
+
+よく使うワークフローは次の通りです。上の2つは、プロジェクトを作った時点で\textbf{最初から有効}になっています。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.2cm} X@{}}
+\toprule
+ワークフロー & 動き \\
+\midrule
+\textbf{Item closed}（最初から有効） & Issue・PRが閉じたら、Statusを \textbf{Done} にする \\
+\textbf{Pull request merged}（最初から有効） & PRがマージされたら、Statusを \textbf{Done} にする \\
+\textbf{Item added to project} & プロジェクトに追加されたら、Statusを \textbf{Todo} にする \\
+\textbf{Auto-add to project} & 条件（例：\cmd{is:issue is:open}）に合うIssueを、リポジトリから自動で追加する \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+ここで、前の節の\textbf{\cmd{Closes \#12}} が効いてきます。PRをマージすると Issue \cmd{\#12} が自動で閉じ、それをきっかけにボードの付箋も自動で \textbf{Done} へ動きます。つまり、\textbf{PRをマージするだけで、Issue・ボード・マイルストーンの完了率が全部そろって更新される}状態になります。
+
+\begin{notebox}
+\textbf{Auto-add to project} で作れるワークフローの数は、契約しているプランによって上限があります。無料プランで足りないときは、リポジトリごとに条件をまとめるか、Issue側から手で追加してください。
+\end{notebox}
+
+\subsection{補足：Markdownだけでガントチャートを書く（Mermaid）}
+
+プロジェクトを作るほどではないが、計画を図で共有したい、というときは、IssueやREADMEの本文に\textbf{Mermaid（マーメイド）}という書き方でガントチャートを書く方法もあります。GitHubは、\cmd{```mermaid} で囲んだ部分を図として表示してくれます。
+
+\begin{codebox}[markdown]
+\begin{code}
+```mermaid
+gantt
+    title 中間発表までの計画
+    dateFormat YYYY-MM-DD
+    section 準備
+    先行研究を調べる      :done,   t1, 2026-11-03, 10d
+    section 実験
+    実験プログラムを作る  :active, t2, 2026-11-10, 16d
+    実験を回して集計する  :        t3, after t2, 12d
+    section 発表
+    発表スライドを作る    :        t4, 2026-11-28, 9d
+    中間発表              :milestone, m1, 2026-12-08, 0d
+```
+\end{code}
+\end{codebox}
+
+1行が1本の横棒で、\cmd{名前 :状態, ID, 開始日, 期間} の順に書きます。\cmd{after t2} と書くと「\cmd{t2} が終わってから始める」という意味になり、\cmd{milestone} を付けると締め切りの印になります。
+
+ただし、この図は\textbf{ただの文章}なので、Issueの開閉や担当者とは連動しません。予定が変わるたびに手で書き直す必要があります。\textbf{計画書や提案書に載せる「最初の予定」}にはMermaid、\textbf{日々の進行管理}にはProjectsのロードマップ、と使い分けてください。
 
 % ---------------------------------------------------------------------
 \section{運用の型}
 
-\begin{draftbox}
-\textbf{書くこと}：そのまま真似できる運用ルールを、別冊 付録Aと同じ調子で示す。
+最後に、Issueとプロジェクトを回すための「型」をまとめます。別冊 付録Aと同じく、\textbf{迷ったらこれに沿えばまず問題ありません}。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{作業を始める前に必ずIssueを立てる}（口頭で決めたことも1行で残す）
-  \item \textbf{1 Issue = 1 ブランチ = 1 PR} を基本にする
-  \item 週に1度、\textbf{開いたままのIssueを棚卸し}する（閉じ忘れの防止）
-  \item 議論はチャットではなく\textbf{Issueのコメントに書く}（後から経緯を追えるようにする）
-\end{itemize}
-\end{draftbox}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.6cm} X@{}}
+\toprule
+ルール & なぜそうするか \\
+\midrule
+作業を始める前に必ずIssueを立てる & 口頭やチャットで決めたことも、1行でも残せば後から追える \\
+\addlinespace[3pt]
+1 Issue ＝ 1 ブランチ ＝ 1 PR & 作業・変更・記録が1対1で対応し、レビューと振り返りが楽になる \\
+\addlinespace[3pt]
+担当者は1人に決め、空のままにしない & 「誰かがやるだろう」で作業が止まるのを防ぐ \\
+\addlinespace[3pt]
+締め切りのある作業はマイルストーンに入れる & 完了率で遅れに早く気づける \\
+\addlinespace[3pt]
+PR本文に \cmd{Closes \#番号} を書く & マージだけでIssueとボードが自動で完了になる \\
+\addlinespace[3pt]
+議論はチャットではなくIssueのコメントに書く & なぜそう決めたかの経緯が、作業とセットで残る \\
+\addlinespace[3pt]
+週に1度、棚卸しをする & 閉じ忘れ・担当者なし・期限切れを早めに片付ける \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+週1回の棚卸しでは、次の順番で見ると10分ほどで終わります。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{マイルストーン}の一覧で、締め切りと完了率を見る（遅れていないか）
+  \item \textbf{ロードマップ}で、締め切りの縦線からはみ出している横棒がないかを見る
+  \item \textbf{ボード}の In Progress に、1週間以上動いていない付箋がないかを見る
+  \item \textbf{担当者が空のIssue}と、もう不要になったIssueを片付ける
+\end{enumerate}
 
 % ---------------------------------------------------------------------
 \section*{この章のまとめ}
 \addcontentsline{toc}{section}{この章のまとめ}
 
-\begin{draftbox}
-本文を書き終えてから、次の骨子でまとめを作る。
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Issueは「やること」、PRは「やった変更」
-  \item Issueは\textbf{タイトルで内容が分かる}ように書く
-  \item \cmd{Closes \#12} でPRとIssueをつなぐと、マージで自動的に閉じる
-  \item 1 Issue = 1 ブランチ = 1 PR
+\begin{itemize}[leftmargin=1.4em]
+  \item Issueは「\textbf{やること}」、PRは「\textbf{やった変更}」。Issueが先、PRが後
+  \item Issueは\textbf{タイトルで内容が分かる}ように書き、本文に現状・期待する状態・手順を書く
+  \item \textbf{ラベル}で種類、\textbf{担当者}で人、\textbf{マイルストーン}で締め切りを表す
+  \item PR本文に \textbf{\cmd{Closes \#12}} と書くと、マージと同時にIssueが閉じる
+  \item \textbf{Projects}で、同じIssueをボード（進み具合）とロードマップ（ガントチャート）で眺められる
+  \item ロードマップにマイルストーンの縦線を出すと、\textbf{締め切りに間に合わない作業}が見える
+  \item 基本は \textbf{1 Issue ＝ 1 ブランチ ＝ 1 PR}
 \end{itemize}
-次章は、この流れに\textbf{自動チェック}を足す話（GitHub Actions）につなげる。
-\end{draftbox}
+
+これで、「何を・誰が・いつまでに」をGitHubの上で管理できるようになりました。次章では、この流れに\textbf{自動チェック}を足します。PRを出すたびに機械が中身を確かめてくれる仕組み、GitHub Actionsです。
