@@ -33,7 +33,7 @@ IssueとPRは画面がよく似ていますが、役割ははっきり違いま�
 \toprule
  & Issue & PR（プルリクエスト） \\
 \midrule
-中身 & \textbf{やること}（これから行う作業） & \textbf{やった変更}（実際に書き換えた差分） \\
+中身 & \textbf{やること}（これから行う作業） & \textbf{やったこと}（実際に書き換えた差分） \\
 作るタイミング & 作業を始める\textbf{前} & 作業を終えた\textbf{後} \\
 ファイルの変更 & 含まない & 含む（コミットの集まり） \\
 閉じるとき & 作業が終わったとき & マージしたとき（または見送ったとき） \\
@@ -41,13 +41,13 @@ IssueとPRは画面がよく似ていますが、役割ははっきり違いま�
 \end{tabularx}
 \end{center}
 
-つまり、\textbf{Issueが先、PRが後}です。Issueで「やること」を決め、ブランチで作業し、PRで「やった変更」を出してマージする、という順番になります（図\ref{fig:issue-flow}）。
+つまり、\textbf{Issueが先、PRが後}です。Issueで「やること」を決め、ブランチで作業し、PRで「やったこと」を出してマージする、という順番になります（図\ref{fig:issue-flow}）。
 
-\begin{numfig}{Issue（やること）から始まり、PR（やった変更）のマージで終わる}{fig:issue-flow}
+\begin{numfig}{Issue（やること）から始まり、PR（やったこと）のマージで終わる}{fig:issue-flow}
 \begin{tikzpicture}
   \node[flownode, fill=gitBlue] (I) {Issue\\やること};
   \node[flownode, fill=gitOrange, right=1.4cm of I] (B) {ブランチ\\作業する};
-  \node[flownode, fill=gitPurple, right=1.4cm of B] (P) {PR\\やった変更};
+  \node[flownode, fill=gitPurple, right=1.4cm of B] (P) {PR\\やったこと};
   \node[flownode, fill=gitGreen, right=1.4cm of P] (M) {マージ\\main に反映};
   \draw[flowarrow] (I) -- (B);
   \draw[flowarrow] (B) -- (P);
@@ -77,17 +77,17 @@ Issueはブラウザから作ります。次の手順で1枚立ててみまし�
   \item GitHubで対象のリポジトリを開き、上部の \textbf{Issues} タブを押す
   \item 右上の緑の \textbf{New issue} ボタンを押す
 \end{enumerate}
-\shotplaceholder{04_advanced/issue_new_button.png}{Issuesタブと「New issue」ボタン}
+\screenshot[0.9]{04_advanced/issue_new_button.png}{Issuesタブと「New issue」ボタン}
 
 \begin{enumerate}[leftmargin=1.6em, start=3]
-  \item \textbf{Title} にタイトル、その下の欄に本文を書く（本文はMarkdownで書ける）
-  \item 右下の \textbf{Create}（または \textbf{Submit new issue}）を押して作成する
+  \item \textbf{Add a title} にタイトル、\textbf{Add a description} に本文を書く（本文はMarkdownで書ける）
+  \item 下の \textbf{Create} を押して作成する
 \end{enumerate}
-\shotplaceholder{04_advanced/issue_form.png}{タイトルと本文の入力画面}
+\screenshot[0.75]{04_advanced/issue_from.png}{タイトルと本文の入力画面。右側のサイドバーは後の節で使う}
 
-作成すると、Issueに \cmd{\#12} のような\textbf{番号}が付きます。この番号が、後でPRやブランチとつなぐときの「住所」になります。
+作成すると、Issueに \cmd{\#9} のような\textbf{番号}が付き、タイトルの下に \textbf{Open}（未完了）と表示されます。この番号が、後でPRやブランチとつなぐときの「住所」になります。以降の説明では、例として \cmd{\#12} を使います。
 
-\shotplaceholder{04_advanced/issue_created.png}{作成したIssue。タイトルの横に番号（\#12）が付く}
+\screenshottrim[0.7]{04_advanced/issue_created.png}{作成したIssue。タイトルの横に番号（\#9）が付く}{0 440bp 0 0}
 
 \begin{notebox}
 Issueの番号とPRの番号は\textbf{同じ通し番号}を使います。Issueが \cmd{\#12} なら、次に作ったPRは \cmd{\#13} になります。番号が飛んでいても、間にPRがあるだけなので気にしなくて大丈夫です。
@@ -138,7 +138,56 @@ README & READMEにWindowsのインストール手順を追記する \\
 
 \subsection{Issueテンプレートを用意する}
 
-毎回3点を思い出して書くのは大変なので、\textbf{テンプレート}を用意しておきます。リポジトリの \cmd{.github/ISSUE\_TEMPLATE/} フォルダにMarkdownファイルを置くと、New issue を押したときに\textbf{テンプレートの選択肢}が出て、選ぶと本文に雛形が入った状態で始まります。
+毎回3点を思い出して書くのは大変なので、\textbf{テンプレート}を用意しておきます。テンプレートがあると、New issue を押したときに\textbf{テンプレートの選択肢}が出て、選ぶと本文に雛形が入った状態で書き始められます。
+
+テンプレートの実体は、リポジトリの \cmd{.github/ISSUE\_TEMPLATE/} フォルダに置くMarkdownファイルです。用意する方法は2つあります。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.4cm} X X@{}}
+\toprule
+ & 方法A：公式のテンプレート & 方法B：自作のテンプレート \\
+\midrule
+作り方 & 設定画面のボタンから追加する & ファイルを自分で書いてPRで追加する \\
+手間 & 数クリックで終わる & ファイルを書く必要がある \\
+中身の言語 & \textbf{英語} & 自由（日本語で書ける） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+どちらで作っても、置かれる場所とファイルの形は同じです。\textbf{日本語のチームなら方法B}がおすすめです。手早く試したいときは方法Aで追加し、後から中身を日本語に書き換えても構いません。
+
+\subsubsection{方法A：GitHub公式のテンプレートを追加する}
+
+GitHubには、よく使われる形のテンプレートが用意されていて、設定画面から追加できます。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item リポジトリの \textbf{Settings} → \textbf{General} を開き、\textbf{Features} の欄までスクロールする
+  \item \textbf{Issues} の項目にある \textbf{Set up templates} を押す
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_template_setup.png}{Settings の Features にある「Set up templates」ボタン}
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item \textbf{Add template} を押し、追加したいテンプレートを選ぶ
+  \begin{itemize}[leftmargin=1.4em, nosep]
+    \item \textbf{Bug report}：不具合の報告用
+    \item \textbf{Feature request}：機能の要望用
+    \item \textbf{Custom template}：中身が空の、自由に書くための雛形
+  \end{itemize}
+  \item 中身を確かめたいときは \textbf{Preview and edit} を押す。鉛筆のアイコンから中身を書き換えることもできる
+  \item 右上の \textbf{Propose changes} を押し、コミットメッセージを入れる
+  \item \cmd{main} に直接コミットするか、\textbf{新しいブランチを作ってPRを出す}かを選び、\textbf{Commit changes} を押す
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_template_add.png}{Add template から公式のテンプレートを選ぶ画面}
+
+コミットすると、\cmd{.github/ISSUE\_TEMPLATE/} に \cmd{bug\_report.md} などのファイルが作られます。PRを選んだ場合は、マージした時点から New issue で選べるようになります。
+
+方法Aの欠点は、\textbf{テンプレートの中身がすべて英語}であることです。「Describe the bug」「To Reproduce」のような見出しが並ぶので、日本語で書くチームでは、書く人が英語の見出しと日本語の本文を行き来することになります。そのため、次の方法Bで日本語のテンプレートを用意するのがおすすめです。
+
+\subsubsection{方法B：日本語のテンプレートを自作する}
+
+テンプレートのファイルを自分で書き、いつもの変更と同じく\textbf{ブランチを切ってPRでマージ}します。ここでは、次の2つを作ります。
 
 \begin{codebox}[text]
 \begin{code}
@@ -150,7 +199,32 @@ my-project/
 \end{code}
 \end{codebox}
 
-次の2つを、そのままコピーして使えます。先頭の \cmd{-{}-{}-} で囲まれた部分は\textbf{設定欄}で、\cmd{name} がテンプレートの名前、\cmd{about} が説明、\cmd{title} がタイトルの書き出し、\cmd{labels} が最初から付けるラベルです。
+\begin{enumerate}[leftmargin=1.6em]
+  \item 作業ブランチを切り、テンプレートを置くフォルダを作る
+\begin{codebox}[bash]
+\begin{code}
+git switch main
+git pull
+git switch -c chore/add-issue-templates
+mkdir -p .github/ISSUE_TEMPLATE
+\end{code}
+\end{codebox}
+  \item フォルダの中に、下の2つのファイル（\cmd{bug\_report.md} と \cmd{task.md}）を作る
+  \item コミット・\cmd{push} して、PRを出す
+\begin{codebox}[bash]
+\begin{code}
+git add .github/ISSUE_TEMPLATE
+git commit -m "chore: 日本語のIssueテンプレートを追加"
+git push -u origin chore/add-issue-templates
+\end{code}
+\end{codebox}
+  \item PRをマージしたら、Issuesタブの \textbf{New issue} を押し、テンプレートの選択肢が出ることを確かめる
+\end{enumerate}
+\shotplaceholder{04_advanced/issue_template_chooser.png}{New issue を押すと、作ったテンプレートが選択肢として並ぶ}
+
+ファイルの中身は、次の2つをそのままコピーして使えます。先頭の \cmd{-{}-{}-} で囲まれた部分は\textbf{設定欄}で、\cmd{name} がテンプレートの名前（選択肢に表示される）、\cmd{about} が説明、\cmd{title} がタイトルの書き出し、\cmd{labels} が最初から付けるラベルです。
+
+\cmd{bug\_report.md}（不具合の報告用）：
 
 \begin{codebox}[markdown]
 \begin{code}
@@ -178,10 +252,12 @@ labels: bug
 \end{code}
 \end{codebox}
 
+\cmd{task.md}（やること用）：
+
 \begin{codebox}[markdown]
 \begin{code}
 ---
-name: タスク
+name: やることの登録
 about: やることを1件登録する
 title: ""
 labels: ""
@@ -201,7 +277,9 @@ labels: ""
 
 \cmd{- [ ]} は\textbf{チェックリスト}になり、Issueの画面でクリックしてチェックを付けられます。完了条件をチェックリストで書いておくと、「どこまで終わったか」が見えるようになります。
 
-テンプレートのファイルは、普段の変更と同じく\textbf{ブランチを切ってPRでマージ}します。\cmd{main} に入った時点から、New issue で選べるようになります。
+\begin{warnbox}
+\cmd{name} は\textbf{4文字以上}にしてください。短すぎる名前のテンプレートは、選択肢に出ないことがあります。また、テンプレートが使えるようになるのは、ファイルが\textbf{\cmd{main}（既定のブランチ）にマージされてから}です。作業ブランチに置いただけでは選択肢に出ません。
+\end{warnbox}
 
 % ---------------------------------------------------------------------
 \section{ラベル・担当者・マイルストーンで整理する}
@@ -701,7 +779,7 @@ PR本文に \cmd{Closes \#番号} を書く & マージだけでIssueとボー�
 \addcontentsline{toc}{section}{この章のまとめ}
 
 \begin{itemize}[leftmargin=1.4em]
-  \item Issueは「\textbf{やること}」、PRは「\textbf{やった変更}」。Issueが先、PRが後
+  \item Issueは「\textbf{やること}」、PRは「\textbf{やったこと}」。Issueが先、PRが後
   \item Issueは\textbf{タイトルで内容が分かる}ように書き、本文に現状・期待する状態・手順を書く
   \item \textbf{ラベル}で種類、\textbf{担当者}で人、\textbf{マイルストーン}で締め切りを表す
   \item PR本文に \textbf{\cmd{Closes \#12}} と書くと、マージと同時にIssueが閉じる
