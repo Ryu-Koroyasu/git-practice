@@ -1,58 +1,81 @@
 % =====================================================================
 % 応用編 第2章 GitHub Actionsで自動化する
-% ステータス: 雛形（見出しと執筆メモのみ。本文はこれから書く）
+% 題材は pytest（Pythonのテスト）。スクリーンショットは \shotplaceholder で仮置き。
 % =====================================================================
 \chapter{GitHub Actionsで自動化する}
 
-前章までで、\textbf{Issueで作業を決め、ブランチを切り、PRでマージする}という流れができました。この章では、その流れの上に\textbf{自動チェック}を載せます。「\cmd{push} するたびにテストが走る」「PRを出すと、通らない限りマージできない」という状態を、\textbf{GitHub Actions} で作ります。
-
-\begin{draftbox}
-\textbf{この章のゴール}（清書時にこの枠は削除する）
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item ワークフローファイル（\cmd{.github/workflows/*.yml}）の構造を読める
-  \item \cmd{push} / PR をきっかけに動く、最初のワークフローを作れる
-  \item 失敗したときに、どこを見て直せばよいか分かる
-  \item ブランチ保護と組み合わせて、\textbf{チェックが通らないとマージできない}状態にできる
-\end{itemize}
-\textbf{書くときの注意}：Actionsは機能が広いので、\textbf{「PRのたびに自動チェックを走らせる」1本に絞る}。
-デプロイ・リリース自動化には深入りせず、最後に「次に何を学べばよいか」として名前だけ挙げる。
-\end{draftbox}
+前章までで、\textbf{Issueで作業を決め、ブランチを切り、PRでマージする}という流れができました。この章では、その流れの上に\textbf{自動チェック}を載せます。「\cmd{push} するたびにテストが走る」「PRを出すと、テストが通らない限りマージできない」という状態を、\textbf{GitHub Actions} で作ります。
 
 \begin{hintbox}
 \textbf{この章の読み方}
 \begin{itemize}[leftmargin=1.4em, nosep]
   \item とりあえず動かしたい人 → 「最初のワークフローを作る」を写経すればOK
   \item YAMLの読み方が不安な人 → 先に「ワークフローファイルの構造」へ
+  \item 赤い×が出て困っている人 → 「実行結果の見方と、失敗したときの直し方」へ
 \end{itemize}
 \end{hintbox}
 
 % ---------------------------------------------------------------------
 \section{GitHub Actionsとは何か}
 
-\begin{draftbox}
-\textbf{書くこと}
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Actions＝\textbf{GitHub上に住んでいる「自動作業係」}。「\cmd{push} されたら」「PRが出たら」といった\textbf{きっかけ}で、決めておいた作業を実行する
-  \item 動く場所は\textbf{GitHubが用意する使い捨てのPC（ランナー）}であり、自分のPCではないこと
-  \item うれしいこと：\textbf{レビュー前に機械が確認してくれる}／\textbf{人によって手順がぶれない}／\textbf{確認忘れがなくなる}
-  \item シリーズのたとえに接続：Actionsは「\textbf{倉庫に荷物を入れる前の検品係}」
-  \item 料金の注意：Publicリポジトリは無料、Privateは無料枠あり（\textbf{枠を超えると課金}）。最新の条件は公式を見るよう促す
+\textbf{GitHub Actions}は、GitHubの上に住んでいる\textbf{自動作業係}です。「\cmd{push} されたら」「PRが出たら」といった\textbf{きっかけ}を決めておくと、そのたびに、あらかじめ書いておいた作業（テストの実行、文章のチェック、PDFのビルドなど）を代わりにやってくれます。
+
+倉庫のたとえでいえば、Actionsは\textbf{倉庫の入口にいる検品係}です。本棚（\cmd{main}）に書類を納める申請（PR）が出るたびに、検品係が中身を確かめ、「問題なし（緑）」か「問題あり（赤）」の札をPRに貼ってくれます。レビューする人は、その札を見てから中身を読めばよくなります（図\ref{fig:actions-flow}）。
+
+\begin{numfig}{きっかけ（push・PR）でランナーが起動し、結果がPRに表示される}{fig:actions-flow}
+\begin{tikzpicture}
+  \node[flownode, fill=gitPurple] (T) {きっかけ\\push・PR};
+  \node[flownode, fill=gitBlue, right=1.3cm of T] (R) {ランナー起動\\（使い捨てのPC）};
+  \node[flownode, fill=gitOrange, right=1.3cm of R] (J) {ジョブ実行\\テストなど};
+  \node[flownode, fill=gitGreen, above right=0.2cm and 1.3cm of J] (OK) {成功\\緑のチェック};
+  \node[flownode, fill=gitRed, below right=0.2cm and 1.3cm of J] (NG) {失敗\\赤い×};
+  \draw[flowarrow] (T) -- (R);
+  \draw[flowarrow] (R) -- (J);
+  \draw[flowarrow] (J.east) -- (OK.west);
+  \draw[flowarrow] (J.east) -- (NG.west);
+\end{tikzpicture}
+\end{numfig}
+
+\subsection{どこで動くのか}
+
+Actionsの作業は、\textbf{自分のPCではなく、GitHubが用意するPC}の上で動きます。このPCを\textbf{ランナー（runner）}と呼びます。ランナーは実行のたびに\textbf{まっさらな状態で用意され、終わると捨てられます}。そのため、毎回「リポジトリを取ってくる」「Pythonを入れる」「必要なパッケージを入れる」といった準備から書く必要があります。面倒に見えますが、この性質のおかげで「自分のPCでは動くのに」という環境の違いに左右されない確認ができます。
+
+\subsection{何がうれしいのか}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{確認忘れがなくなる}：テストを走らせ忘れたまま \cmd{push} しても、機械が必ず走らせる
+  \item \textbf{人によって手順がぶれない}：確認の手順がファイルに書かれているので、誰がPRを出しても同じ確認になる
+  \item \textbf{レビューが楽になる}：「動くかどうか」は機械が見るので、人は「書き方・考え方」のレビューに集中できる
 \end{itemize}
-\textbf{入れる図}：push / PR（きっかけ）→ ランナー起動 → ジョブ実行 → 結果がPRに緑✓／赤×で出る、の流れ図。
-\end{draftbox}
+
+\subsection{料金について}
+
+\textbf{Publicリポジトリ}では、GitHubが用意する標準のランナーを\textbf{無料}で使えます。\textbf{Privateリポジトリ}では、無料プランでも毎月一定の無料枠（Linuxのランナーで約2,000分ぶん）があり、\textbf{枠を超えると課金}されます。この章で作るテストは1回1分もかからないので、ふつうに使う分には枠に収まります。条件は変わることがあるので、最新の情報はGitHubの料金ページで確認してください。
+
+\begin{warnbox}
+WindowsやmacOSのランナーは、Linuxより\textbf{1分あたりの料金が高く}設定されています（macOSは10倍ほど）。Privateリポジトリで使うときは、特別な理由がなければLinux（\cmd{ubuntu-latest}）を使ってください。
+\end{warnbox}
 
 % ---------------------------------------------------------------------
 \section{ワークフローファイルの構造}
 
-\begin{draftbox}
-\textbf{書くこと}：\cmd{.github/workflows/} に置いたYAMLファイルが、そのままワークフローになる。
-下の骨組みを1行ずつ分解して説明する（\cmd{name} / \cmd{on} / \cmd{jobs} / \cmd{runs-on} / \cmd{steps} / \cmd{uses} / \cmd{run}）。
+Actionsで「何を、いつやるか」を書いたファイルを\textbf{ワークフロー}と呼びます。リポジトリの \cmd{.github/workflows/} フォルダにYAML（ヤムル）形式のファイルを置くと、それがそのままワークフローになります。特別な登録操作はいりません。
 
-\textbf{入れる表}：キーワードと意味の対応表（\cmd{on}＝いつ動くか、\cmd{jobs}＝何をするかのまとまり、
-\cmd{steps}＝ジョブの中の手順、\cmd{uses}＝公開部品を使う、\cmd{run}＝コマンドを実行する）。
+\subsection{YAMLの読み方}
 
-\textbf{YAMLの注意}：\textbf{字下げが意味を持つ}こと、タブではなく半角スペースを使うことを警告枠で。
-\end{draftbox}
+YAMLは、設定を書くための形式です。覚えることは3つだけです。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \cmd{名前: 値} で1つの設定を表す（コロンの後ろに\textbf{半角スペース}が必要）
+  \item \textbf{字下げ（インデント）}で「中に含まれる」ことを表す。字下げは\textbf{半角スペース2つ}が慣例
+  \item 行頭の \cmd{- } は\textbf{リストの1項目}を表す（上から順に並ぶもの）
+\end{itemize}
+
+\cmd{\#} から行末まではコメントで、実行には影響しません。
+
+\subsection{骨組みを1行ずつ読む}
+
+次が、ワークフローの最小の骨組みです。
 
 \begin{codebox}[yaml]
 \begin{code}
@@ -61,117 +84,472 @@ name: CI                      # ワークフローの名前（Actionsタブに�
 
 on:                           # いつ動かすか（きっかけ）
   push:
-    branches: [ main ]
-  pull_request:
+    branches: [ main ]        #   main に push されたとき
+  pull_request:               #   PRが出た・更新されたとき
 
 jobs:                         # 何をするか
   test:                       # ジョブの名前（自由に付けられる）
     runs-on: ubuntu-latest    # どのOSのランナーで動かすか
     steps:                    # 上から順に実行される手順
-      - uses: actions/checkout@v4   # リポジトリを取ってくる（定番の1手目）
+      - uses: actions/checkout@v7   # リポジトリを取ってくる（定番の1手目）
       - run: echo "ここに実際のチェックを書く"
 \end{code}
 \end{codebox}
 
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} X@{}}
+\toprule
+キーワード & 意味 \\
+\midrule
+\cmd{name} & ワークフローの名前。Actionsタブの一覧に表示される \\
+\cmd{on} & \textbf{いつ動くか}（きっかけ）。\cmd{push}、\cmd{pull\_request} など \\
+\cmd{jobs} & \textbf{何をするか}のまとまり。1つのワークフローに複数のジョブを書ける \\
+\cmd{runs-on} & そのジョブを動かすランナーのOS \\
+\cmd{steps} & ジョブの中の\textbf{手順}。上から順に1つずつ実行される \\
+\cmd{uses} & 誰かが公開している\textbf{部品（アクション）}を使う \\
+\cmd{run} & \textbf{コマンドを実行}する（ターミナルで打つのと同じ） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+入れ子の関係を図にすると、図\ref{fig:workflow-nest}のようになります。\textbf{ワークフローの中にジョブがあり、ジョブの中にステップが並ぶ}、という3段の箱です。
+
+\begin{numfig}{ワークフロー・ジョブ・ステップの入れ子の関係}{fig:workflow-nest}
+\begin{tikzpicture}
+  \node[flownode, fill=gitOrange, text width=6.4cm, align=left] (S1) {ステップ1：\texttt{uses: actions/checkout}};
+  \node[flownode, fill=gitOrange, text width=6.4cm, align=left, below=0.25cm of S1] (S2) {ステップ2：\texttt{uses: actions/setup-python}};
+  \node[flownode, fill=gitOrange, text width=6.4cm, align=left, below=0.25cm of S2] (S3) {ステップ3：\texttt{run: pytest}};
+  \begin{scope}[on background layer]
+    \node[draw=gitBlue, line width=1.6pt, rounded corners=6pt, inner sep=10pt,
+          fit=(S1)(S3), label={[font=\sffamily\small\bfseries, text=gitBlue]north:ジョブ（test）}] (JOB) {};
+    \node[draw=gitPurple, line width=1.6pt, rounded corners=8pt, inner sep=12pt,
+          fit=(JOB), yshift=6pt, minimum height=5.6cm, label={[font=\sffamily\small\bfseries, text=gitPurple]north:ワークフロー（ci.yml）}] {};
+  \end{scope}
+\end{tikzpicture}
+\end{numfig}
+
+\cmd{on} に書けるきっかけは、ほかにもあります。よく使うものだけ挙げます。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.6cm} X@{}}
+\toprule
+書き方 & 動くタイミング \\
+\midrule
+\cmd{push: branches: [ main ]} & \cmd{main} に \cmd{push}（マージを含む）されたとき \\
+\cmd{pull\_request:} & PRが作られたとき、PRのブランチに \cmd{push} されたとき \\
+\cmd{workflow\_dispatch:} & Actionsタブの \textbf{Run workflow} ボタンを押したとき（手動） \\
+\cmd{schedule:} & 決まった時刻（毎日・毎週など） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{warnbox}
+YAMLは\textbf{字下げそのものが意味を持ちます}。字下げが1つずれるだけで、「\cmd{steps} の中にあるはずの手順が外に出た」と解釈され、エラーになります。字下げには\textbf{タブを使わず、半角スペース}を使ってください。VS Codeなら、右下のステータスバーに「スペース: 2」と出ていれば大丈夫です。
+\end{warnbox}
+
 % ---------------------------------------------------------------------
 \section{最初のワークフローを作る}
 
-\begin{draftbox}
-\textbf{書くこと}：写経して1本動かすまで。ここが章の中心。
+ここがこの章の中心です。\textbf{PRを出すたびにPythonのテストが自動で走る}ワークフローを、写経して1本動かします。テストには、Pythonで定番の \textbf{pytest} を使います。
 
-\textbf{手順の骨子}
-\begin{enumerate}[leftmargin=1.6em, nosep]
-  \item ブランチを切る（\cmd{feature/add-ci}）
-  \item \cmd{.github/workflows/ci.yml} を作る（中身は上の骨組み）
-  \item \cmd{add} → \cmd{commit} → \cmd{push} → PRを出す
-  \item PR画面の下部に\textbf{チェック結果}が出るのを確認する
-  \item 緑✓になったらマージする
-\end{enumerate}
+\subsection{題材を用意する}
 
-\textbf{必要なスクリーンショット}（\cmd{images/04\_advanced/} に置く）
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item \cmd{actions\_tab.png}：Actionsタブの実行一覧
-  \item \cmd{pr\_checks\_running.png}：PR下部で実行中のチェック
-  \item \cmd{pr\_checks\_passed.png}：緑✓になった状態
+まず、テストされる側のプログラムと、テストを用意します。次の3つのファイルをリポジトリの一番上に作ってください。
+
+\begin{codebox}[text]
+\begin{code}
+my-project/
+├── calc.py            ← テストされるプログラム
+├── test_calc.py       ← テスト
+└── requirements.txt   ← 必要なパッケージの一覧
+\end{code}
+\end{codebox}
+
+\cmd{calc.py} は、数のリストの平均を返す関数が1つだけのプログラムです。
+
+\begin{codebox}[python]
+\begin{code}
+def average(nums: list[float]) -> float:
+    """数値のリストの平均を返す。
+
+    Args:
+        nums: 平均を取る数値のリスト。
+
+    Returns:
+        平均値。
+
+    Raises:
+        ValueError: リストが空のとき。
+    """
+    if not nums:
+        raise ValueError("空のリストの平均は計算できません")
+    return sum(nums) / len(nums)
+\end{code}
+\end{codebox}
+
+\cmd{test\_calc.py} は、この関数が正しく動くかを確かめる\textbf{テスト}です。pytestは、\cmd{test\_} で始まるファイルの中の、\cmd{test\_} で始まる関数を自動で見つけて実行します。\cmd{assert} の後ろの式が\textbf{正しくなければ失敗}になります。
+
+\begin{codebox}[python]
+\begin{code}
+import pytest
+
+from calc import average
+
+
+def test_average() -> None:
+    """平均が正しく計算されることを確かめる。"""
+    assert average([1, 2, 3]) == 2
+    assert average([1, 2]) == 1.5
+
+
+def test_average_empty() -> None:
+    """空のリストでは ValueError になることを確かめる。"""
+    with pytest.raises(ValueError):
+        average([])
+\end{code}
+\end{codebox}
+
+\cmd{requirements.txt} には、必要なパッケージの名前を1行に1つ書きます。ランナーはまっさらなPCなので、ここに書いたものを毎回インストールさせます。
+
+\begin{codebox}[text]
+\begin{code}
+pytest
+\end{code}
+\end{codebox}
+
+いきなりActionsに任せる前に、\textbf{手元で一度テストを走らせて}、通ることを確かめておきます。
+
+\begin{codebox}[bash]
+\begin{code}
+pip install -r requirements.txt
+pytest
+\end{code}
+\end{codebox}
+
+\begin{codebox}[text]
+\begin{code}
+collected 2 items
+
+test_calc.py ..                                    [100%]
+
+==================== 2 passed in 0.01s ====================
+\end{code}
+\end{codebox}
+
+\cmd{2 passed} と出れば、2つのテストがどちらも通っています。\textbf{手元で通らないテストは、Actionsでも通りません}。まず手元で確かめる、という順番を習慣にしてください。
+
+\subsection{ワークフローファイルを書く}
+
+次に、\cmd{.github/workflows/ci.yml} を作ります。前の節の骨組みの最後の行を、\textbf{Pythonを入れる → パッケージを入れる → テストを走らせる}の3ステップに置き換えたものです。
+
+\begin{codebox}[yaml]
+\begin{code}
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取ってくる
+        uses: actions/checkout@v7
+
+      - name: Python を用意する
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: パッケージを入れる
+        run: pip install -r requirements.txt
+
+      - name: テストを実行する
+        run: pytest
+\end{code}
+\end{codebox}
+
+骨組みから増えたのは次の点です。
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \cmd{name}：各ステップに\textbf{名前}を付けた。実行結果の画面にこの名前で並ぶので、どこで失敗したか分かりやすくなる
+  \item \cmd{actions/setup-python@v7}：ランナーにPythonを入れる公開部品。\cmd{with} の下に、使うバージョンを書く
+  \item \cmd{@v7}：使う部品の\textbf{バージョン}。勝手に中身が変わらないよう、必ず付ける
 \end{itemize}
 
-\textbf{題材の候補}：本シリーズの読者に合わせるなら、\textbf{LaTeX原稿のビルド}か\textbf{textlintによる文章チェック}が題材として自然。
-Pythonのテスト（\cmd{pytest}）を例にするかは、想定読者を決めてから選ぶ。
-\end{draftbox}
+ファイルの置き場所は、\textbf{必ず} \cmd{.github/workflows/} \textbf{の直下}です。フォルダ名の先頭の \cmd{.}（ドット）や、\cmd{workflows} の \cmd{s} を落とすと、ワークフローとして認識されません。
+
+\begin{codebox}[text]
+\begin{code}
+my-project/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── calc.py
+├── test_calc.py
+└── requirements.txt
+\end{code}
+\end{codebox}
+
+\subsection{PRを出して動かす}
+
+あとは、いつもの流れでPRを出すだけです。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item 作業ブランチを切る
+\begin{codebox}[bash]
+\begin{code}
+git switch main
+git pull
+git switch -c feature/add-ci
+\end{code}
+\end{codebox}
+  \item 4つのファイルを追加して、コミット・\cmd{push} する
+\begin{codebox}[bash]
+\begin{code}
+git add calc.py test_calc.py requirements.txt .github/workflows/ci.yml
+git commit -m "ci: PRのたびにpytestを実行するワークフローを追加"
+git push -u origin feature/add-ci
+\end{code}
+\end{codebox}
+  \item GitHubでPRを作る
+  \item PR画面の下のほうに、\textbf{チェックの欄}が出て、ワークフローが実行中になる
+\end{enumerate}
+\shotplaceholder{04_advanced/pr_checks_running.png}{PRの下部で、チェックが実行中になっている}
+
+\begin{enumerate}[leftmargin=1.6em, start=5]
+  \item 数十秒待つと、\textbf{All checks have passed} と緑のチェックが付く。これを確認してからマージする
+\end{enumerate}
+\shotplaceholder{04_advanced/pr_checks_passed.png}{すべてのチェックが通った状態}
+
+実行の記録は、リポジトリ上部の \textbf{Actions} タブにも一覧で残ります。いつ・どのブランチで・成功したか失敗したかを、ここで振り返れます。
+
+\shotplaceholder{04_advanced/actions_tab.png}{Actionsタブの実行一覧}
+
+\begin{notebox}
+このワークフローは \cmd{on} に \cmd{pull\_request} と \cmd{push: branches: [ main ]} の両方を書いているので、\textbf{PRのとき}と、\textbf{マージして \cmd{main} が更新されたとき}の2回動きます。PRの時点で通っていても、他の人の変更と合わさった \cmd{main} で改めて確かめるためです。
+\end{notebox}
 
 % ---------------------------------------------------------------------
 \section{よくある使いどころ}
 
-\begin{draftbox}
-\textbf{書くこと}：「何を自動化すると効くか」を、\textbf{表で一覧}にする（きっかけ／やること／うれしさ の3列）。
+テスト以外にも、「人が毎回手でやっている確認」はたいていActionsに任せられます。よく使われるものを、きっかけと合わせて挙げます。
 
-候補：
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item PRのたびに\textbf{テスト}を走らせる
-  \item PRのたびに\textbf{文法・書式チェック}（lint、textlint）を走らせる
-  \item \cmd{main} が更新されたら\textbf{ドキュメント（PDF）をビルド}して成果物を残す
-  \item タグを打ったら\textbf{リリースを作る}
-\end{itemize}
-それぞれ\textbf{どのきっかけ（\cmd{on}）で動かすか}を対応づけて書く。
-\end{draftbox}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{4.2cm} X@{}}
+\toprule
+きっかけ（\cmd{on}） & やること & うれしさ \\
+\midrule
+\cmd{pull\_request} & \textbf{テスト}を走らせる（pytestなど） & 壊れた変更がレビューに来る前に分かる \\
+\addlinespace[3pt]
+\cmd{pull\_request} & \textbf{書式・文法のチェック}（lint、textlint） & 書き方の指摘をレビューで言わずに済む \\
+\addlinespace[3pt]
+\cmd{push} （\cmd{main}） & \textbf{PDF・文書のビルド}をして成果物を残す & 最新版のPDFを誰でもダウンロードできる \\
+\addlinespace[3pt]
+\cmd{push} （タグ） & \textbf{リリース}を作る & 配布版の作成を手順どおりに自動化できる \\
+\addlinespace[3pt]
+\cmd{schedule} & 定期的な\textbf{点検}（リンク切れなど） & 誰も触っていない間に起きた問題に気づける \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+最初から全部入れる必要はありません。まずは\textbf{この章で作ったテストの1本}を回し続け、「毎回これを手で確かめているな」と気づいたものから、1つずつステップやワークフローを足していってください。
 
 % ---------------------------------------------------------------------
 \section{実行結果の見方と、失敗したときの直し方}
 
-\begin{draftbox}
-\textbf{書くこと}：赤×が出たときに読者が自力で進めるようにする節。
+自動チェックは、\textbf{失敗したときにこそ}役に立ちます。赤い×が出ても慌てず、自分で原因を突き止められるようにしておきましょう。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Actionsタブ → 対象の実行 → ジョブ → \textbf{失敗したステップを開いてログを読む}
-  \item ログは\textbf{上から読むのではなく、赤い行と最後の数十行}を見るのがコツ
-  \item よくある失敗を表に：YAMLの字下げミス／ファイルの置き場所が違う（\cmd{.github/workflows/} 直下か）／
-        ブランチ名が \cmd{on} の条件と一致していない／依存パッケージの入れ忘れ
-  \item 直したら\textbf{同じブランチに \cmd{push} すれば自動で再実行}される（PRを作り直さなくてよい）
-\end{itemize}
-\textbf{必要なスクリーンショット}：\cmd{actions\_failed\_log.png}（失敗ログを開いた画面）。
-\end{draftbox}
+\subsection{わざと失敗させてみる}
+
+練習として、\cmd{calc.py} にバグを入れてみます。割り算の \cmd{/} を、小数点以下を切り捨てる \cmd{//} に変えます。
+
+\begin{codebox}[python]
+\begin{code}
+    return sum(nums) // len(nums)   # バグ: 小数点以下が切り捨てられる
+\end{code}
+\end{codebox}
+
+これをコミットして、さっきと同じブランチに \cmd{push} します。PRのチェックが走り、しばらくすると\textbf{赤い×}が付きます。
+
+\subsection{失敗したステップのログを読む}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item PRのチェック欄で、失敗したチェックの横の \textbf{Details} を押す（またはActionsタブから、失敗した実行を開く）
+  \item ジョブの画面に、ステップが名前つきで並ぶ。\textbf{赤い×の付いたステップ}を押して開く
+  \item ログが表示されるので、\textbf{赤い行と、最後の数十行}を読む
+\end{enumerate}
+\shotplaceholder[5cm]{04_advanced/actions_failed_log.png}{失敗したステップ（テストを実行する）のログを開いた画面}
+
+今回のログの最後のほうには、次のような行が出ています。
+
+\begin{codebox}[text]
+\begin{code}
+    def test_average() -> None:
+        """平均が正しく計算されることを確かめる。"""
+        assert average([1, 2, 3]) == 2
+>       assert average([1, 2]) == 1.5
+E       assert 1 == 1.5
+E        +  where 1 = average([1, 2])
+
+FAILED test_calc.py::test_average - assert 1 == 1.5
+==================== 1 failed, 1 passed in 0.02s ====================
+Error: Process completed with exit code 1.
+\end{code}
+\end{codebox}
+
+\cmd{>} の付いた行が失敗した場所、\cmd{E} の行が理由です。「\cmd{average([1, 2])} が \cmd{1.5} になるはずなのに \cmd{1} になった」と読めれば、\cmd{//} が原因だと見当が付きます。最後の \cmd{exit code 1} は「コマンドが失敗した」という意味の決まり文句で、原因そのものではありません。
+
+ログは長いので、\textbf{上から順に読まない}のがコツです。失敗したステップだけを開き、その\textbf{最後の数十行}から上にさかのぼって読みます。
+
+\subsection{直して、もう一度 push する}
+
+原因が分かったら、手元で直して \cmd{pytest} が通ることを確かめ、\textbf{同じブランチに \cmd{push}} します。
+
+\begin{codebox}[bash]
+\begin{code}
+# calc.py の // を / に戻してから
+pytest
+git add calc.py
+git commit -m "fix: 平均の計算で小数点以下が切り捨てられる不具合を修正"
+git push
+\end{code}
+\end{codebox}
+
+PRのブランチに \cmd{push} すると、\textbf{ワークフローが自動でもう一度動きます}。PRを作り直す必要はありません。コードを変えずにもう一度だけ試したいとき（ネットワークの一時的な不調など）は、失敗した実行の画面右上の \textbf{Re-run jobs} からやり直せます。
+
+\subsection{よくある失敗}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.8cm} X@{}}
+\toprule
+症状 & 原因と直し方 \\
+\midrule
+PRを出してもチェックが出ない & ファイルの置き場所が違う。\cmd{.github/workflows/} の\textbf{直下}にあるか、綴りを確認する \\
+\addlinespace[3pt]
+Actionsタブに \textbf{Invalid workflow file} と出る & YAMLの書き間違い。\textbf{字下げのずれ}、タブの混入、コロンの後のスペース忘れを確認する \\
+\addlinespace[3pt]
+\cmd{ModuleNotFoundError} と出る & パッケージの入れ忘れ。\cmd{requirements.txt} に書いたか確認する \\
+\addlinespace[3pt]
+\cmd{main} に \cmd{push} しても動かない & \cmd{on} の \cmd{branches} の名前が違う（\cmd{master} になっているなど） \\
+\addlinespace[3pt]
+手元では通るのにActionsで失敗する & 手元にだけあるファイルや設定に頼っている。コミットし忘れたファイルがないか、\cmd{git status} で確認する \\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 % ---------------------------------------------------------------------
 \section{ブランチ保護と組み合わせる}
 
-\begin{draftbox}
-\textbf{書くこと}：自動チェックを\textbf{マージの条件}にして、はじめて効果が出る。
+ここまでで、PRに緑のチェックか赤い×が付くようになりました。ただし、このままでは\textbf{赤い×のままでもマージボタンは押せてしまいます}。自動チェックは、\textbf{マージの条件}にしてはじめて「壊れたものが \cmd{main} に入らない」仕組みになります。
 
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Settings → Branches → \textbf{ブランチ保護ルール}で \cmd{main} を守る
-  \item 設定する項目：\textbf{PR必須}／\textbf{チェックの成功を必須}／\textbf{レビュー承認を必須}／\cmd{main} への直接pushを禁止
-  \item 別冊で書いた「\cmd{main} は直接編集しない」という\textbf{約束を、仕組みとして強制する}のがこの節、という位置づけを明示する
-  \item 少人数のうちは厳しくしすぎない、という運用上の注意も書く
-\end{itemize}
-\textbf{必要なスクリーンショット}：\cmd{branch\_protection.png}（保護ルールの設定画面）。
-\end{draftbox}
+別冊『チームで安全に開発する』では、「\cmd{main} は直接編集しない」「PRでレビューしてからマージする」を\textbf{チームの約束}として扱いました。この節では、その約束を\textbf{GitHubの設定で強制}します。
+
+\subsection{ルールセットで main を守る}
+
+GitHubでは、ブランチを守る設定を\textbf{ルールセット（Rulesets）}で作ります。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item リポジトリの \textbf{Settings} → 左のメニューの \textbf{Rules} → \textbf{Rulesets} を開く
+  \item \textbf{New ruleset} → \textbf{New branch ruleset} を押す
+  \item \textbf{Ruleset name} に名前（例：\cmd{protect-main}）を入れ、\textbf{Enforcement status} を \textbf{Active} にする（最初は Disabled なので、変え忘れると効かない）
+  \item \textbf{Target branches} の \textbf{Add target} → \textbf{Include default branch} を選ぶ（＝\cmd{main} が対象になる）
+  \item \textbf{Branch rules} で、下の表のルールにチェックを入れる
+  \item 一番下の \textbf{Create} を押す
+\end{enumerate}
+\shotplaceholder[5cm]{04_advanced/branch_ruleset.png}{ルールセットの作成画面}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.4cm} X@{}}
+\toprule
+ルール & 効果 \\
+\midrule
+\textbf{Restrict deletions}（最初から選択済み） & \cmd{main} を消せなくする \\
+\textbf{Block force pushes}（最初から選択済み） & 強制 \cmd{push} で履歴を書き換えられなくする \\
+\textbf{Require a pull request before merging} & \cmd{main} への直接 \cmd{push} を禁止し、\textbf{PR経由でしか変更できなく}する。中の \textbf{Required approvals} で、必要な承認の人数を決められる \\
+\textbf{Require status checks to pass} & \textbf{指定したチェックが通らないとマージできなく}する \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+\textbf{Require status checks to pass} にチェックを入れたら、その下の \textbf{Add checks} を押し、必須にするチェックの名前を探して追加します。チェックの名前は、ワークフローの\textbf{ジョブ名}（この章の例では \cmd{test}）です。候補は\textbf{一度でも実行されたチェック}から出るので、先に前の節のPRでワークフローを動かしておいてください。
+
+設定が済むと、チェックが通っていないPRや、承認が足りないPRでは、マージボタンが押せなくなります。\cmd{main} に直接 \cmd{push} しようとしても、GitHubに拒否されます。
+
+\begin{warnbox}
+無料プランの個人アカウントでは、ルールセット（とブランチ保護）が効くのは\textbf{Publicリポジトリだけ}です。Privateリポジトリで使うには、有料プラン（Pro・Team）か、学生・教員向けの\textbf{GitHub Education}の特典が必要です。
+\end{warnbox}
+
+\begin{notebox}
+Settings → \textbf{Branches} にある\textbf{Branch protection rules}（ブランチ保護ルール）も、ほぼ同じことができる従来からの設定です。古い解説記事ではこちらが出てきますが、新しく設定するならルールセットを使ってください。
+\end{notebox}
+
+\subsection{厳しくしすぎない}
+
+ルールは強力ですが、最初から全部入れると窮屈になります。たとえば2人のチームで「承認2人必須」にすると、自分以外の全員が承認するまで何もマージできません。おすすめの順番は次の通りです。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item まずは \textbf{Require status checks to pass} だけ（壊れたものが入らない）
+  \item 慣れてきたら \textbf{Require a pull request before merging}（直接 \cmd{push} の禁止）
+  \item レビューの習慣が根付いたら、\textbf{Required approvals} を \cmd{1} にする
+\end{enumerate}
 
 % ---------------------------------------------------------------------
 \section{秘密情報の扱い（Secrets）}
 
-\begin{draftbox}
-\textbf{書くこと}：APIキーやトークンをワークフローで使うときの置き場所。
+ワークフローで外部のサービスを使うと、\textbf{APIキーやトークン}（パスワードのようなもの）が必要になることがあります。こうした秘密情報を、ワークフローのYAMLに直接書いてはいけません。YAMLはリポジトリに入るので、\textbf{リポジトリを見られる人全員に見えてしまう}からです。
 
+秘密情報は、GitHubの\textbf{Secrets}という金庫に預けて、ワークフローからは名前で呼び出します。
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item リポジトリの \textbf{Settings} → \textbf{Secrets and variables} → \textbf{Actions} を開く
+  \item \textbf{New repository secret} を押す
+  \item \textbf{Name} に名前（例：\cmd{API\_TOKEN}）、\textbf{Secret} に値を入れて \textbf{Add secret} を押す
+\end{enumerate}
+
+ワークフローからは、\cmd{\$\{\{ secrets.名前 \}\}} の形で参照します。次のように、\textbf{環境変数として渡す}のが基本です。
+
+\begin{codebox}[yaml]
+\begin{code}
+      - name: 外部サービスに結果を送る
+        run: python send_report.py
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+\end{code}
+\end{codebox}
+
+一度登録した値は、登録した本人も含めて\textbf{画面から見ることはできません}（上書きはできます）。また、ログに値がそのまま出そうになると、GitHubが自動で \cmd{***} に伏せます。
+
+\begin{warnbox}
 \begin{itemize}[leftmargin=1.4em, nosep]
-  \item \textbf{YAMLに直接書かない}。Settings → Secrets and variables → Actions に登録し、\cmd{\$\{\{ secrets.NAME \}\}} で参照する
-  \item ログに出さない工夫（\cmd{echo} しない）
-  \item 本編『はじめてのバージョン管理』の \cmd{.gitignore} の話とつなげる：\textbf{秘密情報はリポジトリに置かない}という原則は同じ
+  \item 秘密情報を\textbf{YAMLやプログラムに直接書かない}。一度でもコミットすると履歴に残り、消しても過去のコミットから読めてしまう
+  \item \cmd{echo} などで\textbf{わざとログに出さない}。自動の伏せ字は、値を加工すると効かないことがある
+  \item 誤ってコミットしてしまったら、\textbf{そのキーはすぐに無効化して作り直す}（履歴を消すより先に）
 \end{itemize}
-\textbf{枠は warnbox を使う}（ヒントではなく注意）。
-\end{draftbox}
+\end{warnbox}
+
+これは本編『はじめてのバージョン管理』の \cmd{.gitignore} の話と同じ原則です。\textbf{秘密情報はリポジトリに置かない}。手元では \cmd{.gitignore} で、Actionsでは Secrets で守ります。
 
 % ---------------------------------------------------------------------
 \section*{この章のまとめ}
 \addcontentsline{toc}{section}{この章のまとめ}
 
-\begin{draftbox}
-本文を書き終えてから、次の骨子でまとめを作る。
-\begin{itemize}[leftmargin=1.4em, nosep]
-  \item Actionsは「きっかけ（\cmd{on}）」と「やること（\cmd{jobs}）」を書くだけ
-  \item ファイルの置き場所は \cmd{.github/workflows/} 直下
-  \item 失敗したら\textbf{赤いステップのログ}を読む。直して \cmd{push} すれば再実行される
-  \item ブランチ保護と組み合わせて、はじめて「壊れたものがマージされない」状態になる
+\begin{itemize}[leftmargin=1.4em]
+  \item Actionsは「\textbf{きっかけ}（\cmd{on}）」と「\textbf{やること}（\cmd{jobs}）」を書くだけで動く
+  \item ファイルの置き場所は \textbf{\cmd{.github/workflows/} の直下}。YAMLは字下げに注意する
+  \item ランナーは毎回まっさらなので、Pythonやパッケージの準備から書く
+  \item 失敗したら、\textbf{赤いステップのログの最後}を読む。直して \cmd{push} すれば自動で再実行される
+  \item ルールセットでチェックを必須にして、はじめて「\textbf{壊れたものがマージされない}」状態になる
+  \item 秘密情報は \textbf{Secrets} に預け、YAMLには書かない
 \end{itemize}
-\textbf{次に学ぶとよいもの}として名前だけ挙げる：自作アクション、再利用可能ワークフロー、
-マトリクスビルド、デプロイ（GitHub Pages など）。
-\end{draftbox}
+
+これで、「Issueで作業を決め、PRで変更を出し、機械がチェックし、通ったものだけがマージされる」という一連の流れが揃いました。\textbf{人が気をつける}のではなく、\textbf{仕組みで守る}チーム開発の出来上がりです。ここから先に進むための手がかりは、付録にまとめました。
