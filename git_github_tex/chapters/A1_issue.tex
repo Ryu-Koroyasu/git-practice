@@ -166,7 +166,7 @@ GitHubには、よく使われる形のテンプレートが用意されてい�
   \item リポジトリの \textbf{Settings} → \textbf{General} を開き、\textbf{Features} の欄までスクロールする
   \item \textbf{Issues} の項目にある \textbf{Set up templates} を押す
 \end{enumerate}
-\shotplaceholder{04_advanced/issue_template_setup.png}{Settings の Features にある「Set up templates」ボタン}
+\screenshottrim[0.9]{04_advanced/issue_template_setup.png}{Settings の Features にある「Set up templates」ボタン}{1270bp 688bp 190bp 420bp}
 
 \begin{enumerate}[leftmargin=1.6em, start=3]
   \item \textbf{Add template} を押し、追加したいテンプレートを選ぶ
@@ -179,9 +179,13 @@ GitHubには、よく使われる形のテンプレートが用意されてい�
   \item 右上の \textbf{Propose changes} を押し、コミットメッセージを入れる
   \item \cmd{main} に直接コミットするか、\textbf{新しいブランチを作ってPRを出す}かを選び、\textbf{Commit changes} を押す
 \end{enumerate}
-\shotplaceholder{04_advanced/issue_template_add.png}{Add template から公式のテンプレートを選ぶ画面}
+\shotplaceholder{04_advanced/issue_template_builder.png}{Add template から公式のテンプレートを選ぶ画面}
 
 コミットすると、\cmd{.github/ISSUE\_TEMPLATE/} に \cmd{bug\_report.md} などのファイルが作られます。PRを選んだ場合は、マージした時点から New issue で選べるようになります。
+
+テンプレートが入った後に Issuesタブの \textbf{New issue} を押すと、いきなり入力画面には進まず、\textbf{テンプレートの選択肢}が出ます。使いたいテンプレートを選ぶと、本文に雛形が入った入力画面が開きます。テンプレートを使わずに書きたいときは、一番下の \textbf{Blank issue} を選びます。
+
+\screenshottrim[0.9]{04_advanced/issue_template_add.png}{New issue を押すと、テンプレートの選択肢が出る（赤枠：テンプレートを使う／青枠：使わない）}{860bp 618bp 360bp 0bp}
 
 方法Aの欠点は、\textbf{テンプレートの中身がすべて英語}であることです。「Describe the bug」「To Reproduce」のような見出しが並ぶので、日本語で書くチームでは、書く人が英語の見出しと日本語の本文を行き来することになります。そのため、次の方法Bで日本語のテンプレートを用意するのがおすすめです。
 
@@ -192,10 +196,10 @@ GitHubには、よく使われる形のテンプレートが用意されてい�
 \begin{codebox}[text]
 \begin{code}
 my-project/
-└── .github/
-    └── ISSUE_TEMPLATE/
-        ├── bug_report.md   ← 不具合の報告用
-        └── task.md         ← やること用
+`-- .github/
+    `-- ISSUE_TEMPLATE/
+        |-- bug_report.md   ← 不具合の報告用
+        `-- task.md         ← やること用
 \end{code}
 \end{codebox}
 
