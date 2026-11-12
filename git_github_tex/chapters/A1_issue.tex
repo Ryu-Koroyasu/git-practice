@@ -430,9 +430,16 @@ Closes #12
 キーワードが効くのは、\textbf{既定のブランチ（ふつうは \cmd{main}）へのマージ}だけです。\cmd{develop} など別のブランチへのPRでは、マージしてもIssueは閉じません。また、PRの\textbf{タイトル}ではなく\textbf{本文}に書いてください。
 \end{warnbox}
 
-うまくつながると、PRの画面とIssueの画面の両方に、相手へのリンクが表示されます。Issueのサイドバーの \textbf{Development} 欄にPRが出ていれば成功です。
+うまくつながると、PRの画面とIssueの画面の両方の \textbf{Development} 欄に、相手へのリンクが表示されます。
 
-\shotplaceholder{04_advanced/issue_linked_pr.png}{PR本文の Closes \#12 と、Issue側の Development 欄に出るリンク}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{PR側}：\textit{Successfully merging this pull request may close these issues.}（このPRをマージすると、次のIssueが閉じます）という説明の下に、Issueの名前が出る
+  \item \textbf{Issue側}：サイドバーの Development 欄に、PRの名前が出る
+\end{itemize}
+
+両方に出ていれば成功です。
+
+\screenshot[1.0]{04_advanced/issue_linked_pr.png}{左：PR本文の Closes \#12 と、PR側の Development 欄／右：Issue側の Development 欄}
 
 \subsection{ブランチ名にIssue番号を入れる}
 
