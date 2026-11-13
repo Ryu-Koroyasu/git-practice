@@ -3,6 +3,8 @@ name: バグ報告
 about: 動かない・想定と違う挙動を報告する
 title: "[Bug] "
 labels: bug
+assignees: ''
+
 ---
 
 ## 現象

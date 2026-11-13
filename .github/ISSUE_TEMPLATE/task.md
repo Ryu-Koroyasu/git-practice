@@ -1,8 +1,10 @@
 ---
 name: やることの登録
 about: やることを1件登録する
-title: ""
-labels: ""
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 ## 背景
