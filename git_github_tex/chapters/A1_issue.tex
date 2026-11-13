@@ -529,7 +529,7 @@ Projectsは便利ですが、\textbf{最初から入れる必要はありませ�
   \item テンプレートの選択画面で、\textbf{Start from scratch} の中から \textbf{Board} を選ぶ（後から他のレイアウトも追加できる）
   \item \textbf{Project name} に名前（例：\cmd{研究プロジェクト 2026後期}）を入れて、\textbf{Create project} を押す
 \end{enumerate}
-\shotplaceholder{04_advanced/project_new.png}{プロジェクトの作成画面（テンプレートとプロジェクト名）}
+\screenshot[0.8]{04_advanced/project_new.png}{New project を押すと、テンプレートの選択画面が開く}
 
 プロジェクトは、リポジトリの中ではなく\textbf{自分（または組織）のアカウントの持ち物}として作られます。そのため、\textbf{複数のリポジトリのIssueを1つのプロジェクトにまとめる}こともできます。リポジトリの Projects タブから作った場合は、そのリポジトリに自動でひも付きます。
 
@@ -546,7 +546,9 @@ Projectsは便利ですが、\textbf{最初から入れる必要はありませ�
 
 Boardレイアウトでは、Issueが\textbf{Status（状態）}ごとの列に並びます。最初は \textbf{Todo}（未着手）、\textbf{In Progress}（作業中）、\textbf{Done}（完了）の3列です。作業を始めたら付箋を \textbf{In Progress} へ、終わったら \textbf{Done} へ\textbf{ドラッグして動かします}。
 
-\shotplaceholder{04_advanced/project_board.png}{Boardレイアウト。Statusごとの列にIssueが並ぶ}
+ほかのレイアウトでプロジェクトを作った場合は、ビューのタブの横の \textbf{+ New view} から \textbf{Board} を選ぶと、Boardのビューを追加できます。
+
+\screenshottrim[1.0]{04_advanced/project_board.png}{+ New view → Board で追加したBoardのビュー。Statusごとの列にIssueが並ぶ}{0 240bp 0 0}
 
 PRでレビューを挟むチームなら、\textbf{In Review}（レビュー中）の列を足しておくと、「作業は終わったがレビュー待ち」の付箋が見えて、レビューの頼み忘れを防げます。列を足すには、ボードの一番右の \textbf{+} を押して選択肢を追加します。
 
@@ -569,13 +571,22 @@ Status & 付箋がここにある意味 \\
 
 \begin{enumerate}[leftmargin=1.6em]
   \item ビューのタブの横にある \textbf{+ New view} から \textbf{Table} を追加する（表で見るほうが、フィールドを編集しやすい）
-  \item 表の一番右の列見出し \textbf{+} を押し、\textbf{+ New field} を選ぶ
-  \item \textbf{Field name} に \cmd{Start date}、\textbf{Field type} に \textbf{Date} を選んで \textbf{Save} を押す
+  \item 表の一番右の列見出し \textbf{+} を押し、\textbf{+ Add field} を選ぶ
+  \item \textbf{Add issue fields} の画面が開くので、\textbf{Create a project field} のリンクを押す
+  \item \textbf{Field name} に \cmd{Start date}、\textbf{Field type} に \textbf{Date} を選んで \textbf{Create} を押す
+\end{enumerate}
+\screenshot[1.0]{04_advanced/project_fields_new.png}{+ → Add field → Create a project field の順に進み、名前と種類を決める}
+
+\begin{enumerate}[leftmargin=1.6em, start=5]
   \item 同じ手順で、\cmd{Target date}（終了予定日）も \textbf{Date} で作る
 \end{enumerate}
-\shotplaceholder{04_advanced/project_fields.png}{Tableレイアウトで Start date・Target date のフィールドを足したところ}
+\screenshottrim[0.95]{04_advanced/project_fields.png}{Start date・Target date の列が増えたところ（まだ空欄）}{0 700bp 0 0}
 
-作ったら、表の各セルを押して、Issueごとに開始日と終了予定日を入れていきます。フィールドの種類には、ほかに次のものがあります。
+作ったら、表の各セルを押して、Issueごとに開始日と終了予定日を入れていきます。
+
+\screenshottrim[0.95]{04_advanced/project_table.png}{Issueごとに開始日と終了予定日を入れたところ}{0 700bp 0 0}
+
+\noindent フィールドの種類には、ほかに次のものがあります。
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} X >{\raggedright\arraybackslash}p{4.2cm}@{}}
@@ -635,10 +646,14 @@ GitHubのProjectsでは、\textbf{Roadmapレイアウト}がこのガントチ�
 
 \begin{enumerate}[leftmargin=1.6em]
   \item ビューのタブの横の \textbf{+ New view} を押し、\textbf{Roadmap} を選ぶ
-  \item 右上の \textbf{Date fields}（カレンダーのアイコン）を押し、\textbf{Start date} に \cmd{Start date}、\textbf{Target date} に \cmd{Target date} を選ぶ
+  \item 右上の \textbf{Date fields}（カレンダーのアイコン）を押し、\textbf{Start date} の欄で \cmd{Start date}、\textbf{Target date} の欄で \cmd{Target date} にチェックを入れる
   \item 横棒が表示されたら、ビューのタブ名を押して名前を付け（例：\cmd{スケジュール}）、\textbf{Save} で保存する
 \end{enumerate}
-\shotplaceholder[5cm]{04_advanced/project_roadmap.png}{Roadmapレイアウト。開始日から終了予定日までが横棒で表示される}
+\screenshot[1.0]{04_advanced/project_roadmap.png}{New view → Roadmap でビューを作り、Date fields で日付フィールドを選ぶ}
+
+作ったばかりのロードマップでは、Date fields が\textbf{未設定}のことがあります。その場合は横棒が出ないので、どちらの欄にどのフィールドを使うかを指定します。
+
+\screenshot[0.7]{04_advanced/project_roadmap_datefields.png}{Date fields のメニュー。開始日と終了予定日に使うフィールドを1つずつ選ぶ}
 
 \begin{notebox}
 Date fields には、日付フィールドの代わりに \textbf{Iteration} フィールドも選べます。その場合、横棒はイテレーションの区切り（例：第1週〜第2週）単位で描かれます。日付を1件ずつ決めるのが大変なときに便利です。
@@ -663,9 +678,11 @@ Date fields には、日付フィールドの代わりに \textbf{Iteration} フ
 
 \begin{enumerate}[leftmargin=1.6em]
   \item ロードマップ右上の \textbf{Markers} を押す
-  \item 表示したいマーカーの種類として \textbf{Milestones} にチェックを入れる
+  \item 表示したいマーカーの種類として \textbf{Milestone} にチェックを入れる
 \end{enumerate}
-\shotplaceholder{04_advanced/project_markers.png}{Markers メニューでマイルストーンの縦線を表示する}
+\screenshottrim[0.95]{04_advanced/project_markers.png}{Markers で Milestone を選ぶと、締め切りの日に緑の縦線とマイルストーン名が出る}{0 520bp 0 0}
+
+実際の画面では、マイルストーンの縦線は\textbf{緑}で、上にマイルストーン名が表示されます。\textbf{赤い縦線}は今日の日付です。
 
 縦線の\textbf{右側にはみ出している横棒}は、「締め切りまでに終わらない予定の作業」です。計画を立てた段階で見つかれば、作業を減らす・担当を替える・順番を入れ替える、といった手を打てます。Markers では、マイルストーンのほかにイテレーションの区切りや日付フィールドも縦線として出せます。
 
@@ -694,22 +711,33 @@ Date fields には、日付フィールドの代わりに \textbf{Iteration} フ
 
 Boardの付箋を毎回手で動かすのは面倒で、動かし忘れると進行表が実態とずれていきます。Projectsには、決まった出来事で\textbf{フィールドを自動で書き換える仕組み（ワークフロー）}が組み込まれています。
 
-\begin{enumerate}[leftmargin=1.6em]
-  \item プロジェクト右上の \textbf{…}（メニュー）→ \textbf{Workflows} を開く
-  \item 左の一覧から設定したいワークフローを選び、右上の \textbf{Edit} を押す
-  \item 設定を変えたら、\textbf{Save and turn on workflow} を押す
-\end{enumerate}
-\shotplaceholder{04_advanced/project_workflows.png}{Workflows の設定画面}
+ここでは例として、Issue・PRが閉じたら付箋を \textbf{Done} へ動かす \textbf{Item closed} を設定します。
 
-よく使うワークフローは次の通りです。上の2つは、プロジェクトを作った時点で\textbf{最初から有効}になっています。
+\begin{enumerate}[leftmargin=1.6em]
+  \item プロジェクト右上の \textbf{Workflows} を押す
+  \item 左の一覧から \textbf{Item closed} を選び、右上の \textbf{Edit} を押す
+\end{enumerate}
+\screenshottrim[0.95]{04_advanced/project_workflow.png}{Workflows の画面。左の一覧からワークフローを選び、Edit で編集を始める}{0 370bp 0 0}
+
+\begin{enumerate}[leftmargin=1.6em, start=3]
+  \item \textbf{When an item is closed} の欄で、対象に \textbf{issue} と \textbf{pull request} の両方にチェックが入っていることを確かめる
+  \item \textbf{Set value} の欄で、\textbf{Status: Done} を選ぶ
+  \item 右上の \textbf{Save and turn on workflow} を押す
+  \item 同じ手順で、\textbf{Pull request merged} も \textbf{Status: Done} にして有効にする
+\end{enumerate}
+\screenshot[0.55]{04_advanced/project_workflow_setting.png}{Edit 後の設定画面。上：対象の種類を選ぶ、下：書き換える値（Status: Done）を選ぶ}
+
+有効になったワークフローは、左の一覧で緑の丸が付きます。
+
+よく使うワークフローは次の通りです。上の2つは、画面からプロジェクトを作った場合は\textbf{最初から有効}になっているのがふつうです。ただし、Off になっていたり、Set value が Done 以外になっていたりすることもあるので、一度開いて確かめておきましょう。
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.2cm} X@{}}
 \toprule
 ワークフロー & 動き \\
 \midrule
-\textbf{Item closed}（最初から有効） & Issue・PRが閉じたら、Statusを \textbf{Done} にする \\
-\textbf{Pull request merged}（最初から有効） & PRがマージされたら、Statusを \textbf{Done} にする \\
+\textbf{Item closed} & Issue・PRが閉じたら、Statusを \textbf{Done} にする \\
+\textbf{Pull request merged} & PRがマージされたら、Statusを \textbf{Done} にする \\
 \textbf{Item added to project} & プロジェクトに追加されたら、Statusを \textbf{Todo} にする \\
 \textbf{Auto-add to project} & 条件（例：\cmd{is:issue is:open}）に合うIssueを、リポジトリから自動で追加する \\
 \bottomrule
