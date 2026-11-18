@@ -50,7 +50,13 @@ Actionsの作業は、\textbf{自分のPCではなく、GitHubが用意するPC}
 
 \subsection{料金について}
 
-\textbf{Publicリポジトリ}では、GitHubが用意する標準のランナーを\textbf{無料}で使えます。\textbf{Privateリポジトリ}では、無料プランでも毎月一定の無料枠（Linuxのランナーで約2,000分ぶん）があり、\textbf{枠を超えると課金}されます。この章で作るテストは1回1分もかからないので、ふつうに使う分には枠に収まります。条件は変わることがあるので、最新の情報はGitHubの料金ページで確認してください。
+\textbf{Publicリポジトリ}では、GitHubが用意する標準のランナーを\textbf{無料}で使えます。\textbf{Privateリポジトリ}では、毎月一定の無料枠があります。無料プラン（Free）で月12ドル分（Linuxのランナーで約2,000分）、学生認証で使えるGitHub Proで月18ドル分（約3,000分）です。支払い方法を登録していなければ、\textbf{枠を使い切った時点でActionsが止まり}、翌月まで動きません（勝手に課金はされません）。この章で作るテストは1回1分もかからないので、ふつうに使う分には枠に収まります。
+
+プランと公開範囲による違いは、付録\ref{app:plans}にまとめました。条件は変わることがあるので、最新の情報はGitHubの料金ページで確認してください。
+
+\begin{hintbox}
+この章の練習は、\textbf{Publicリポジトリ}で行うのがおすすめです。Actionsの時間を気にせず何度でも試せて、後半のルールセットも無料プランのまま使えます。中身は練習用のコードだけなので、公開しても困りません。
+\end{hintbox}
 
 \begin{warnbox}
 WindowsやmacOSのランナーは、Linuxより\textbf{1分あたりの料金が高く}設定されています（macOSは10倍ほど）。Privateリポジトリで使うときは、特別な理由がなければLinux（\cmd{ubuntu-latest}）を使ってください。
@@ -320,16 +326,16 @@ git push -u origin feature/add-ci
   \item GitHubでPRを作る
   \item PR画面の下のほうに、\textbf{チェックの欄}が出て、ワークフローが実行中になる
 \end{enumerate}
-\shotplaceholder{04_advanced/pr_checks_running.png}{PRの下部で、チェックが実行中になっている}
+\screenshottrim[0.8]{04_advanced/pr_checks_running.png}{PRの下部で、チェックが実行中になっている（Some checks haven't completed yet）}{790bp 208bp 1375bp 1000bp}
 
 \begin{enumerate}[leftmargin=1.6em, start=5]
   \item 数十秒待つと、\textbf{All checks have passed} と緑のチェックが付く。これを確認してからマージする
 \end{enumerate}
-\shotplaceholder{04_advanced/pr_checks_passed.png}{すべてのチェックが通った状態}
+\screenshottrim[0.8]{04_advanced/pr_checks_passed.png}{すべてのチェックが通った状態。Merge pull request のボタンが緑になる}{790bp 208bp 1375bp 1000bp}
 
 実行の記録は、リポジトリ上部の \textbf{Actions} タブにも一覧で残ります。いつ・どのブランチで・成功したか失敗したかを、ここで振り返れます。
 
-\shotplaceholder{04_advanced/actions_tab.png}{Actionsタブの実行一覧}
+\screenshottrim[0.95]{04_advanced/actions_tab.png}{Actionsタブの実行一覧。緑のチェックが成功、赤い×が失敗}{0 868bp 360bp 0}
 
 \begin{notebox}
 このワークフローは \cmd{on} に \cmd{pull\_request} と \cmd{push: branches: [ main ]} の両方を書いているので、\textbf{PRのとき}と、\textbf{マージして \cmd{main} が更新されたとき}の2回動きます。PRの時点で通っていても、他の人の変更と合わさった \cmd{main} で改めて確かめるためです。
@@ -386,7 +392,7 @@ git push -u origin feature/add-ci
   \item ジョブの画面に、ステップが名前つきで並ぶ。\textbf{赤い×の付いたステップ}を押して開く
   \item ログが表示されるので、\textbf{赤い行と、最後の数十行}を読む
 \end{enumerate}
-\shotplaceholder[5cm]{04_advanced/actions_failed_log.png}{失敗したステップ（テストを実行する）のログを開いた画面}
+\screenshottrim[0.95]{04_advanced/actions_failed_log.png}{失敗したステップ（テストを実行する）のログを開いた画面}{700bp 248bp 40bp 190bp}
 
 今回のログの最後のほうには、次のような行が出ています。
 
@@ -457,14 +463,14 @@ Actionsタブに \textbf{Invalid workflow file} と出る & YAMLの書き間違�
 GitHubでは、ブランチを守る設定を\textbf{ルールセット（Rulesets）}で作ります。
 
 \begin{enumerate}[leftmargin=1.6em]
-  \item リポジトリの \textbf{Settings} → 左のメニューの \textbf{Rules} → \textbf{Rulesets} を開く
+  \item リポジトリの \textbf{Settings} → 左のメニューの \textbf{Rulesets}（Code, planning, and automation の中）を開く
   \item \textbf{New ruleset} → \textbf{New branch ruleset} を押す
-  \item \textbf{Ruleset name} に名前（例：\cmd{protect-main}）を入れ、\textbf{Enforcement status} を \textbf{Active} にする（最初は Disabled なので、変え忘れると効かない）
+  \item \textbf{Ruleset Name} に名前（例：\cmd{protect-main}）を入れ、\textbf{Enforcement status} が \textbf{Active} になっていることを確かめる（Disabled のままだと効かない）
   \item \textbf{Target branches} の \textbf{Add target} → \textbf{Include default branch} を選ぶ（＝\cmd{main} が対象になる）
   \item \textbf{Branch rules} で、下の表のルールにチェックを入れる
   \item 一番下の \textbf{Create} を押す
 \end{enumerate}
-\shotplaceholder[5cm]{04_advanced/branch_ruleset.png}{ルールセットの作成画面}
+\screenshottrim[0.95]{04_advanced/branch_ruleset.png}{ルールセットの作成画面。Add target から対象のブランチを選ぶ}{685bp 43bp 690bp 250bp}
 
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.4cm} X@{}}
@@ -486,7 +492,7 @@ GitHubでは、ブランチを守る設定を\textbf{ルールセット（Rulese
 設定が済むと、チェックが通っていないPRや、承認が足りないPRでは、マージボタンが押せなくなります。\cmd{main} に直接 \cmd{push} しようとしても、GitHubに拒否されます。
 
 \begin{warnbox}
-無料プランの個人アカウントでは、ルールセット（とブランチ保護）が効くのは\textbf{Publicリポジトリだけ}です。Privateリポジトリで使うには、有料プラン（Pro・Team）か、学生・教員向けの\textbf{GitHub Education}の特典が必要です。
+無料プランの個人アカウントでは、ルールセット（とブランチ保護）が使えるのは\textbf{Publicリポジトリだけ}です。Privateリポジトリで使うには、\textbf{GitHub Pro}以上のプランが必要です。学生なら、GitHub Educationで学生認証をすると在学中はGitHub Proが無料になります（付録\ref{app:plans}）。
 \end{warnbox}
 
 \begin{notebox}

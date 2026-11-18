@@ -127,4 +127,53 @@ self-hosted runner & GPUのある研究室のPCなど、\textbf{自前のマシ�
 
 どれも、本書で身につけた\textbf{「Issueで決めて、PRで出して、機械に確かめさせる」}という流れの上に足していくものです。困りごとが出てきたときに、1つずつ試してみてください。
 
+\chapter{プランと公開範囲で使える機能の違い}\label{app:plans}
+
+GitHubでは、\textbf{契約しているプラン}と、リポジトリが\textbf{Public（公開）かPrivate（非公開）か}によって、使える機能や無料枠が変わります。本書の内容に関係するものを、個人アカウントの場合でまとめます（2026年11月時点。条件は変わることがあるので、最新の情報は \cmd{docs.github.com} の「GitHub's plans」で確認してください）。
+
+\section{学生はGitHub Proを無料で使える}
+
+学生は、\textbf{GitHub Education}で学生認証をすると、\textbf{在学中はGitHub Proが無料}になります（Student Developer Packの特典の1つ）。認証には、学校のメールアドレスや学生証などが必要です。以下の表の「Pro」の列は、この学生向けのProも含みます。
+
+\section{機能と無料枠の比較}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}X >{\centering\arraybackslash}p{2.4cm} >{\centering\arraybackslash}p{2.4cm} >{\centering\arraybackslash}p{2.4cm}@{}}
+\toprule
+機能 & Free・Public & Free・Private & Pro・Private \\
+\midrule
+Issue・ラベル・マイルストーン & ○ & ○ & ○ \\
+Projects（Board・Roadmap・Workflows） & ○ & ○ & ○ \\
+\addlinespace[3pt]
+GitHub Actions（標準のランナー） & 無料・無制限 & 月12ドル分（約2,000分） & 月18ドル分（約3,000分） \\
+\addlinespace[3pt]
+ルールセット・ブランチ保護 & ○ & × & ○ \\
+必須レビュー（Required reviewers） & ○ & × & ○ \\
+CODEOWNERS & ○ & × & ○ \\
+\addlinespace[3pt]
+GitHub Pages & ○ & × & ○ \\
+Wiki & ○ & × & ○ \\
+Insights のグラフ（Pulse・Contributors など） & ○ & × & ○ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\medskip
+
+Pro の Private リポジトリで GitHub Pages を使っても、公開されるページは\textbf{誰でも見られます}。ページだけを限られた人に見せる機能は、組織向けの上位プランにしかありません。
+
+\begin{notebox}
+Actionsの無料枠は、分数ではなく\textbf{金額}で決まっています。表の「約2,000分」「約3,000分」は、Linuxの標準ランナーだけを使った場合の目安です。WindowsやmacOSのランナーは1分あたりの料金が高いので、同じ枠でも使える時間が短くなります。支払い方法を登録していなければ、枠を使い切った時点でActionsは止まり、勝手に課金はされません。
+\end{notebox}
+
+\section{本書の内容に当てはめると}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{第1章（Issue・Projects）}：どのプランでも、Privateリポジトリのまま全部できる
+  \item \textbf{第2章のActions}：Privateでもできるが、実行のたびに無料枠を使う。練習で何度も動かすなら、Publicの練習用リポジトリを作ると枠を気にしなくてよい
+  \item \textbf{第2章のルールセット}：無料プランでは\textbf{Publicリポジトリでしか効かない}。Privateで使うなら学生認証でProにする
+\end{itemize}
+
+研究のコードやデータのように公開できないものは、学生認証でProにしたうえでPrivateリポジトリに置くのが、いちばん手間がかかりません。
+
 \end{document}
